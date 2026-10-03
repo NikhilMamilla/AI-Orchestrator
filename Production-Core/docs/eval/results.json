@@ -1,0 +1,281 @@
+{
+  "store": "sqlite",
+  "embedder": "BAAI/bge-small-en-v1.5",
+  "reranker": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+  "corpus": {
+    "documents": 26,
+    "sections": 144,
+    "passages": 146
+  },
+  "n_scoped": 66,
+  "configs": {
+    "bm25_only": {
+      "n": 66,
+      "metrics": {
+        "recall@1": 0.6515,
+        "precision@1": 0.6515,
+        "ndcg@1": 0.6515,
+        "recall@3": 0.8636,
+        "precision@3": 0.2879,
+        "ndcg@3": 0.7754,
+        "recall@5": 0.8939,
+        "precision@5": 0.1788,
+        "ndcg@5": 0.7878,
+        "mrr": 0.7636,
+        "latency_ms_p50": 8.2,
+        "latency_ms_p95": 40.4
+      },
+      "by_kind": {
+        "direct": {
+          "n": 53,
+          "recall@3": 0.9623,
+          "mrr": 0.8379
+        },
+        "multi": {
+          "n": 2,
+          "recall@3": 1.0,
+          "mrr": 1.0
+        },
+        "paraphrase": {
+          "n": 11,
+          "recall@3": 0.3636,
+          "mrr": 0.3623
+        }
+      }
+    },
+    "dense_only": {
+      "n": 66,
+      "metrics": {
+        "recall@1": 0.7121,
+        "precision@1": 0.7121,
+        "ndcg@1": 0.7121,
+        "recall@3": 0.8788,
+        "precision@3": 0.2929,
+        "ndcg@3": 0.8133,
+        "recall@5": 0.9394,
+        "precision@5": 0.1879,
+        "ndcg@5": 0.8358,
+        "mrr": 0.8088,
+        "latency_ms_p50": 123.1,
+        "latency_ms_p95": 362.9
+      },
+      "by_kind": {
+        "direct": {
+          "n": 53,
+          "recall@3": 0.9623,
+          "mrr": 0.8579
+        },
+        "multi": {
+          "n": 2,
+          "recall@3": 1.0,
+          "mrr": 1.0
+        },
+        "paraphrase": {
+          "n": 11,
+          "recall@3": 0.4545,
+          "mrr": 0.5378
+        }
+      }
+    },
+    "hybrid_rrf": {
+      "n": 66,
+      "metrics": {
+        "recall@1": 0.7273,
+        "precision@1": 0.7273,
+        "ndcg@1": 0.7273,
+        "recall@3": 0.9091,
+        "precision@3": 0.303,
+        "ndcg@3": 0.836,
+        "recall@5": 0.9394,
+        "precision@5": 0.1879,
+        "ndcg@5": 0.8484,
+        "mrr": 0.8254,
+        "latency_ms_p50": 14.1,
+        "latency_ms_p95": 23.8
+      },
+      "by_kind": {
+        "direct": {
+          "n": 53,
+          "recall@3": 0.9623,
+          "mrr": 0.8681
+        },
+        "multi": {
+          "n": 2,
+          "recall@3": 1.0,
+          "mrr": 1.0
+        },
+        "paraphrase": {
+          "n": 11,
+          "recall@3": 0.6364,
+          "mrr": 0.588
+        }
+      }
+    },
+    "hybrid+multiquery": {
+      "n": 66,
+      "metrics": {
+        "recall@1": 0.7121,
+        "precision@1": 0.7121,
+        "ndcg@1": 0.7121,
+        "recall@3": 0.9242,
+        "precision@3": 0.3081,
+        "ndcg@3": 0.84,
+        "recall@5": 0.9545,
+        "precision@5": 0.1909,
+        "ndcg@5": 0.8531,
+        "mrr": 0.8244,
+        "latency_ms_p50": 507.0,
+        "latency_ms_p95": 1747.9
+      },
+      "by_kind": {
+        "direct": {
+          "n": 53,
+          "recall@3": 0.9623,
+          "mrr": 0.8682
+        },
+        "multi": {
+          "n": 2,
+          "recall@3": 1.0,
+          "mrr": 1.0
+        },
+        "paraphrase": {
+          "n": 11,
+          "recall@3": 0.7273,
+          "mrr": 0.5812
+        }
+      }
+    },
+    "hybrid+multiquery+rerank": {
+      "n": 66,
+      "metrics": {
+        "recall@1": 0.8182,
+        "precision@1": 0.8182,
+        "ndcg@1": 0.8182,
+        "recall@3": 0.9697,
+        "precision@3": 0.3232,
+        "ndcg@3": 0.9098,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 0.9199,
+        "mrr": 0.8957,
+        "latency_ms_p50": 1821.4,
+        "latency_ms_p95": 3030.1
+      },
+      "by_kind": {
+        "direct": {
+          "n": 53,
+          "recall@3": 0.9811,
+          "mrr": 0.8947
+        },
+        "multi": {
+          "n": 2,
+          "recall@3": 1.0,
+          "mrr": 1.0
+        },
+        "paraphrase": {
+          "n": 11,
+          "recall@3": 0.9091,
+          "mrr": 0.8818
+        }
+      }
+    },
+    "full (+prereq hop)": {
+      "n": 66,
+      "metrics": {
+        "recall@1": 0.8182,
+        "precision@1": 0.8182,
+        "ndcg@1": 0.8182,
+        "recall@3": 0.9697,
+        "precision@3": 0.3232,
+        "ndcg@3": 0.9098,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 0.9199,
+        "mrr": 0.8957,
+        "latency_ms_p50": 1856.5,
+        "latency_ms_p95": 3106.6
+      },
+      "by_kind": {
+        "direct": {
+          "n": 53,
+          "recall@3": 0.9811,
+          "mrr": 0.8947
+        },
+        "multi": {
+          "n": 2,
+          "recall@3": 1.0,
+          "mrr": 1.0
+        },
+        "paraphrase": {
+          "n": 11,
+          "recall@3": 0.9091,
+          "mrr": 0.8818
+        }
+      }
+    }
+  },
+  "evidence_gate": {
+    "best": {
+      "threshold": 0.14,
+      "inscope_answered": 0.894,
+      "oos_refused": 1.0,
+      "balanced_accuracy": 0.947
+    },
+    "sweep": [
+      {
+        "threshold": 0.0,
+        "inscope_answered": 1.0,
+        "oos_refused": 0.0
+      },
+      {
+        "threshold": 0.1,
+        "inscope_answered": 0.909,
+        "oos_refused": 0.9
+      },
+      {
+        "threshold": 0.2,
+        "inscope_answered": 0.894,
+        "oos_refused": 1.0
+      },
+      {
+        "threshold": 0.3,
+        "inscope_answered": 0.879,
+        "oos_refused": 1.0
+      },
+      {
+        "threshold": 0.4,
+        "inscope_answered": 0.864,
+        "oos_refused": 1.0
+      },
+      {
+        "threshold": 0.5,
+        "inscope_answered": 0.833,
+        "oos_refused": 1.0
+      },
+      {
+        "threshold": 0.6,
+        "inscope_answered": 0.833,
+        "oos_refused": 1.0
+      },
+      {
+        "threshold": 0.7,
+        "inscope_answered": 0.818,
+        "oos_refused": 1.0
+      },
+      {
+        "threshold": 0.8,
+        "inscope_answered": 0.818,
+        "oos_refused": 1.0
+      },
+      {
+        "threshold": 0.9,
+        "inscope_answered": 0.803,
+        "oos_refused": 1.0
+      }
+    ]
+  },
+  "injection_guard": {
+    "queries": 3,
+    "rejected": 3
+  }
+}

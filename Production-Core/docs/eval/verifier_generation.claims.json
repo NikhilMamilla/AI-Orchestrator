@@ -1,0 +1,887 @@
+[
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.79,
+    "nli": 0.907,
+    "text": "The time complexity of binary search is **O(log n)**."
+   },
+   {
+    "lex": 0.864,
+    "nli": 0.013,
+    "text": "This is because it repeatedly halves the search space by comparing the target with the middle element of the sorted array [3][4]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.723,
+    "nli": 0.124,
+    "text": "Binary search needs a sorted array because it depends on the order of elements to eliminate half of the search space at each step."
+   },
+   {
+    "lex": 0.613,
+    "nli": 0.773,
+    "text": "If the array is unsorted, the middle element might not be the largest or smallest in its half, so the algorithm could skip the target by mistake."
+   },
+   {
+    "lex": 0.735,
+    "nli": 0.01,
+    "text": "For example, if the middle element is smaller than the target, all elements to its left are also smaller only if the array is sorted [1]."
+   },
+   {
+    "lex": 0.712,
+    "nli": 0.929,
+    "text": "This ensures the algorithm can safely discard the left half [1][2]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.825,
+    "nli": 0.061,
+    "text": "Use `lo + (hi - lo) / 2` instead of `(lo + hi) / 2` to avoid integer overflow when computing the midpoint [1]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.836,
+    "nli": 0.025,
+    "text": "Floyd's tortoise and hare uses two pointers on a linked list: a slow pointer that moves one step at a time and a fast pointer that moves two steps at a time [1]."
+   },
+   {
+    "lex": 0.729,
+    "nli": 0.289,
+    "text": "If there is a cycle, the fast pointer will eventually catch up to the slow pointer inside the cycle, meaning they meet at the same node [1]."
+   },
+   {
+    "lex": 0.877,
+    "nli": 0.384,
+    "text": "If the fast pointer reaches the end (null), there is no cycle [1]."
+   },
+   {
+    "lex": 0.595,
+    "nli": 0.013,
+    "text": "This method works because the fast pointer moves twice as fast, so it will loop around the cycle and meet the slow pointer if one exists."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.552,
+    "nli": 0.009,
+    "text": "Inserting at the front of an array is slow (O(n)) because every existing element must shift one position to the right to make space for the new element."
+   },
+   {
+    "lex": 0.418,
+    "nli": 0.017,
+    "text": "This shifting happens for each insertion, turning a loop of insertions into O(n^2) time [1][2]."
+   }
+  ]
+ },
+ {
+  "faithful": false,
+  "claims": [
+   {
+    "lex": 0.391,
+    "nli": 0.936,
+    "text": "To reverse a singly linked list in place, use this method:"
+   },
+   {
+    "lex": 0.658,
+    "nli": 0.435,
+    "text": "Start with `prev = None` and `head` at the list\u2019s start."
+   },
+   {
+    "lex": 0.562,
+    "nli": 0.953,
+    "text": "Loop through each node:"
+   },
+   {
+    "lex": 0.776,
+    "nli": 0.036,
+    "text": "- Store the `next` node (`nxt = head.next`)."
+   },
+   {
+    "lex": 0.852,
+    "nli": 0.746,
+    "text": "- Reverse the `head.next` pointer to point to `prev`."
+   },
+   {
+    "lex": 0.683,
+    "nli": 0.386,
+    "text": "- Move `prev` and `head` forward (`prev = head`, `head = nxt`)."
+   },
+   {
+    "lex": 0.676,
+    "nli": 0.548,
+    "text": "When `head` becomes `None`, `prev` is the new head."
+   },
+   {
+    "lex": 0.692,
+    "nli": 0.956,
+    "text": "This works in **O(n) time** and **O(1) space** by re-pointing nodes [1]."
+   },
+   {
+    "lex": 0.788,
+    "nli": 0.011,
+    "text": "Handle edge cases: empty list (return `None`) and single-node list (return the node) [4]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.532,
+    "nli": 0.008,
+    "text": "Appending to a dynamic array is O(1) amortized because most of the time, the array has free space, so adding an element takes constant time [2][3]."
+   },
+   {
+    "lex": 0.638,
+    "nli": 0.888,
+    "text": "However, when the array is full, it must resize (copy all elements to a larger block), which takes O(n) time [2]."
+   },
+   {
+    "lex": 0.536,
+    "nli": 0.892,
+    "text": "By doubling the capacity during resizes, the expensive O(n) operations are spread out over many O(1) operations, averaging to O(1) per append [1][2]."
+   }
+  ]
+ },
+ {
+  "faithful": false,
+  "claims": [
+   {
+    "lex": 0.577,
+    "nli": 0.626,
+    "text": "Hash tables handle collisions in two main ways:"
+   },
+   {
+    "lex": 0.861,
+    "nli": 0.495,
+    "text": "**Chaining**: Stores colliding keys in a small list at the same bucket."
+   },
+   {
+    "lex": 0.494,
+    "nli": 0.002,
+    "text": "This keeps all items in one place [1]."
+   },
+   {
+    "lex": 0.788,
+    "nli": 0.599,
+    "text": "**Open addressing**: Finds another free slot in the array (using linear probing, quadratic probing, or double hashing) to store the colliding item [1]."
+   },
+   {
+    "lex": 0.785,
+    "nli": 0.909,
+    "text": "A good hash function spreads keys evenly to minimize collisions [1]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.677,
+    "nli": 0.019,
+    "text": "The load factor of a hash table is calculated by dividing the number of **items** (key-value pairs) by the number of **buckets** in the table [1]."
+   },
+   {
+    "lex": 0.472,
+    "nli": 0.315,
+    "text": "It measures how full the table is."
+   },
+   {
+    "lex": 0.58,
+    "nli": 0.11,
+    "text": "When this ratio exceeds a set threshold (like 0.75), the table resizes to maintain efficiency [1]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.454,
+    "nli": 0.748,
+    "text": "To check balanced brackets with a stack, follow these steps:"
+   },
+   {
+    "lex": 0.508,
+    "nli": 0.035,
+    "text": "Use a stack to track opening brackets (`(`, `[`, `{`)."
+   },
+   {
+    "lex": 0.236,
+    "nli": 0.014,
+    "text": "When you see an opening bracket, push it onto the stack [1]."
+   },
+   {
+    "lex": 0.287,
+    "nli": 0.146,
+    "text": "When you see a closing bracket (`)`, `]`, `}`), check if the stack is empty or if the top of the stack does not match the corresponding opening bracket [1]."
+   },
+   {
+    "lex": 0.395,
+    "nli": 0.344,
+    "text": "If it matches, pop the stack; otherwise, the brackets are unbalanced [1]."
+   },
+   {
+    "lex": 0.521,
+    "nli": 0.013,
+    "text": "After processing all characters, the stack should be empty for the brackets to be balanced [1]."
+   },
+   {
+    "lex": 0.364,
+    "nli": 0.015,
+    "text": "This works because a stack follows LIFO order, ensuring the most recent opening bracket must match the next closing bracket [4]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.911,
+    "nli": 0.462,
+    "text": "A monotonic stack solves the next-greater-element problem in O(n) time because each element is pushed and popped **at most once** [1]."
+   },
+   {
+    "lex": 0.619,
+    "nli": 0.726,
+    "text": "As you iterate through the array, you maintain a stack of elements in decreasing order."
+   },
+   {
+    "lex": 0.645,
+    "nli": 0.006,
+    "text": "When a new element is larger than the top of the stack, it becomes the next greater element for that top element, which is then popped."
+   },
+   {
+    "lex": 0.513,
+    "nli": 0.007,
+    "text": "This ensures no element stays in the stack longer than necessary, keeping operations efficient."
+   },
+   {
+    "lex": 0.52,
+    "nli": 0.192,
+    "text": "The process guarantees each element is handled exactly once [1]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.673,
+    "nli": 0.304,
+    "text": "A circular buffer is a fixed-size data structure that uses **modulo arithmetic** to wrap around its indices for **head** (front) and **tail** (back) pointers."
+   },
+   {
+    "lex": 0.514,
+    "nli": 0.023,
+    "text": "It allows **O(1) enqueue and dequeue** operations by reusing empty slots after the tail passes the head."
+   },
+   {
+    "lex": 0.635,
+    "nli": 0.013,
+    "text": "It avoids shifting elements like a naive array queue [1][2]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.384,
+    "nli": 0.005,
+    "text": "Using `list.pop(0)` as a queue is inefficient because it has a time complexity of **O(n)** for each operation, since all remaining elements must shift left [2]."
+   },
+   {
+    "lex": 0.597,
+    "nli": 0.938,
+    "text": "For queues, use `collections.deque` instead, as its `popleft()` operation runs in **O(1)** time [2]."
+   },
+   {
+    "lex": 0.464,
+    "nli": 0.005,
+    "text": "This is why BFS and other queue-based algorithms (like in evidence 3) use `deque` for efficiency [3][4]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.865,
+    "nli": 0.022,
+    "text": "A missing or unreachable base case causes infinite recursion, which fills the call stack until it overflows [1]."
+   },
+   {
+    "lex": 0.587,
+    "nli": 0.027,
+    "text": "Each recursive call adds a new frame to the stack, and if recursion never stops, the stack eventually runs out of space [1][4]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.813,
+    "nli": 0.836,
+    "text": "Big-O notation describes how an algorithm's **running time or memory usage** grows as the input size (n) increases, focusing on the worst-case scenario [1]."
+   },
+   {
+    "lex": 0.723,
+    "nli": 0.959,
+    "text": "It ignores constant factors and lower-order terms, providing an **upper bound** of growth [1]."
+   },
+   {
+    "lex": 0.7,
+    "nli": 0.085,
+    "text": "For example, O(n) means the time/memory grows at most linearly with input size [1][3]."
+   },
+   {
+    "lex": 0.661,
+    "nli": 0.214,
+    "text": "It does not mean \"exactly n steps\" or represent the best case [2]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.586,
+    "nli": 0.055,
+    "text": "Naive Fibonacci is exponential time (O(2^n)) because it recalculates the same subproblems repeatedly."
+   },
+   {
+    "lex": 0.419,
+    "nli": 0.011,
+    "text": "For example, to compute `fib(5)`, it calculates `fib(3)` twice, `fib(2)` three times, and so on."
+   },
+   {
+    "lex": 0.369,
+    "nli": 0.009,
+    "text": "Each call branches into two more calls, leading to a binary tree of computations with roughly 2^n nodes [1][4]."
+   },
+   {
+    "lex": 0.338,
+    "nli": 0.012,
+    "text": "Memoization fixes this by caching results, reducing time to O(n) [2]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.547,
+    "nli": 0.022,
+    "text": "Quick sort degrades to **O(n\u00b2)** when the pivot selection consistently results in highly unbalanced partitions."
+   },
+   {
+    "lex": 0.76,
+    "nli": 0.023,
+    "text": "This happens if the pivot is always the smallest or largest element, like in a sorted array with a naive first-element pivot."
+   },
+   {
+    "lex": 0.637,
+    "nli": 0.371,
+    "text": "Using a random or median-of-three pivot reduces this risk [1]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.476,
+    "nli": 0.004,
+    "text": "Worst case is the highest cost for any single input, like a hash table collision causing O(n) time [3]."
+   },
+   {
+    "lex": 0.785,
+    "nli": 0.649,
+    "text": "Amortized cost spreads out occasional expensive operations (like resizing a dynamic array) over many cheap ones, so the *average* per-operation cost is low\u2014like O(1) for appending to a dynamic array [1]."
+   },
+   {
+    "lex": 0.65,
+    "nli": 0.849,
+    "text": "Worst case focuses on a single bad input; amortized cost considers the total cost over many operations."
+   }
+  ]
+ },
+ {
+  "faithful": false,
+  "claims": [
+   {
+    "lex": 0.547,
+    "nli": 0.008,
+    "text": "Insertion sort is best for nearly sorted data because it runs in **O(n)** time when the input is almost sorted."
+   },
+   {
+    "lex": 0.565,
+    "nli": 0.027,
+    "text": "This is because it only needs to shift elements a little to build the sorted prefix [1]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.525,
+    "nli": 0.038,
+    "text": "Merge sort is **stable**\u2014it preserves the relative order of equal elements [2]."
+   },
+   {
+    "lex": 0.591,
+    "nli": 0.16,
+    "text": "It uses **O(n) extra memory** for merging the sorted halves [2]."
+   },
+   {
+    "lex": 0.425,
+    "nli": 0.108,
+    "text": "The code creates temporary arrays (`l`, `r`, `out`) during recursion, requiring space proportional to the input size."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.75,
+    "nli": 0.133,
+    "text": "To delete a node with two children in a BST, you replace it with its **inorder successor** (the smallest key in its right subtree) or its **inorder predecessor** (the largest key in its left subtree)."
+   },
+   {
+    "lex": 0.631,
+    "nli": 0.123,
+    "text": "Then, you delete that successor or predecessor node (which will have at most one child) from its original position."
+   },
+   {
+    "lex": 0.211,
+    "nli": 0.005,
+    "text": "This maintains the BST property [1]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.672,
+    "nli": 0.194,
+    "text": "An inorder traversal of a BST gives the node values in **ascending order** (sorted order)."
+   },
+   {
+    "lex": 0.696,
+    "nli": 0.03,
+    "text": "This happens because the BST property ensures all left subtree values are smaller than the current node, and all right subtree values are larger."
+   },
+   {
+    "lex": 0.364,
+    "nli": 0.017,
+    "text": "The traversal visits left subtree \u2192 node \u2192 right subtree, producing a sorted sequence [1]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.58,
+    "nli": 0.278,
+    "text": "A binary search tree (BST) can degrade to **O(n)** time for operations (search, insert, delete) when it becomes **degenerate**, meaning it turns into a linked list due to unbalanced insertions (e.g., inserting sorted data repeatedly)."
+   },
+   {
+    "lex": 0.409,
+    "nli": 0.014,
+    "text": "This happens because the tree height **h** becomes **n** (like a straight line), making operations linear instead of logarithmic."
+   },
+   {
+    "lex": 0.359,
+    "nli": 0.178,
+    "text": "The example in evidence shows search takes **O(h)**, which becomes **O(n)** in this case [1]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.874,
+    "nli": 0.002,
+    "text": "Preorder traversal visits the **node first**, then its **left subtree**, then its **right subtree** (order: node, left, right) [1]."
+   },
+   {
+    "lex": 0.873,
+    "nli": 0.002,
+    "text": "Inorder traversal visits the **left subtree first**, then the **node**, then the **right subtree** (order: left, node, right) [1]."
+   },
+   {
+    "lex": 0.873,
+    "nli": 0.002,
+    "text": "Postorder traversal visits the **left subtree first**, then the **right subtree**, then the **node** (order: left, right, node) [1]."
+   },
+   {
+    "lex": 0.727,
+    "nli": 0.099,
+    "text": "All three are depth-first traversals, but their order of visiting nodes differs."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.614,
+    "nli": 0.033,
+    "text": "For a node at index **i** (0-based) in a heap stored as an array:"
+   },
+   {
+    "lex": 0.956,
+    "nli": 0.063,
+    "text": "- The **left child** index is `2i + 1` [1]."
+   },
+   {
+    "lex": 0.951,
+    "nli": 0.297,
+    "text": "- The **right child** index is `2i + 2` [1]."
+   },
+   {
+    "lex": 0.433,
+    "nli": 0.003,
+    "text": "No pointers are needed because the array layout enforces this structure [1]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.811,
+    "nli": 0.182,
+    "text": "A complete binary tree fills every level except possibly the last, which must be filled from left to right."
+   },
+   {
+    "lex": 0.554,
+    "nli": 0.19,
+    "text": "This means all levels are fully filled until the last one, where nodes are packed to the left as much as possible."
+   },
+   {
+    "lex": 0.431,
+    "nli": 0.08,
+    "text": "It is also described as a heap structure [1]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.738,
+    "nli": 0.452,
+    "text": "The complexity of building a heap from **n** elements using **heapify** is **O(n)**, not **O(n log n)** [1]."
+   },
+   {
+    "lex": 0.557,
+    "nli": 0.008,
+    "text": "This is more efficient than inserting elements one by one (which would be **O(n log n)**)."
+   },
+   {
+    "lex": 0.408,
+    "nli": 0.053,
+    "text": "The heapify process starts from the last non-leaf node and works upward, ensuring the heap property in linear time [1]."
+   }
+  ]
+ },
+ {
+  "faithful": false,
+  "claims": [
+   {
+    "lex": 0.703,
+    "nli": 0.204,
+    "text": "Use a size-**k** min-heap to track the top **k** elements efficiently in **O(n log k)** time."
+   },
+   {
+    "lex": 0.545,
+    "nli": 0.023,
+    "text": "Insert all elements into the heap."
+   },
+   {
+    "lex": 0.548,
+    "nli": 0.024,
+    "text": "If the heap size exceeds **k**, remove the smallest element (root)."
+   },
+   {
+    "lex": 0.5,
+    "nli": 0.125,
+    "text": "After processing, the heap contains the **k** largest elements."
+   },
+   {
+    "lex": 0.411,
+    "nli": 0.001,
+    "text": "This works because the min-heap keeps only the **k** largest seen so far at its root [1]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.585,
+    "nli": 0.063,
+    "text": "An adjacency list uses **O(V + E)** space, where V is the number of vertices and E is the number of edges."
+   },
+   {
+    "lex": 0.51,
+    "nli": 0.074,
+    "text": "It is efficient for sparse graphs (few edges) [1]."
+   },
+   {
+    "lex": 0.792,
+    "nli": 0.07,
+    "text": "An adjacency matrix uses **O(V\u00b2)** space, as it stores a V x V table regardless of edges."
+   },
+   {
+    "lex": 0.519,
+    "nli": 0.169,
+    "text": "It is better for dense graphs (many edges) [1]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.798,
+    "nli": 0.043,
+    "text": "BFS finds the shortest path in an unweighted graph by exploring all vertices level by level, starting from the source."
+   },
+   {
+    "lex": 0.685,
+    "nli": 0.285,
+    "text": "It discovers vertices in order of their distance from the source, ensuring the first time a vertex is reached, it is via the shortest path (fewest edges)."
+   },
+   {
+    "lex": 0.557,
+    "nli": 0.007,
+    "text": "This works because BFS uses a queue to process nodes in the order they are discovered, guaranteeing that closer nodes are processed before farther ones [1]."
+   },
+   {
+    "lex": 0.849,
+    "nli": 0.969,
+    "text": "For weighted graphs, BFS is incorrect\u2014use Dijkstra\u2019s instead [1][4]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.799,
+    "nli": 0.788,
+    "text": "Mark nodes **visited when enqueuing** in BFS."
+   },
+   {
+    "lex": 0.442,
+    "nli": 0.003,
+    "text": "This prevents the same node from being added to the queue multiple times, ensuring efficiency and correctness."
+   },
+   {
+    "lex": 0.48,
+    "nli": 0.046,
+    "text": "Marking when dequeuing allows duplicates, wasting time and space."
+   },
+   {
+    "lex": 0.247,
+    "nli": 0.019,
+    "text": "The correct approach is shown in the algorithm:"
+   }
+  ]
+ },
+ {
+  "faithful": false,
+  "claims": [
+   {
+    "lex": 0.871,
+    "nli": 0.09,
+    "text": "To detect a cycle in a **directed graph** using DFS, you check if DFS reaches a vertex that is **currently on the recursion stack** (a back edge)."
+   },
+   {
+    "lex": 0.599,
+    "nli": 0.775,
+    "text": "This means if you encounter a vertex that is being processed (not fully explored) in the current DFS path, a cycle exists."
+   },
+   {
+    "lex": 0.555,
+    "nli": 0.01,
+    "text": "Always track vertices on the recursion stack separately from visited vertices [1]."
+   },
+   {
+    "lex": 0.466,
+    "nli": 0.007,
+    "text": "**Pitfall:** Forgetting to reset the recursion stack after finishing a branch can cause false positives [2]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.647,
+    "nli": 0.088,
+    "text": "Dijkstra fails with negative edge weights because once a vertex is marked as finalized, its distance is assumed correct."
+   },
+   {
+    "lex": 0.545,
+    "nli": 0.17,
+    "text": "However, a negative edge later could provide a shorter path to that vertex, making the earlier distance incorrect."
+   },
+   {
+    "lex": 0.427,
+    "nli": 0.006,
+    "text": "This breaks Dijkstra\u2019s greedy approach of always picking the next closest vertex [1]."
+   },
+   {
+    "lex": 0.716,
+    "nli": 0.034,
+    "text": "For graphs with negative weights, use Bellman-Ford instead, as it can handle them and detect negative cycles [1]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.663,
+    "nli": 0.012,
+    "text": "The time complexity of Dijkstra's algorithm with a **binary heap** is **O((V + E) log V)**."
+   },
+   {
+    "lex": 0.342,
+    "nli": 0.007,
+    "text": "This accounts for heap operations (insertions and extractions) across all vertices (V) and edges (E) in the graph [1]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.472,
+    "nli": 0.667,
+    "text": "Using topological sorting, a cycle exists if the algorithm does not produce a full ordering (i.e., the length of the returned order is less than the number of vertices)."
+   },
+   {
+    "lex": 0.394,
+    "nli": 0.094,
+    "text": "In Kahn's algorithm, if the final `order` list has fewer than `n` nodes, it means some nodes were never processed due to cyclic dependencies, indicating a cycle [4]."
+   },
+   {
+    "lex": 0.831,
+    "nli": 0.012,
+    "text": "This works because a topological order only exists in a directed acyclic graph (DAG) [2]."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.439,
+    "nli": 0.231,
+    "text": "Kahn's algorithm uses in-degree to track how many edges point to each vertex."
+   },
+   {
+    "lex": 0.628,
+    "nli": 0.089,
+    "text": "It starts by enqueuing all vertices with an in-degree of 0, meaning no edges lead into them [1]."
+   },
+   {
+    "lex": 0.534,
+    "nli": 0.858,
+    "text": "As it processes each vertex, it removes it from the graph (conceptually) by decrementing the in-degree of its neighbors."
+   },
+   {
+    "lex": 0.534,
+    "nli": 0.041,
+    "text": "If a neighbor's in-degree reaches 0, it means all its dependencies have been processed, so it is enqueued [1]."
+   },
+   {
+    "lex": 0.383,
+    "nli": 0.027,
+    "text": "This ensures vertices are only processed once all their prerequisites are done."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.61,
+    "nli": 0.031,
+    "text": "Path compression flattens the tree during a `find` operation by making every node point directly to its root, reducing future lookup times."
+   },
+   {
+    "lex": 0.492,
+    "nli": 0.082,
+    "text": "It\u2019s done in the `find` method by updating `self.p[x] = self.p[self.p[x]]` before moving up the tree [1]."
+   },
+   {
+    "lex": 0.731,
+    "nli": 0.301,
+    "text": "Union by rank (or size) attaches the smaller tree under the larger one during a `union` to keep the tree balanced."
+   },
+   {
+    "lex": 0.676,
+    "nli": 0.572,
+    "text": "In the code, it compares `self.size[ra]` and `self.size[rb]` to decide which root becomes the parent [1]."
+   },
+   {
+    "lex": 0.382,
+    "nli": 0.02,
+    "text": "This ensures operations stay efficient."
+   }
+  ]
+ },
+ {
+  "faithful": true,
+  "claims": [
+   {
+    "lex": 0.598,
+    "nli": 0.034,
+    "text": "The inverse Ackermann function, **alpha(n)**, in Union-Find complexity measures how quickly the tree height grows with optimizations."
+   },
+   {
+    "lex": 0.581,
+    "nli": 0.111,
+    "text": "With **path compression** and **union by size/rank**, the tree height remains extremely small\u2014effectively constant for practical purposes."
+   },
+   {
+    "lex": 0.589,
+    "nli": 0.006,
+    "text": "The inverse Ackermann function grows so slowly that **alpha(n) \u2264 4** for all computable values of *n* [1]."
+   },
+   {
+    "lex": 0.507,
+    "nli": 0.012,
+    "text": "This means each **find** or **union** operation is nearly **O(1)** in practice [1]."
+   }
+  ]
+ }
+]

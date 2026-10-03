@@ -1,0 +1,1196 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   KIDDOO DESIGN SYSTEM — "Aurora Glass"
+   Layers: aurora WebGL background → grain → glass surfaces (spotlight + gradient
+   border) → clay buttons → soft neumorphic insets. Two themes share every token.
+   All text/background pairs below were checked against WCAG AA (≥ 4.5:1).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  color-scheme: light;
+  /* surfaces */
+  --c-cream: 251 246 238;
+  --c-ivory: 255 253 247;
+  --c-surface: 255 255 255;
+  --c-warm-50: 255 251 245;
+  --c-warm-100: 245 237 227;
+  --c-warm-200: 232 221 208;
+  --c-warm-300: 115 101 88;
+  --c-warm-400: 98 84 74;
+  --c-warm-500: 74 62 53;
+  /* text */
+  --c-ink: 31 26 23;
+  --c-navy: 27 42 74;
+  --c-navy-light: 36 54 86;
+  /* brand */
+  --c-primary: 27 42 74;
+  --c-primary-light: 45 66 112;
+  --c-gold: 200 169 81;
+  --c-gold-light: 235 221 176;
+  --c-gold-dark: 122 96 28;
+  /* status */
+  --c-success: 31 107 63;
+  --c-success-light: 232 245 236;
+  --c-amber: 143 82 0;
+  --c-amber-light: 255 243 224;
+  --c-rose: 160 55 42;
+  --c-rose-light: 252 234 231;
+  /* aurora */
+  --c-aurora1: 255 176 120;
+  --c-aurora2: 170 150 255;
+  --c-aurora3: 120 220 200;
+
+  --glass: 255 255 255;
+  --glass-alpha: 0.74;
+  --glass-border: 255 255 255;
+  --edge: 27 42 74;
+  --shadow-1: 0 1px 2px rgb(var(--edge) / 0.06), 0 8px 24px -12px rgb(var(--edge) / 0.18);
+  --shadow-2: 0 2px 4px rgb(var(--edge) / 0.06), 0 16px 36px -14px rgb(var(--edge) / 0.26);
+  --shadow-3: 0 4px 8px rgb(var(--edge) / 0.08), 0 28px 56px -18px rgb(var(--edge) / 0.34);
+  --grain-opacity: 0.05;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --c-cream: 9 13 28;
+  --c-ivory: 18 24 46;
+  --c-surface: 24 31 58;
+  --c-warm-50: 20 27 50;
+  --c-warm-100: 30 38 68;
+  --c-warm-200: 48 58 94;
+  --c-warm-300: 158 168 196;
+  --c-warm-400: 178 188 214;
+  --c-warm-500: 204 212 232;
+
+  --c-ink: 233 236 247;
+  --c-navy: 226 232 255;
+  --c-navy-light: 200 210 250;
+  --c-primary: 79 70 229;
+  --c-primary-light: 99 91 240;
+  --c-gold: 232 196 104;
+  --c-gold-light: 76 62 24;
+  --c-gold-dark: 240 208 128;
+
+  --c-success: 74 222 128;
+  --c-success-light: 20 60 40;
+  --c-amber: 251 191 36;
+  --c-amber-light: 60 44 14;
+  --c-rose: 251 113 133;
+  --c-rose-light: 70 24 32;
+
+  --c-aurora1: 99 91 240;
+  --c-aurora2: 34 211 238;
+  --c-aurora3: 217 70 239;
+
+  --glass: 22 29 56;
+  --glass-alpha: 0.62;
+  --glass-border: 255 255 255;
+  --edge: 0 0 0;
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4), 0 10px 30px -14px rgb(0 0 0 / 0.6);
+  --shadow-2: 0 2px 4px rgb(0 0 0 / 0.4), 0 18px 40px -14px rgb(0 0 0 / 0.65);
+  --shadow-3: 0 4px 8px rgb(0 0 0 / 0.45), 0 30px 60px -18px rgb(0 0 0 / 0.7);
+  --grain-opacity: 0.07;
+}
+
+@layer base {
+  html {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+    background: rgb(var(--c-cream));
+  }
+
+  body {
+    @apply text-campus-ink;
+    background: transparent;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* film grain over everything: adds depth, kills gradient banding */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    opacity: var(--grain-opacity);
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  h1, h2, h3 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    color: rgb(var(--c-navy));
+  }
+
+  h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 700;
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--c-gold));
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  button, a, [role='button'], select, input[type='checkbox'], input[type='radio'], input[type='range'] {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* the home indicator on phones */
+  @media (max-width: 1023px) {
+    main { padding-bottom: calc(1.25rem + env(safe-area-inset-bottom)); }
+    main.landing { padding-bottom: 0; }
+  }
+}
+
+@layer components {
+
+  /* ── Glass surface: translucent, blurred, gradient edge, cursor spotlight ── */
+  .campus-card {
+    position: relative;
+    isolation: isolate;
+    border-radius: 20px;
+    background: rgb(var(--glass) / var(--glass-alpha));
+    -webkit-backdrop-filter: blur(16px) saturate(1.5);
+    backdrop-filter: blur(16px) saturate(1.5);
+    box-shadow: var(--shadow-1), inset 0 1px 0 rgb(var(--glass-border) / 0.35);
+    transition: box-shadow 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.3s ease;
+  }
+
+  .campus-card::before {            /* spotlight that follows the pointer */
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 0%), rgb(var(--c-gold) / 0.16), transparent 62%);
+    transition: opacity 0.35s ease;
+  }
+
+  .campus-card::after {             /* 1px gradient edge */
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    pointer-events: none;
+    background: linear-gradient(140deg, rgb(var(--glass-border) / 0.55), rgb(var(--glass-border) / 0.08) 38%, rgb(var(--c-aurora2) / 0.28) 100%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  }
+
+  .campus-card:hover {
+    box-shadow: var(--shadow-2), inset 0 1px 0 rgb(var(--glass-border) / 0.45);
+    transform: translateY(-2px);
+  }
+  .campus-card:hover::before { opacity: 1; }
+
+  /* ── Buttons: clay / soft-3D ── */
+  .campus-btn {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-campus-sm font-body font-semibold text-sm;
+    position: relative;
+    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, background-color 0.2s ease, filter 0.2s ease;
+  }
+  .campus-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+  .campus-btn-primary {
+    @apply campus-btn text-white;
+    background: linear-gradient(180deg, rgb(var(--c-primary-light)) 0%, rgb(var(--c-primary)) 100%);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.28) inset,
+      0 -3px 6px rgb(0 0 0 / 0.22) inset,
+      0 10px 22px -8px rgb(var(--c-primary) / 0.65),
+      0 2px 4px rgb(0 0 0 / 0.18);
+    overflow: hidden;
+  }
+  .campus-btn-primary::after {      /* light sweep */
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.28) 50%, transparent 70%);
+    transform: translateX(-120%);
+    transition: transform 0.7s ease;
+  }
+  .campus-btn-primary:hover { transform: translateY(-2px); filter: brightness(1.06); }
+  .campus-btn-primary:hover::after { transform: translateX(120%); }
+  .campus-btn-primary:active { transform: translateY(1px) scale(0.985); box-shadow: 0 2px 6px -2px rgb(var(--c-primary) / 0.6), 0 2px 5px rgb(0 0 0 / 0.3) inset; }
+
+  .campus-btn-gold {
+    @apply campus-btn font-bold;
+    color: #1b1405;
+    background: linear-gradient(180deg, #f0d684 0%, rgb(var(--c-gold)) 100%);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.65) inset,
+      0 -3px 6px rgb(120 90 20 / 0.28) inset,
+      0 10px 22px -8px rgb(var(--c-gold) / 0.7),
+      0 2px 4px rgb(0 0 0 / 0.15);
+    overflow: hidden;
+  }
+  .campus-btn-gold::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.5) 50%, transparent 70%);
+    transform: translateX(-120%);
+    transition: transform 0.7s ease;
+  }
+  .campus-btn-gold:hover { transform: translateY(-2px); filter: brightness(1.04); }
+  .campus-btn-gold:hover::after { transform: translateX(120%); }
+  .campus-btn-gold:active { transform: translateY(1px) scale(0.985); }
+
+  .campus-btn-secondary {
+    @apply campus-btn text-campus-warm-500;
+    background: rgb(var(--glass) / 0.55);
+    border: 1px solid rgb(var(--c-warm-200));
+    box-shadow: inset 0 1px 0 rgb(var(--glass-border) / 0.35);
+  }
+  .campus-btn-secondary:hover { background: rgb(var(--c-warm-100)); color: rgb(var(--c-ink)); transform: translateY(-1px); }
+
+  .campus-btn-ghost {
+    @apply campus-btn bg-transparent text-campus-warm-400;
+  }
+  .campus-btn-ghost:hover { background: rgb(var(--c-warm-100)); color: rgb(var(--c-ink)); }
+
+  /* ── Inputs: soft inset (neumorphic) ── */
+  .campus-input {
+    @apply w-full px-4 py-3 rounded-campus-sm font-body text-sm text-campus-ink placeholder:text-campus-warm-300 focus:outline-none transition-all duration-200;
+    background: rgb(var(--c-surface) / 0.7);
+    border: 1px solid rgb(var(--c-warm-200));
+    box-shadow: inset 0 2px 4px rgb(var(--edge) / 0.06);
+  }
+  .campus-input:focus {
+    border-color: rgb(var(--c-gold));
+    box-shadow: inset 0 2px 4px rgb(var(--edge) / 0.05), 0 0 0 4px rgb(var(--c-gold) / 0.2);
+  }
+
+  .campus-stat { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 600; letter-spacing: -0.02em; }
+  .campus-badge { @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-accent font-semibold; }
+}
+
+@layer utilities {
+  .font-heading { font-family: 'Fraunces', Georgia, serif; }
+  .font-body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+  .font-accent { font-family: 'Space Grotesk', system-ui, sans-serif; }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .text-gradient {
+    background: linear-gradient(100deg, rgb(var(--c-gold)) 0%, rgb(var(--c-aurora2)) 45%, rgb(var(--c-aurora3)) 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradient-pan 8s ease infinite;
+  }
+
+  .glass {
+    background: rgb(var(--glass) / var(--glass-alpha));
+    -webkit-backdrop-filter: blur(16px) saturate(1.5);
+    backdrop-filter: blur(16px) saturate(1.5);
+    border: 1px solid rgb(var(--glass-border) / 0.28);
+  }
+
+  .neo-inset { background: rgb(var(--c-warm-100) / 0.7); box-shadow: inset 2px 2px 5px rgb(var(--edge) / 0.1), inset -2px -2px 5px rgb(var(--glass-border) / 0.35); }
+  .neo-raised { background: rgb(var(--c-surface) / 0.8); box-shadow: 4px 4px 10px rgb(var(--edge) / 0.1), -3px -3px 8px rgb(var(--glass-border) / 0.45); }
+
+  .bg-grid {
+    background-image:
+      linear-gradient(rgb(var(--c-navy) / 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--c-navy) / 0.05) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+  .bg-dots { background-image: radial-gradient(rgb(var(--c-navy) / 0.14) 1px, transparent 1.2px); background-size: 22px 22px; }
+  .mask-fade-y { -webkit-mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent); mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent); }
+  .mask-fade-x { -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent); mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent); }
+  .perspective { perspective: 1200px; }
+  .preserve-3d { transform-style: preserve-3d; }
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgb(var(--c-warm-300) / 0.45); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: rgb(var(--c-warm-300) / 0.7); }
+
+::selection { background-color: rgb(var(--c-gold) / 0.35); color: rgb(var(--c-navy)); }
+
+/* markdown / code in answers */
+.prose code { background: rgb(var(--c-warm-100)); padding: 0.1em 0.35em; border-radius: 6px; }
+.prose pre { box-shadow: var(--shadow-1); }
+
+select, option { background-color: rgb(var(--c-surface)); color: rgb(var(--c-ink)); }
+
+/* motion is optional */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+}
+
+/* print (learning journal → PDF): flat, light, no effects */
+@media print {
+  :root, :root[data-theme='dark'] { --c-cream: 255 255 255; --c-ink: 20 20 20; --c-navy: 20 20 20; --c-warm-300: 90 90 90; --c-warm-400: 70 70 70; --c-warm-500: 40 40 40; --glass: 255 255 255; --glass-alpha: 1; }
+  body::after, [data-fx] { display: none !important; }
+  .campus-card { box-shadow: none !important; backdrop-filter: none !important; border: 1px solid #ddd; }
+  .campus-card::before, .campus-card::after { display: none; }
+}
+
+/* ── Orbiting border beam ── */
+@property --beam-angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@keyframes beam-spin { to { --beam-angle: 360deg; } }
+.border-beam {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  pointer-events: none;
+  background: conic-gradient(from var(--beam-angle), transparent 0 68%, rgb(var(--c-gold)) 84%, rgb(var(--c-aurora2)) 94%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: beam-spin 7s linear infinite;
+}
+
+/* Deep, always-dark feature band (same in both themes): navy gradient with soft aurora glows */
+.band {
+  background:
+    radial-gradient(60% 80% at 15% 0%, rgb(var(--c-gold) / 0.14), transparent 60%),
+    radial-gradient(50% 70% at 90% 100%, rgb(99 91 240 / 0.28), transparent 60%),
+    linear-gradient(135deg, rgba(11, 18, 48, 0.74) 0%, rgba(20, 33, 63, 0.7) 55%, rgba(26, 22, 71, 0.74) 100%);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  color: #e9ecf7;
+}
+
+/* flowing dashes on the edges that lead to a concept you can start now */
+@keyframes edge-flow { to { stroke-dashoffset: -32; } }
+.edge-flow { animation: edge-flow 1.4s linear infinite; }
+
+
+/* ── Landing page stages: one fixed viewport, sections swap in place (the page itself never scrolls) ── */
+.stages > .stage {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  align-items: safe center;                 /* tall content starts at the top instead of being clipped above it */
+  opacity: 0;
+  visibility: hidden;
+  filter: blur(10px);
+  transform: translateY(28px) scale(0.985);
+  transition: opacity 0.55s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), filter 0.55s ease, visibility 0s linear 0.7s;
+}
+.stages > .stage[data-pos="before"] { transform: translateY(-28px) scale(0.985); }
+.stages > .stage[data-pos="active"] {
+  opacity: 1;
+  visibility: visible;
+  filter: none;
+  transform: none;
+  transition-delay: 0.12s, 0.12s, 0.12s, 0s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .stages > .stage, .stages > .stage[data-pos="active"] { transition: none; filter: none; transform: none; }
+}
+
+/* Stages must fit one screen: tighten vertical rhythm on desktop-height viewports (taller content still scrolls inside its stage) */
+@media (min-width: 1024px) and (max-height: 900px) {
+  .stages > section.stage:not(#top):not(#believed),
+  .stages > .stage > section { padding-top: 5rem !important; padding-bottom: 1rem !important; }
+  .stages .stage .mb-16 { margin-bottom: 1.25rem !important; }
+  .stages .stage .mb-12 { margin-bottom: 1rem !important; }
+  .stages .stage h2:not(.story-h) { font-size: clamp(1.8rem, 3vw, 2.5rem) !important; line-height: 1.1 !important; }
+  .stages > #top h1 { font-size: clamp(2.4rem, 4.6vw, 3.9rem) !important; }
+  .stages > #top { padding-top: 5rem !important; padding-bottom: 1rem !important; }
+  .stages .stage .campus-card.p-6, .stages .stage .p-6 { padding: 1rem !important; }
+  .stages .stage .gap-8 { gap: 1.25rem !important; }
+}
+
+/* dark bands over the light theme need to be nearly opaque to keep their white text readable */
+:root:not([data-theme='dark']) .band {
+  background:
+    radial-gradient(60% 80% at 15% 0%, rgb(var(--c-gold) / 0.14), transparent 60%),
+    radial-gradient(50% 70% at 90% 100%, rgb(99 91 240 / 0.28), transparent 60%),
+    linear-gradient(135deg, rgba(11, 18, 48, 0.94) 0%, rgba(20, 33, 63, 0.92) 55%, rgba(26, 22, 71, 0.94) 100%);
+}
+
+/* In stages the dark "band" becomes a rounded panel for the text, so the 3D graph stays visible beside it in both themes */
+.stages > .stage.band { background: none !important; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.stages > .stage.band > div.relative {
+  background:
+    radial-gradient(60% 80% at 15% 0%, rgb(var(--c-gold) / 0.14), transparent 60%),
+    radial-gradient(50% 70% at 90% 100%, rgb(99 91 240 / 0.28), transparent 60%),
+    linear-gradient(135deg, rgba(11, 18, 48, 0.9) 0%, rgba(20, 33, 63, 0.88) 55%, rgba(26, 22, 71, 0.9) 100%);
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 28px;
+  padding: 2rem 1.5rem;
+  box-shadow: 0 24px 60px -20px rgb(0 0 0 / 0.5);
+  color: #e9ecf7;
+}
+
+@media (min-width: 1024px) {
+  .stages > section.stage:not(#top):not(#believed) { padding-left: 4.5rem; }
+}
+
+
+/* ── Opening sequence ── */
+.intro-backdrop {                              /* stage one's sky, so the opening and the first scene are one world */
+  background:
+    radial-gradient(ellipse 85% 70% at 50% 0%, #aaebd7 0%, rgb(170 235 215 / 0) 100%),
+    radial-gradient(ellipse 85% 70% at 50% 100%, rgb(170 235 215 / 0.5) 0%, rgb(170 235 215 / 0) 100%),
+    #6ec8e6;
+}
+.intro-backdrop::after {                       /* hairline grid: gives the dark frame depth without moving */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgb(255 255 255 / 0.12) 1px, transparent 1px), linear-gradient(90deg, rgb(255 255 255 / 0.12) 1px, transparent 1px);
+  background-size: 72px 72px;
+  -webkit-mask-image: radial-gradient(ellipse at 60% 50%, #000 30%, transparent 75%);
+  mask-image: radial-gradient(ellipse at 60% 50%, #000 30%, transparent 75%);
+}
+/* the backdrop opens around the graph (a hole that grows) while the page appears through the same circle */
+.intro-iris-out {
+  -webkit-mask-image: radial-gradient(circle at var(--ix, 50%) var(--iy, 50%), transparent var(--ir, 0px), #000 calc(var(--ir, 0px) + 22vmin));
+  mask-image: radial-gradient(circle at var(--ix, 50%) var(--iy, 50%), transparent var(--ir, 0px), #000 calc(var(--ir, 0px) + 22vmin));
+}
+.intro-iris-in {
+  -webkit-mask-image: radial-gradient(circle at var(--ix, 50%) var(--iy, 50%), #000 var(--ir, 0px), transparent calc(var(--ir, 0px) + 22vmin));
+  mask-image: radial-gradient(circle at var(--ix, 50%) var(--iy, 50%), #000 var(--ir, 0px), transparent calc(var(--ir, 0px) + 22vmin));
+}
+
+
+/* ── Story stages: staggered rise + mask when the stage arrives ── */
+.stage .story-in { opacity: 0; transform: translateY(0.6em); clip-path: inset(0 0 100% 0); transition: opacity 0.8s ease, transform 1s cubic-bezier(0.22, 1, 0.36, 1), clip-path 1s cubic-bezier(0.22, 1, 0.36, 1); }
+.stage[data-pos="active"] .story-in { opacity: 1; transform: none; clip-path: inset(-20% -10% -25% -10%); }
+.stage[data-pos="active"] .story-d1 { transition-delay: 0.25s; }
+.stage[data-pos="active"] .story-d2 { transition-delay: 0.4s; }
+.stage[data-pos="active"] .story-d3 { transition-delay: 0.7s; }
+.stage[data-pos="active"] .story-d4 { transition-delay: 0.9s; }
+.story-swash path { stroke-dasharray: 700; stroke-dashoffset: 700; transition: stroke-dashoffset 1.4s cubic-bezier(0.65, 0, 0.35, 1) 0.9s; }
+.stage[data-pos="active"] .story-swash path { stroke-dashoffset: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .stage .story-in, .story-swash path { transition: none; opacity: 1; transform: none; clip-path: none; stroke-dashoffset: 0; }
+}
+
+/* the stages end on the call to action: no footer band inside the fixed viewport */
+.stages footer { display: none; }
+
+
+/* ── Gate scene (draw a zero): the same navy world as the count, lit from below with indigo frost ── */
+.gate-bg {
+  background:
+    radial-gradient(ellipse 85% 70% at 50% 0%, #aaebd7 0%, rgb(170 235 215 / 0) 100%),
+    radial-gradient(ellipse 85% 70% at 50% 100%, rgb(170 235 215 / 0.5) 0%, rgb(170 235 215 / 0) 100%),
+    #6ec8e6;
+}
+.gate-frost { mix-blend-mode: soft-light; opacity: 0.8; animation: frostDrift 38s ease-in-out infinite alternate; will-change: transform; }
+@keyframes frostDrift { from { transform: translate3d(-1.5%, -1%, 0) scale(1.02); } to { transform: translate3d(1.5%, 1.2%, 0) scale(1.07); } }
+.gate-vignette { background: radial-gradient(ellipse 75% 70% at 50% 52%, transparent 45%, rgb(23 63 77 / 0.22) 100%); }
+.gate-guide {
+  border-radius: 9999px;
+  border: 6px solid rgb(255 255 255 / 0.4);
+  -webkit-mask-image: conic-gradient(#000 0 58%, transparent 58% 100%);
+  mask-image: conic-gradient(#000 0 58%, transparent 58% 100%);
+  animation: guideSpin 7s linear infinite;
+}
+@keyframes guideSpin { to { rotate: 360deg; } }
+
+/* ── "You Believed": the first stage. Same navy world; pearl-to-gold calligraphy ── */
+.believed-bg {
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 46%, rgb(79 70 229 / 0.3), transparent 72%),
+    radial-gradient(ellipse 120% 80% at 50% 125%, #2a2f74 0%, #141a3d 48%, #070a19 100%);
+}
+.believed-ink {
+  background: linear-gradient(180deg, #fffaf0 0%, #f3dc8f 48%, #c9a64a 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 10px 30px rgb(232 196 104 / 0.25));
+}
+.believed-in { opacity: 0; filter: blur(18px); transform: translateY(0.02em) scale(1.05); animation: believedIn 2s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.believed-d1 { animation-delay: 0.45s; }
+.believed-d2 { animation-delay: 0.75s; }
+.believed-d3 { animation-delay: 1.15s; }
+.believed-late { opacity: 0; animation: believedFade 1.2s ease 1.9s forwards; }
+html[data-intro='running'] .believed-in, html[data-intro='running'] .believed-late { animation-play-state: paused; }
+@keyframes believedIn { to { opacity: 1; filter: blur(0); transform: none; } }
+@keyframes believedFade { to { opacity: 1; } }
+/* nothing of the page's navigation exists while the opening plays */
+html[data-intro] .landing-nav { opacity: 0 !important; visibility: hidden !important; }
+@media (prefers-reduced-motion: reduce) {
+  .believed-in, .believed-late { animation: none; opacity: 1; filter: none; transform: none; }
+  .gate-frost { animation: none; }
+}
+
+/* script swashes overhang the glyph box; extend the gradient-text box so nothing is clipped, without moving the text */
+.believed-ink { padding: 0.12em 0.5em 0.32em 0.4em; margin: -0.12em 0 0 -0.4em; }
+
+
+/* Opening scenes after the title: one navy world with a soft living glow behind the hand */
+.story-backdrop {
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 46%, rgb(79 70 229 / 0.3), transparent 72%),
+    radial-gradient(ellipse 120% 80% at 50% 125%, #2a2f74 0%, #141a3d 48%, #070a19 100%);
+}
+.story-blob {
+  position: absolute; left: 50%; top: 50%; width: 62vmin; height: 56vmin; translate: -50% -50%;
+  background: radial-gradient(circle at 50% 45%, rgb(150 165 255 / 0.55), rgb(95 110 235 / 0.28) 45%, transparent 70%);
+  filter: blur(34px);
+  animation: blobMorph 16s ease-in-out infinite alternate;
+}
+@keyframes blobMorph {
+  0% { border-radius: 58% 42% 51% 49% / 46% 56% 44% 54%; rotate: 0deg; scale: 1; }
+  50% { border-radius: 44% 56% 38% 62% / 58% 40% 60% 42%; rotate: 25deg; scale: 1.12; }
+  100% { border-radius: 52% 48% 60% 40% / 40% 60% 46% 54%; rotate: -15deg; scale: 0.95; }
+}
+.story-ink { background: linear-gradient(180deg, #fffaf0 0%, #f3dc8f 52%, #c9a64a 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+html[data-intro] .story-dock { opacity: 0 !important; }
+@media (prefers-reduced-motion: reduce) { .story-blob { animation: none; } }
+
+/* ── Landing story (src/experience): hidden behind the opening until the white flash ── */
+html[data-intro='running'] .exp { opacity: 0; visibility: hidden; }
+/* phones: the story's words a touch larger (scaled on the child: the engine owns each line's own transform) */
+@media (max-width: 639px) { .exp-lines [data-in] > * { scale: 1.08; } }
+/* inside the story the gold capitals need no glow either (every filter is a repaint per frame while lines fade) */
+.exp .believed-ink { filter: none; }
+.exp-xp-burst { animation: xpBurst 1.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+@keyframes xpBurst {
+  0% { opacity: 0; transform: translate(-50%, -30%) scale(0.6); }
+  18% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  70% { opacity: 1; transform: translate(-50%, -55%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -75%) scale(1.04); }
+}
+.exp-hold-ripple { position: absolute; inset: 1.25rem; border-radius: 9999px; border: 1.5px solid rgb(255 255 255 / 0.55); opacity: calc(1 - var(--exp-hold, 0) * 6); animation: holdRipple 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite; pointer-events: none; }
+@keyframes holdRipple { 0% { transform: scale(0.9); border-color: rgb(255 255 255 / 0.6); } 100% { transform: scale(1.45); border-color: rgb(255 255 255 / 0); } }
+@media (prefers-reduced-motion: reduce) { .exp-xp-burst, .exp-hold-ripple { animation: none; } }
+/* the landing page coming back after the story: out of the white */
+.story-return { animation: storyReturn 0.9s ease-out both; }
+@keyframes storyReturn { from { opacity: 0; } to { opacity: 1; } }
+/* dark ink for the light stage (the garden): deep teal with a soft white glow, like the reference's stage-one type */
+.ink-deep { background: linear-gradient(180deg, #2e7d77 0%, #1f5a60 55%, #173f4d 100%); -webkit-background-clip: text; background-clip: text; color: transparent; padding: 0.12em 0.5em 0.32em 0.4em; margin: -0.12em 0 0 -0.4em; }
+.ink-deep-flat { background: linear-gradient(180deg, #2e7d77 0%, #1f5a60 55%, #173f4d 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+/* a soft light behind dark lines on the light scenes: a static gradient, not a filter */
+.halo { isolation: isolate; }
+.halo::before { content: ''; position: absolute; inset: -12% -8%; z-index: -1; background: radial-gradient(closest-side, rgb(255 255 255 / 0.62), rgb(255 255 255 / 0) 100%); }
+.exp { --hud: 255 255 255; }
+.exp[data-tone='light'] { --hud: 23 63 77; }
+.gate-frost-img { background-size: cover; background-position: center; mix-blend-mode: soft-light; opacity: 0.5; filter: grayscale(1); animation: frostDrift 38s ease-in-out infinite alternate; }
+@media (prefers-reduced-motion: reduce) { .gate-frost-img { animation: none; } }
+
+/* while the opening or the story owns the screen, the page behind it is plain navy: no aurora, no grain overlay */
+html[data-intro] { background: #6ec8e6; }
+html[data-story] { background: #070a19; }
+html[data-intro] .aurora-layer, html[data-story] .aurora-layer,
+html[data-intro] body::after, html[data-story] body::after { display: none !important; }
+
+/* phones: the ruler sits lower, so top-anchored statement lines move down below it */
+@media (max-width: 640px) { .exp [data-stage-overlay] > [data-in][class*='top-['] { margin-top: 9svh; } }
+
+/* ── Landing page backgrounds: each section wears one of the story's scenes ── */
+.world { position: relative; overflow: hidden; isolation: isolate; }
+.world-layer { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+
+/* the sky of "Every learner": teal-blue with mint glows at the top and bottom, light rays, falling petals */
+.world-sky {
+  background:
+    radial-gradient(ellipse 85% 70% at 50% 0%, #aaebd7 0%, rgb(170 235 215 / 0) 100%),
+    radial-gradient(ellipse 85% 70% at 50% 100%, rgb(170 235 215 / 0.5) 0%, rgb(170 235 215 / 0) 100%),
+    #6ec8e6;
+}
+.sky-rays {
+  background: conic-gradient(from 150deg at 50% -20%, transparent 0deg, rgb(255 255 255 / 0.28) 6deg, transparent 13deg, transparent 22deg,
+    rgb(255 255 255 / 0.2) 27deg, transparent 33deg, transparent 41deg, rgb(255 255 255 / 0.24) 46deg, transparent 53deg, transparent 60deg);
+  -webkit-mask-image: linear-gradient(#000, transparent 80%); mask-image: linear-gradient(#000, transparent 80%);
+  transform-origin: 50% -20%; animation: raysSway 16s ease-in-out infinite alternate;
+}
+@keyframes raysSway { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
+.petal {
+  position: absolute; top: -6%; width: 16px; height: 10px; border-radius: 70% 30% 70% 30%;
+  background: radial-gradient(circle at 30% 30%, #fff4f6, #f6b9c8 70%); opacity: 0.85;
+  animation: petalFall 18s linear infinite;
+}
+@keyframes petalFall {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(6vw, 55svh, 0) rotate(200deg); }
+  100% { transform: translate3d(-2vw, 112svh, 0) rotate(420deg); }
+}
+
+/* the red curtain: soft vertical light drifting over deep red */
+.world-curtain { background: linear-gradient(180deg, #7f2329 0%, #b8323a 48%, #8e2a2e 100%); }
+.curtain-streaks {
+  background: repeating-linear-gradient(90deg, rgb(255 230 230 / 0) 0, rgb(255 230 230 / 0) 5vw, rgb(255 225 225 / 0.13) 7vw, rgb(255 230 230 / 0) 9vw,
+    rgb(255 230 230 / 0) 13vw, rgb(255 210 210 / 0.08) 14vw, rgb(255 230 230 / 0) 16vw);
+  background-size: 200% 100%; animation: curtainDrift 22s ease-in-out infinite alternate;
+}
+@keyframes curtainDrift { from { background-position: 0 0; } to { background-position: -40vw 0; } }
+.curtain-glow { background: radial-gradient(ellipse 60% 50% at 50% 40%, rgb(255 190 170 / 0.25), transparent 70%); }
+
+/* the chalkboard green, with ash rising through it */
+.world-chalk { background: radial-gradient(ellipse 120% 90% at 50% 0%, #4e7c63 0%, #2b4a3b 50%, #15261d 100%); }
+.ash {
+  background-image:
+    radial-gradient(circle, rgb(236 244 238 / 0.7) 1px, transparent 1.7px),
+    radial-gradient(circle, rgb(243 220 143 / 0.55) 1px, transparent 1.8px),
+    radial-gradient(circle, rgb(236 244 238 / 0.35) 1.4px, transparent 2.2px);
+  background-size: 140px 160px, 230px 250px, 330px 300px;
+  animation: ashRise 40s linear infinite;
+}
+@keyframes ashRise { from { background-position: 0 0, 40px 0, 90px 0; } to { background-position: 30px -800px, 10px -1250px, 120px -1500px; } }
+
+/* the emerald tunnel: rings of light fly past from a bright centre */
+.world-tunnel { background: radial-gradient(circle at 50% 46%, #effff6 0, #9df0c8 1.5%, #1c7a53 7%, #07402b 24%, #031a11 55%, #010a06 100%); }
+.tunnel-rings span {
+  position: absolute; left: 50%; top: 46%; width: 120vmax; height: 120vmax; margin: -60vmax 0 0 -60vmax; border-radius: 50%;
+  border: 1.5px solid rgb(143 245 200 / 0.5); box-shadow: 0 0 24px rgb(143 245 200 / 0.18), inset 0 0 24px rgb(143 245 200 / 0.12);
+  transform: scale(0.02); opacity: 0; animation: ringFly 9s cubic-bezier(0.55, 0, 1, 0.45) infinite;
+}
+@keyframes ringFly { 0% { transform: scale(0.02); opacity: 0; } 15% { opacity: 0.9; } 100% { transform: scale(1.3); opacity: 0; } }
+
+/* the clouds over the map: a pale morning sky with clouds drifting through */
+.world-clouds { background: linear-gradient(180deg, #cfe9f2 0%, #e8f4f2 55%, #f7fbfa 100%); }
+.cloud {
+  position: absolute; left: -40vw; width: 38vw; height: 14vw; border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 60%, rgb(255 255 255 / 0.95), rgb(255 255 255 / 0) 68%);
+  animation: cloudDrift 70s linear infinite;
+}
+@keyframes cloudDrift { from { transform: translateX(0); } to { transform: translateX(150vw); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .sky-rays, .petal, .curtain-streaks, .ash, .tunnel-rings span, .cloud { animation: none; }
+  .petal, .tunnel-rings span { display: none; }
+}
+
+
+
+/* ── the landing's worlds in each theme: daylight in the light theme, the story's night in the dark theme ── */
+/* sky, dark: the same sky at night, deep teal with faint mint glows; the rays become moonlight */
+:root[data-theme='dark'] .world-sky {
+  background:
+    radial-gradient(ellipse 85% 70% at 50% 0%, rgb(46 125 119 / 0.55) 0%, rgb(46 125 119 / 0) 100%),
+    radial-gradient(ellipse 85% 70% at 50% 100%, rgb(46 125 119 / 0.3) 0%, rgb(46 125 119 / 0) 100%),
+    #08202a;
+}
+:root[data-theme='dark'] .sky-rays { opacity: 0.35; }
+:root[data-theme='dark'] .petal { opacity: 0.45; }
+/* clouds, dark: moonlit clouds over a night sky */
+:root[data-theme='dark'] .world-clouds { background: linear-gradient(180deg, #0a1a22 0%, #10252e 55%, #0c1c23 100%); }
+.world-clouds.world-flat { background: #e3f1f4; }
+:root[data-theme='dark'] .world-clouds.world-flat { background: #0e2129; }
+:root[data-theme='dark'] .cloud { background: radial-gradient(ellipse at 50% 60%, rgb(190 225 235 / 0.12), rgb(190 225 235 / 0) 68%); }
+/* curtain and chalk are the story's dark scenes in both themes (they replace the dark bands); at night they go deeper */
+:root[data-theme='dark'] .world-curtain { background: linear-gradient(180deg, #3f1013 0%, #6e1d22 48%, #4a1418 100%); }
+:root[data-theme='dark'] .world-chalk { background: radial-gradient(ellipse 120% 90% at 50% 0%, #2c4a3b 0%, #18291f 50%, #0b140f 100%); }
+
+/* Meet Your AI Team: plain green, light by day and deep by night */
+.world-green { background: linear-gradient(180deg, #dff3e7 0%, #c9ead6 100%); }
+:root[data-theme='dark'] .world-green { background: linear-gradient(180deg, #0f2a1f 0%, #0a1f17 100%); }
+/* Your Progress, Visualized: a clear sky blue by day, deep teal by night, so the cards and words read in both */
+.world-insight { background: linear-gradient(180deg, #e3f2f7 0%, #d2e9f1 100%); }
+:root[data-theme='dark'] .world-insight { background: linear-gradient(180deg, #0c1f27 0%, #08171d 100%); }
+
+/* ── Landing surfaces: a different material for each section, in both themes ── */
+/* skeuomorphic gold: a pressed-metal button with a lit top edge, it sinks when pressed */
+.btn-skeu {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border-radius: 9999px;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-weight: 700; color: #2a1d04;
+  background: linear-gradient(180deg, #fbe9a8 0%, #f0cf6a 45%, #d9ac3d 100%);
+  border: 1px solid #b88f2a;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.8), inset 0 -2px 0 rgb(140 100 20 / 0.35), 0 6px 0 #a87f22, 0 12px 24px -8px rgb(120 84 10 / 0.55);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.2s;
+}
+.btn-skeu:hover { filter: brightness(1.04); }
+.btn-skeu:active { transform: translateY(5px); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.6), inset 0 -1px 0 rgb(140 100 20 / 0.3), 0 1px 0 #a87f22, 0 4px 10px -4px rgb(120 84 10 / 0.5); }
+/* frosted glass pill */
+.btn-glass {
+  display: inline-flex; align-items: center; gap: 0.4rem; border-radius: 9999px; font-weight: 700; color: rgb(var(--c-navy));
+  background: linear-gradient(135deg, rgb(255 255 255 / 0.55), rgb(255 255 255 / 0.2));
+  border: 1px solid rgb(255 255 255 / 0.7); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 10px 24px -14px rgb(23 63 77 / 0.5);
+  -webkit-backdrop-filter: blur(10px) saturate(140%); backdrop-filter: blur(10px) saturate(140%); transition: transform 0.2s, background 0.2s;
+}
+.btn-glass:hover { transform: translateY(2px); background: linear-gradient(135deg, rgb(255 255 255 / 0.7), rgb(255 255 255 / 0.3)); }
+:root[data-theme='dark'] .btn-glass { background: linear-gradient(135deg, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0.04)); border-color: rgb(255 255 255 / 0.2); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.15), 0 10px 24px -14px rgb(0 0 0 / 0.6); }
+/* minimal: a line that draws itself under the words */
+.btn-min { position: relative; color: rgb(var(--c-warm-500)); }
+.btn-min::after { content: ''; position: absolute; left: 0.75rem; right: 0.75rem; bottom: 0.8rem; height: 1px; background: currentColor; transform: scaleX(0.25); transform-origin: left; transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+.btn-min:hover { color: rgb(var(--c-navy)); }
+.btn-min:hover::after { transform: scaleX(1); }
+
+/* glass pebbles: frosted, organic outlines */
+.glass-pebble {
+  background: linear-gradient(135deg, rgb(255 255 255 / 0.55), rgb(255 255 255 / 0.22));
+  border: 1px solid rgb(255 255 255 / 0.75);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 24px 48px -28px rgb(23 63 77 / 0.55);
+  -webkit-backdrop-filter: blur(16px) saturate(150%); backdrop-filter: blur(16px) saturate(150%);
+}
+:root[data-theme='dark'] .glass-pebble { background: linear-gradient(135deg, rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.03)); border-color: rgb(255 255 255 / 0.14); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12), 0 24px 48px -28px rgb(0 0 0 / 0.7); }
+.glass-chip { border-radius: 9999px; color: rgb(var(--c-warm-500)); background: rgb(255 255 255 / 0.45); border: 1px solid rgb(255 255 255 / 0.7); }
+:root[data-theme='dark'] .glass-chip { background: rgb(255 255 255 / 0.06); border-color: rgb(255 255 255 / 0.14); }
+
+/* claymorphism: puffy, soft, lit from the top left, pressed in from the bottom right */
+.clay-card {
+  background: #eef8f1;
+  box-shadow: 18px 18px 36px rgb(60 110 80 / 0.25), inset -8px -8px 18px rgb(60 110 80 / 0.14), inset 8px 8px 18px rgb(255 255 255 / 0.95);
+}
+:root[data-theme='dark'] .clay-card { background: #17362a; box-shadow: 18px 18px 36px rgb(0 0 0 / 0.45), inset -8px -8px 18px rgb(0 0 0 / 0.3), inset 8px 8px 18px rgb(255 255 255 / 0.06); }
+.clay-icon { border-radius: 42% 58% 55% 45% / 50% 45% 55% 50%; box-shadow: inset -4px -4px 8px rgb(0 0 0 / 0.18), inset 4px 4px 8px rgb(255 255 255 / 0.35), 6px 8px 16px rgb(0 0 0 / 0.18); }
+.clay-chip { border-radius: 9999px; color: rgb(var(--c-warm-500)); background: rgb(255 255 255 / 0.6); box-shadow: inset 2px 2px 4px rgb(255 255 255 / 0.9), inset -2px -2px 4px rgb(60 110 80 / 0.15); }
+:root[data-theme='dark'] .clay-chip { background: rgb(255 255 255 / 0.06); box-shadow: inset 2px 2px 4px rgb(255 255 255 / 0.06), inset -2px -2px 4px rgb(0 0 0 / 0.3); }
+
+/* neumorphism: the cards are the background, pushed out; the icons sit in wells pressed into them */
+.neu-card {
+  border-radius: 48px; background: #dbedf3;
+  box-shadow: -12px -12px 26px rgb(255 255 255 / 0.85), 14px 14px 30px rgb(70 115 135 / 0.28);
+}
+.neu-card:hover { box-shadow: -8px -8px 18px rgb(255 255 255 / 0.85), 10px 10px 22px rgb(70 115 135 / 0.3); }
+.neu-well { background: #dbedf3; box-shadow: inset 6px 6px 12px rgb(70 115 135 / 0.3), inset -6px -6px 12px rgb(255 255 255 / 0.9); }
+:root[data-theme='dark'] .neu-card { background: #0b1d24; box-shadow: -10px -10px 24px rgb(255 255 255 / 0.04), 14px 14px 30px rgb(0 0 0 / 0.6); }
+:root[data-theme='dark'] .neu-well { background: #0b1d24; box-shadow: inset 6px 6px 12px rgb(0 0 0 / 0.55), inset -6px -6px 12px rgb(255 255 255 / 0.05); }
+
+/* minimalism: a hairline circle, nothing else */
+.min-node { border: 1px solid rgb(var(--c-navy) / 0.35); background: transparent; transition: border-color 0.3s, transform 0.3s; }
+.min-node:hover { border-color: rgb(var(--c-gold)); transform: scale(1.04); }
+
+/* maximalism on the chalkboard: cream stickers, a bold outline and a hard gold shadow, each at its own tilt */
+.brut-card {
+  background: #fff6dc; border: 2.5px solid #1b1405; box-shadow: 7px 7px 0 #f3dc8f, 7px 7px 0 2.5px #1b1405;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.brut-card:hover { transform: translate(-3px, -3px); box-shadow: 10px 10px 0 #f3dc8f, 10px 10px 0 2.5px #1b1405; }
+.brut-icon { background: #f3dc8f; border: 2.5px solid #1b1405; }
+
+/* ── Maximalism over the materials: an ink outline, a hard shadow in the section's colour, sticker tags, scribbles ── */
+:root { --max-line: #1b1405; }
+:root[data-theme='dark'] { --max-line: #f6ecd2; }
+.world-sky { --max: #ff8a73; }
+.world-clouds { --max: #5bb8e0; }
+.world-green { --max: #3fbf8a; }
+.world-insight { --max: #9b8cff; }
+.world-chalk { --max: #f3dc8f; }
+.landing { --max: #f3dc8f; }
+
+.max-edge { border: 2.5px solid var(--max-line) !important; }
+.clay-card.max-edge { box-shadow: 9px 9px 0 var(--max), inset -8px -8px 18px rgb(60 110 80 / 0.14), inset 8px 8px 18px rgb(255 255 255 / 0.95); }
+:root[data-theme='dark'] .clay-card.max-edge { box-shadow: 9px 9px 0 var(--max), inset -8px -8px 18px rgb(0 0 0 / 0.3), inset 8px 8px 18px rgb(255 255 255 / 0.06); }
+.glass-pebble.max-edge { box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 8px 8px 0 var(--max); }
+:root[data-theme='dark'] .glass-pebble.max-edge { box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12), 8px 8px 0 var(--max); }
+.max-edge { transition: translate 0.2s ease, box-shadow 0.2s ease; }
+.max-edge:hover { translate: -3px -3px; }
+
+.max-btn { border: 2px solid var(--max-line) !important; box-shadow: 4px 4px 0 var(--max-line) !important; }
+.max-btn:hover { transform: translate(2px, 2px) !important; box-shadow: 2px 2px 0 var(--max-line) !important; }
+.max-btn:active { transform: translate(4px, 4px) !important; box-shadow: 0 0 0 var(--max-line) !important; }
+
+.max-tag {
+  display: inline-block; padding: 0.35rem 0.9rem; border-radius: 9999px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+  color: #1b1405; background: var(--max); border: 2px solid var(--max-line); box-shadow: 3px 3px 0 var(--max-line);
+}
+.max-sticker {
+  display: inline-block; padding: 0.2rem 0.65rem; border-radius: 0.6rem;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+  color: #1b1405; background: var(--max); border: 2px solid var(--max-line);
+}
+
+/* ── Maximalist type: big serif headings with a hard shadow, an italic serif word on a marker, an italic serif lead ── */
+.max-h1 {
+  font-family: 'Fraunces', Georgia, serif; font-weight: 800; letter-spacing: -0.03em; line-height: 1;
+  font-size: clamp(2.7rem, 6.6vw, min(5.4rem, 10svh));
+  text-shadow: 3px 3px 0 var(--max);
+}
+.max-h2 {
+  font-family: 'Fraunces', Georgia, serif; font-weight: 800; letter-spacing: -0.03em; line-height: 1.02;
+  font-size: clamp(2.4rem, 5vw, 4.4rem); text-shadow: 3px 3px 0 var(--max);
+}
+.max-h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 700; font-size: 1.3rem; line-height: 1.15; letter-spacing: -0.01em; }
+.max-sub { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 500; font-size: clamp(1.15rem, 1.7vw, 1.45rem); line-height: 1.4; color: rgb(var(--c-warm-500)); }
+.world-chalk .max-sub { color: rgb(255 255 255 / 0.8); }
+.max-mark {
+  font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 700; letter-spacing: 0;
+  text-shadow: none; padding: 0 0.12em; margin: 0 -0.04em;
+  background-color: color-mix(in srgb, var(--max) 38%, transparent);
+  border-radius: 0.2em 0.5em 0.25em 0.45em;
+  box-decoration-break: clone; -webkit-box-decoration-break: clone;
+}
+.max-num { font-family: 'Fraunces', Georgia, serif; font-weight: 800; font-size: clamp(2.2rem, 3.6vw, 3rem); line-height: 1; text-shadow: 2px 2px 0 var(--max); }
+/* the dark theme: the hard shadow and marker stay in the section colour, a little deeper */
+:root[data-theme='dark'] .max-h1, :root[data-theme='dark'] .max-h2 { text-shadow: 3px 3px 0 color-mix(in srgb, var(--max) 70%, black); }
+:root[data-theme='dark'] .max-mark { background-color: color-mix(in srgb, var(--max) 30%, transparent); }
+
+/* ── Buttons press down while held and spring back up when let go; they lift a little on hover ── */
+.landing button, .landing .btn-glass, .landing-nav button, .landing a.campus-btn-gold {
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease, filter 0.2s, background 0.2s, color 0.2s;
+}
+.landing button:hover, .landing .btn-glass:hover, .landing-nav button:hover { transform: translateY(2px); }
+.landing button:active, .landing .btn-glass:active, .landing-nav button:active { transform: translateY(5px) scale(0.97); transition-duration: 0.06s; }
+.landing .btn-skeu:active, .landing-nav .btn-skeu:active { transform: translateY(5px); }
+@media (prefers-reduced-motion: reduce) {
+  .landing button:hover, .landing .btn-glass:hover, .landing-nav button:hover,
+  .landing button:active, .landing .btn-glass:active, .landing-nav button:active { transform: none; }
+}
+
+/* the workflow diagram's canvas follows the theme */
+:root[data-theme='dark'] .landing .bg-\[\#FAFAFA\] { background-color: #0e1a22; }
+
+/* ── Sign in / sign up: the sticker card on the story's sky, inset fields, the same button presses as the landing ── */
+.auth { --max: #ff8a73; }
+.auth-card {
+  border-radius: 40px 16px 40px 16px; border: 2.5px solid var(--max-line);
+  background: rgb(255 252 244 / 0.92); box-shadow: 9px 9px 0 var(--max);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+}
+:root[data-theme='dark'] .auth-card { background: rgb(12 29 36 / 0.92); }
+.auth-input {
+  width: 100%; height: 3rem; border-radius: 9999px; padding: 0 1.1rem 0 2.9rem;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 0.95rem; color: rgb(var(--c-navy));
+  background: rgb(var(--c-warm-50)); border: 2px solid rgb(var(--c-navy) / 0.18);
+  box-shadow: inset 3px 3px 6px rgb(0 0 0 / 0.06), inset -3px -3px 6px rgb(255 255 255 / 0.7);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.auth-input::placeholder { color: rgb(var(--c-warm-400)); }
+.auth-input:focus { outline: none; border-color: var(--max-line); box-shadow: 4px 4px 0 var(--max); }
+:root[data-theme='dark'] .auth-input { background: rgb(255 255 255 / 0.05); box-shadow: inset 3px 3px 6px rgb(0 0 0 / 0.35); }
+.auth button, .auth a.btn-glass { transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease, filter 0.2s; }
+.auth button:not(:disabled):hover { transform: translateY(2px); }
+.auth button:not(:disabled):active { transform: translateY(5px) scale(0.98); transition-duration: 0.06s; }
+@media (prefers-reduced-motion: reduce) { .auth button:hover, .auth button:active { transform: none; } }
+/* at night the title card on the sky is drawn in light mint, so it reads */
+:root[data-theme='dark'] .auth .ink-deep, :root[data-theme='dark'] .auth .ink-deep-flat { background-image: linear-gradient(180deg, #f2fff9 0%, #b7ecd6 60%, #8fd8bb 100%); }
+
+/* ── the footer: a sticker card on the sky, the name set large ── */
+.foot-card {
+  border-radius: 56px 20px 56px 20px; border: 2.5px solid var(--max-line);
+  background: rgb(255 252 244 / 0.9); box-shadow: 10px 10px 0 var(--max);
+}
+:root[data-theme='dark'] .foot-card { background: rgb(12 29 36 / 0.92); }
+.foot-word {
+  font-family: 'Fraunces', Georgia, serif; font-weight: 800; letter-spacing: -0.04em; line-height: 0.9;
+  font-size: clamp(3.4rem, 7vw, 5.6rem); text-shadow: 4px 4px 0 var(--max);
+}
+.foot-link { position: relative; transition: color 0.2s; }
+.foot-link::after { content: ''; position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; background: var(--max); transform: scaleX(0); transform-origin: left; transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+.foot-link:hover::after { transform: scaleX(1); }
+.foot-social {
+  color: rgb(var(--c-navy)); background: rgb(var(--c-warm-50)); border: 2px solid var(--max-line); box-shadow: 3px 3px 0 var(--max-line);
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s, background 0.2s;
+}
+.foot-social:hover { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--max-line); background: var(--max); color: #1b1405; }
+.foot-social:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--max-line); transition-duration: 0.06s; }
+
+/* the gold metal button sinks into its base under the cursor, and all the way when pressed */
+.btn-skeu:hover { transform: translateY(3px); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.8), inset 0 -2px 0 rgb(140 100 20 / 0.35), 0 3px 0 #a87f22, 0 8px 16px -8px rgb(120 84 10 / 0.55); }
+.landing .btn-skeu:hover, .landing-nav .btn-skeu:hover, .auth .btn-skeu:not(:disabled):hover { transform: translateY(3px); }
+/* the badge: dot and words on one line */
+.max-tag.inline-flex { display: inline-flex; align-items: center; white-space: nowrap; }
+/* the hero headline: room between the lines, so the highlighted word never touches the line above */
+.max-h1 { line-height: 1.14; }
+.max-h1 .max-mark { display: inline-block; line-height: 1.05; margin-top: 0.1em; padding: 0.02em 0.14em 0.06em; }
+/* How It Works: plain and quiet */
+.world-plain { background: #f6f9fa; }
+:root[data-theme='dark'] .world-plain { background: #0d171c; }
+
+/* How It Works: three sticker stops joined by hand-drawn arrows; each stop floats, the arrows nudge forward */
+.world-plain { --max: #ff8a73; }
+.step-arrow { z-index: 1; animation: arrowNudge 1.8s ease-in-out infinite; }
+@keyframes arrowNudge { 0%, 100% { translate: 0 0; } 50% { translate: 7px 3px; } }
+.step-card {
+  border-radius: 36px 14px 36px 14px; border: 2.5px solid var(--max-line);
+  background: rgb(255 252 244 / 0.96); box-shadow: 7px 7px 0 var(--max);
+  animation: stepFloat 6s ease-in-out infinite;
+}
+.step-card:nth-child(1) { animation-delay: 0s; }
+:root[data-theme='dark'] .step-card { background: rgb(14 29 36 / 0.96); }
+@keyframes stepFloat { 0%, 100% { translate: 0 0; } 50% { translate: 0 -8px; } }
+.step-num {
+  position: absolute; top: -1.6rem; left: 50%; translate: -50% 0; line-height: 1;
+  font-family: 'Fraunces', Georgia, serif; font-weight: 900; font-size: 3.4rem; letter-spacing: -0.04em;
+  color: var(--max); -webkit-text-stroke: 2.5px var(--max-line); paint-order: stroke fill;
+}
+.step-blob {
+  border-radius: 46% 54% 52% 48% / 52% 46% 54% 48%; background: radial-gradient(circle at 35% 30%, #fff4d6, #f3dc8f 60%, #e2bd5a);
+  border: 2.5px solid var(--max-line);
+  box-shadow: inset -5px -6px 10px rgb(150 105 20 / 0.3), inset 5px 5px 10px rgb(255 255 255 / 0.7);
+  animation: blobMorph 8s ease-in-out infinite;
+}
+@keyframes blobMorph {
+  0%, 100% { border-radius: 46% 54% 52% 48% / 52% 46% 54% 48%; }
+  50% { border-radius: 56% 44% 46% 54% / 44% 56% 48% 52%; }
+}
+@media (prefers-reduced-motion: reduce) { .step-arrow, .step-card, .step-blob { animation: none; } }
+
+/* the arrows draw in (no dots before: hidden until the stroke starts), hold ~3 s, fade, and loop */
+.arrow-line, .arrow-head { stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; animation: 5.2s ease-out infinite both; }
+.arrow-line { animation-name: arrowLine; }
+.arrow-head { animation-name: arrowHead; }
+@keyframes arrowLine {
+  0% { stroke-dashoffset: 1; opacity: 0; }
+  1% { opacity: 1; }
+  15% { stroke-dashoffset: 0; opacity: 1; }
+  86% { stroke-dashoffset: 0; opacity: 1; }
+  94%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes arrowHead {
+  0%, 14% { stroke-dashoffset: 1; opacity: 0; }
+  15% { opacity: 1; }
+  22% { stroke-dashoffset: 0; opacity: 1; }
+  86% { stroke-dashoffset: 0; opacity: 1; }
+  94%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .arrow-line, .arrow-head { animation: none; stroke-dashoffset: 0; opacity: 1; } }
+
+/* ── the pill navbar: one floating pill, no shadow; a sliding highlight behind the current link ── */
+.pill-nav { border-radius: 9999px; border: 2px solid transparent; }
+.pill-nav-on {
+  border-color: var(--max-line); background: rgb(255 252 244 / 0.86);
+  -webkit-backdrop-filter: blur(14px) saturate(150%); backdrop-filter: blur(14px) saturate(150%);
+}
+:root[data-theme='dark'] .pill-nav-on { background: rgb(12 29 36 / 0.86); }
+.pill-lit { background: linear-gradient(180deg, #fbe9a8, #f0cf6a 55%, #dcb24a); border: 1.5px solid var(--max-line); box-shadow: 2px 2px 0 var(--max-line); }
+.landing-nav .btn-skeu { box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.8), inset 0 -2px 0 rgb(140 100 20 / 0.35), 0 3px 0 #a87f22; }
+.pill-theme { border: 2px solid var(--max-line); background: rgb(255 252 244 / 0.86) !important; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+:root[data-theme='dark'] .pill-theme { background: rgb(12 29 36 / 0.86) !important; }
+
+/* the hero's fuller petal fall: a second sway path and two more colours */
+@keyframes petalFallAlt {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg) rotateX(0deg); }
+  30% { transform: translate3d(-5vw, 32svh, 0) rotate(-120deg) rotateX(60deg); }
+  65% { transform: translate3d(3vw, 70svh, 0) rotate(-260deg) rotateX(0deg); }
+  100% { transform: translate3d(-4vw, 112svh, 0) rotate(-400deg) rotateX(50deg); }
+}
+.petal-white { background: radial-gradient(circle at 30% 30%, #ffffff, #ffe9ef 70%); }
+.petal-deep { background: radial-gradient(circle at 30% 30%, #ffd9e2, #ee8fa8 70%); }
+
+/* ── The app (dashboard and the pages that share its sidebar) ── */
+:root { --max: #ff8a73; }
+.app-rail {
+  border-radius: 32px 14px 32px 14px; border: 2.5px solid var(--max-line);
+  background: rgb(255 252 244 / 0.9); box-shadow: 8px 8px 0 var(--max);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+}
+:root[data-theme='dark'] .app-rail { background: rgb(12 29 36 / 0.92); }
+.step-chip {
+  background: rgb(255 255 255 / 0.55); border: 2px solid rgb(var(--c-navy) / 0.14);
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s, box-shadow 0.2s;
+}
+.step-chip:hover { border-color: var(--max-line); box-shadow: 4px 4px 0 var(--max-line); transform: translate(-2px, -2px); }
+:root[data-theme='dark'] .step-chip { background: rgb(255 255 255 / 0.05); }
+/* buttons in the app press in under the cursor and all the way when clicked, as on the landing page */
+.app-shell button, .app-shell .btn-glass, .app-press { transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease, filter 0.2s, background 0.2s, color 0.2s; }
+.app-shell button:not(:disabled):not(.step-chip):hover, .app-shell .btn-glass:hover { transform: translateY(2px); }
+.app-shell button:not(:disabled):not(.step-chip):active, .app-shell .btn-glass:active { transform: translateY(5px) scale(0.98); transition-duration: 0.06s; }
+.app-shell .btn-skeu:hover { transform: translateY(3px); }
+@media (prefers-reduced-motion: reduce) { .app-shell button:hover, .app-shell button:active, .step-chip:hover { transform: none; } }
+
+/* the app's top bar: a slim sticker pill */
+.top-bar { border-radius: 9999px; border: 2px solid var(--max-line); background: rgb(255 252 244 / 0.88); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+:root[data-theme='dark'] .top-bar { background: rgb(12 29 36 / 0.9); }
+
+/* ── Everything that can be pressed sinks into its shadow under the cursor, and rises when the cursor leaves ── */
+.max-edge { transition: translate 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease; }
+.max-edge:hover { translate: 4px 4px; }
+.clay-card.max-edge:hover { box-shadow: 4px 4px 0 var(--max), inset -8px -8px 18px rgb(60 110 80 / 0.14), inset 8px 8px 18px rgb(255 255 255 / 0.95); }
+:root[data-theme='dark'] .clay-card.max-edge:hover { box-shadow: 4px 4px 0 var(--max), inset -8px -8px 18px rgb(0 0 0 / 0.3), inset 8px 8px 18px rgb(255 255 255 / 0.06); }
+.glass-pebble.max-edge:hover { box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 3px 3px 0 var(--max); }
+:root[data-theme='dark'] .glass-pebble.max-edge:hover { box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12), 3px 3px 0 var(--max); }
+.brut-card:hover { transform: translate(4px, 4px); box-shadow: 3px 3px 0 #f3dc8f, 3px 3px 0 2.5px #1b1405; }
+.step-chip { border-color: var(--max-line); box-shadow: 4px 4px 0 var(--max-line); }
+.step-chip:hover { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--max-line); }
+.step-chip:active { transform: translate(4px, 4px); box-shadow: 0 0 0 var(--max-line); transition-duration: 0.06s; }
+@media (prefers-reduced-motion: reduce) { .max-edge:hover, .brut-card:hover, .step-chip:hover { translate: none; transform: none; } }
+
+/* a sticker panel that stays still (forms and reading panels: no press on hover) */
+.sticker { border: 2.5px solid var(--max-line); background: rgb(255 252 244 / 0.9); box-shadow: 6px 6px 0 var(--max); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+:root[data-theme='dark'] .sticker { background: rgb(12 29 36 / 0.92); }
+/* inside the app, the shared cards drop their boxy look: rounder, with a soft ink edge */
+.app-shell .campus-card { border-radius: 22px; border: 2px solid rgb(var(--c-navy) / 0.14); box-shadow: none; }
+/* pill selects */
+.pill-select {
+  height: 2rem; border-radius: 9999px; padding: 0 0.85rem; font-size: 0.75rem; font-weight: 600; color: rgb(var(--c-navy));
+  background: rgb(var(--c-warm-50)); border: 2px solid rgb(var(--c-navy) / 0.18); cursor: pointer;
+}
+.pill-select:focus-visible { outline: none; border-color: var(--max-line); box-shadow: 3px 3px 0 var(--max); }
+/* scrolls, without showing a scrollbar */
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* topic chips: quiet until hovered, then they press in like the rest */
+.topic-chip { background: rgb(var(--c-warm-50)); border: 1.5px solid rgb(var(--c-navy) / 0.16); box-shadow: 2px 2px 0 rgb(var(--c-navy) / 0.16);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s, border-color 0.15s, background 0.15s; }
+.topic-chip:hover { border-color: var(--max-line); background: var(--max); color: #1b1405; transform: translate(2px, 2px); box-shadow: 0 0 0 var(--max-line); }
+:root[data-theme='dark'] .topic-chip { background: rgb(255 255 255 / 0.05); }
+.app-shell button.topic-chip:hover, .app-shell button.topic-chip:active { transform: translate(2px, 2px); }
+
+/* headings: a soft glow in the section's colour instead of a hard offset copy of the letters */
+.max-h1, .max-h2 { text-shadow: 0 3px 16px color-mix(in srgb, var(--max) 45%, transparent); }
+:root[data-theme='dark'] .max-h1, :root[data-theme='dark'] .max-h2 { text-shadow: 0 3px 18px color-mix(in srgb, var(--max) 35%, transparent); }
+.max-num { text-shadow: 0 2px 10px color-mix(in srgb, var(--max) 40%, transparent); }
+.foot-word { text-shadow: 0 4px 18px color-mix(in srgb, var(--max) 45%, transparent); }
+
+/* round icon buttons: the icon sits dead centre */
+.btn-glass, .btn-skeu { justify-content: center; }
+/* pill selects: our own arrow, with room before the edge */
+.pill-select {
+  appearance: none; -webkit-appearance: none; padding: 0 2.1rem 0 0.95rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231b2a4a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 0.8rem center; background-size: 12px;
+}
+:root[data-theme='dark'] .pill-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23e9ecf7' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+/* code blocks: the inline-code chip must not paint every line of a block (that hid the code) */
+.prose pre code { background: transparent; padding: 0; border-radius: 0; color: inherit; font-size: 0.85em; }
+.prose pre { color: #f6ecd2; background: #1b2a4a; border-radius: 16px; }
+
+/* Learn: roadmap rows (quiet, an ink edge on hover), and the tool panel's own cards lose their outer margins */
+.road-row { background: rgb(255 255 255 / 0.55); border: 2px solid rgb(var(--c-navy) / 0.12); transition: border-color 0.2s; }
+.road-row:hover { border-color: rgb(var(--c-navy) / 0.35); }
+:root[data-theme='dark'] .road-row { background: rgb(255 255 255 / 0.05); }
+.learn-panel > section, .learn-panel > div > section, .learn-panel .campus-card { margin-bottom: 0 !important; }
+
+/* Challenges: list items press in; the open one wears the gold pill; samples are small ink panels */
+.chal-item { border: 2px solid rgb(var(--c-navy) / 0.12); background: rgb(255 255 255 / 0.5); }
+.chal-item:hover { border-color: rgb(var(--c-navy) / 0.35); }
+.chal-on { background: linear-gradient(180deg, #fbe9a8, #f0cf6a 60%, #e2bd5a) !important; border-color: var(--max-line) !important; box-shadow: 3px 3px 0 var(--max-line); }
+.chal-on strong, .chal-on span { color: #1b1405 !important; }
+:root[data-theme='dark'] .chal-item { background: rgb(255 255 255 / 0.05); }
+.chal-pre { overflow-x: auto; border-radius: 12px; padding: 0.5rem 0.65rem; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; background: #1b2a4a; color: #f6ecd2; }
+
+/* the journal prints in full: no fixed height, nothing clipped, plain paper */
+@media print {
+  .journal-page, .journal-page * { overflow: visible !important; height: auto !important; max-height: none !important; }
+  .journal-page .sticker, .journal-page .clay-card { box-shadow: none !important; background: #fff !important; -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+/* the share panel's own card sits flat inside the panel */
+
+/* ── Journal ── */
+.j-stat { border: 2.5px solid var(--max-line); background: rgb(255 252 244 / 0.9); box-shadow: 6px 6px 0 var(--max); }
+:root[data-theme='dark'] .j-stat { background: rgb(12 29 36 / 0.92); }
+.j-stat:hover { box-shadow: 2px 2px 0 var(--max); }
+.j-row { border-radius: 14px; padding: 0.55rem 0.7rem; background: rgb(var(--c-navy) / 0.04); border: 1.5px solid rgb(var(--c-navy) / 0.08); }
+:root[data-theme='dark'] .j-row { background: rgb(255 255 255 / 0.04); border-color: rgb(255 255 255 / 0.07); }
+.j-note { border-radius: 16px; padding: 0.8rem 0.9rem; border: 2px dashed rgb(var(--c-navy) / 0.18); }
+
+/* the share input: the app's pill field */
+.share-input {
+  height: 2.5rem; border-radius: 9999px; padding: 0 1rem; font-size: 0.8rem; color: rgb(var(--c-navy));
+  background: rgb(var(--c-warm-50)); border: 2px solid rgb(var(--c-navy) / 0.18);
+}
+.share-input::placeholder { color: rgb(var(--c-warm-400)); }
+.share-input:focus { outline: none; border-color: var(--max-line); box-shadow: 3px 3px 0 var(--max); }
+:root[data-theme='dark'] .share-input { background: rgb(255 255 255 / 0.05); }
+
+/* Visualizer: the floor the bars stand on, and range sliders in the app's ink and gold */
+.viz-floor { background: linear-gradient(180deg, transparent 0%, rgb(var(--c-navy) / 0.04) 100%); border: 2px dashed rgb(var(--c-navy) / 0.12); }
+.viz-range { appearance: none; -webkit-appearance: none; height: 8px; border-radius: 9999px; background: rgb(var(--c-navy) / 0.12); border: 1.5px solid rgb(var(--c-navy) / 0.2); }
+.viz-range::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 9999px; background: #f3dc8f; border: 2px solid var(--max-line); box-shadow: 2px 2px 0 var(--max-line); cursor: pointer; }
+.viz-range::-moz-range-thumb { width: 16px; height: 16px; border-radius: 9999px; background: #f3dc8f; border: 2px solid var(--max-line); box-shadow: 2px 2px 0 var(--max-line); cursor: pointer; }
+
+/* earned badges: warm cream by day, a gold-tinted panel at night */
+.badge-earned { background: #fdf3cf; }
+:root[data-theme='dark'] .badge-earned { background: rgb(243 220 143 / 0.12); }
+
+/* Settings > Appearance > Reduce motion: the app's decorative animation stops */
+html[data-motion='reduce'] *, html[data-motion='reduce'] *::before, html[data-motion='reduce'] *::after {
+  animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important;
+}
+html[data-motion='reduce'] .petal { display: none; }
+html[data-petals='off'] .petal { display: none; }
+/* high contrast: solid surfaces, full-strength ink and borders, no glass blur */
+html[data-contrast='high'] { --max-line: #000; }
+html[data-contrast='high'] .sticker, html[data-contrast='high'] .app-rail, html[data-contrast='high'] .top-bar,
+html[data-contrast='high'] .glass-pebble, html[data-contrast='high'] .clay-card { background: #fffdf7 !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+html[data-contrast='high'] .text-campus-warm-500, html[data-contrast='high'] .text-campus-warm-400, html[data-contrast='high'] .max-sub { color: rgb(var(--c-navy)) !important; }
+:root[data-theme='dark'][data-contrast='high'] { --max-line: #fff; }
+:root[data-theme='dark'][data-contrast='high'] .sticker, :root[data-theme='dark'][data-contrast='high'] .app-rail,
+:root[data-theme='dark'][data-contrast='high'] .top-bar, :root[data-theme='dark'][data-contrast='high'] .glass-pebble,
+:root[data-theme='dark'][data-contrast='high'] .clay-card { background: #04121a !important; }
+
+/* Settings: choice tiles (radio-like), a dot that fills in gold when chosen */
+.choice { display: flex; width: 100%; align-items: center; gap: 0.6rem; border-radius: 16px; padding: 0.65rem 0.85rem; text-align: left;
+  font-size: 0.8rem; font-weight: 600; color: rgb(var(--c-navy)); border: 2px solid rgb(var(--c-navy) / 0.14); background: rgb(255 255 255 / 0.45); }
+:root[data-theme='dark'] .choice { background: rgb(255 255 255 / 0.04); }
+.choice:hover { border-color: rgb(var(--c-navy) / 0.35); }
+.choice-dot { height: 0.85rem; width: 0.85rem; flex-shrink: 0; border-radius: 9999px; border: 2px solid var(--max-line); background: transparent; }
+.choice-on { border-color: var(--max-line); box-shadow: 3px 3px 0 var(--max-line); background: color-mix(in srgb, var(--max) 40%, transparent); }
+.choice-on .choice-dot { background: #f3dc8f; box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.7); }
+
+/* the show-password eye stays put: no press movement or shadow on hover/click */
+button.auth-eye, button.auth-eye:hover, button.auth-eye:active { transform: none !important; box-shadow: none !important; }
+
+/* sign in / sign up on phones: everything on one screen, no scrolling, even on short ones */
+@media (max-width: 1023px) {
+  .auth .auth-card { padding-top: 1.1rem !important; padding-bottom: 1rem !important; }
+  .auth .auth-card h1 { font-size: clamp(1.7rem, 3.6svh + 0.55rem, 2.4rem) !important; }
+  .auth .auth-card .max-sub { font-size: 0.98rem !important; }
+}
+@media (max-width: 1023px) and (max-height: 760px) {
+  .auth .auth-input { height: 2.6rem; font-size: 0.9rem; }
+  .auth .auth-card form > * + * { margin-top: 0.5rem !important; }
+  .auth .auth-card .btn-skeu, .auth .auth-card .btn-glass { height: 2.75rem !important; }
+  .auth .auth-card .mt-5 { margin-top: 0.85rem !important; }
+  .auth .auth-card .my-4 { margin-top: 0.6rem !important; margin-bottom: 0.6rem !important; }
+  .auth .auth-card > .pt-4 { padding-top: 0.6rem !important; }
+}
+
+/* phones: the landing sections are simply there, no entrance as they scroll in */
+@media (max-width: 767px) {
+  .landing .stage .story-in, .landing .story-swash path { transition: none !important; opacity: 1 !important; transform: none !important; clip-path: none !important; stroke-dashoffset: 0 !important; }
+}
+
+/* phones, landing page: nothing fixed behind or over the sections (the aurora canvas and the blended grain made fast
+   scrolling repaint the whole screen and flash their colours); a sky tone underneath matches the sections */
+@media (max-width: 767px) {
+  html:has(main.landing) { background: #d7eef3; }
+  :root[data-theme='dark']:has(main.landing) { background: #10262e; }
+  html:has(main.landing) .aurora-layer, html:has(main.landing) body::after { display: none !important; }
+}
+
+/* phones: sign in / sign up is exactly one screen. The page itself never scrolls (100vh is taller than the visible area
+   under a browser toolbar), and nothing behind it (aurora, grain) can show below the card */
+@media (max-width: 1023px) {
+  html:has(.auth), html:has(.auth) body { overflow: hidden; height: 100%; min-height: 0; overscroll-behavior: none; }
+  html:has(.auth) .aurora-layer, html:has(.auth) body::after { display: none !important; }
+}
+
+/* phones, landing page: every section cheap to paint, so a fast fling never outruns the painter (no blank tiles).
+   Glass blur samples and re-blurs what is behind it on every frame; huge blurred glows and moving light rays repaint
+   whole sections. The cards keep their colour, borders and sticker shadows. */
+@media (max-width: 767px) {
+  main.landing *, main.landing *::before, main.landing *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+  main.landing [class*='blur-['], main.landing [data-fx] { display: none !important; }
+  main.landing .sky-rays { animation: none !important; }
+  main.landing .petal:nth-child(2n) { display: none; }
+  main.landing .stage { contain: paint; }
+  main.landing .glass-pebble, main.landing .glass { background-color: rgb(255 252 244 / 0.94); }
+  :root[data-theme='dark'] main.landing .glass-pebble, :root[data-theme='dark'] main.landing .glass { background-color: rgb(12 29 36 / 0.94); }
+}
+
+/* phones, app pages: cheap to paint, so a fast fling never shows an unpainted (sky-blue) card for a moment.
+   No glass blur (it re-blurs what is behind on every frame), still light rays, fewer petals; cards stay near-opaque */
+@media (max-width: 767px) {
+  .app-shell *, .app-shell *::before, .app-shell *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+  .app-shell .sky-rays { animation: none !important; }
+  .app-shell .petal:nth-child(2n) { display: none; }
+  .app-shell .glass, .app-shell .glass-pebble, .app-shell .campus-card { background-color: rgb(255 252 244 / 0.95); }
+  :root[data-theme='dark'] .app-shell .glass, :root[data-theme='dark'] .app-shell .glass-pebble, :root[data-theme='dark'] .app-shell .campus-card { background-color: rgb(12 29 36 / 0.95); }
+}
+
+/* phones, app pages: the sky is a plain painted background that scrolls with the page (no fixed layer, no petals, no
+   moving rays), so a fast fling has nothing extra to repaint and never shows a blue, not-yet-painted box */
+@media (max-width: 767px) {
+  .app-shell > .world-sky { position: absolute !important; }
+  .app-shell .petal, .app-shell .sky-rays { display: none !important; }
+  html:has(.app-shell) .aurora-layer, html:has(.app-shell) body::after { display: none !important; }
+}

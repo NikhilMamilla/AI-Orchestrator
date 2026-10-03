@@ -1,0 +1,15 @@
+fastapi>=0.109,<1
+uvicorn[standard]>=0.27
+pydantic>=2.6
+pydantic-settings>=2.1
+python-jose[cryptography]>=3.3
+python-multipart>=0.0.9
+httpx>=0.26
+python-dotenv>=1.0
+numpy>=1.26
+scipy>=1.11
+sentence-transformers>=2.5      # bge-small embeddings + MiniLM cross-encoder reranker (free, local)
+pypdf>=4.0                      # PDF ingestion
+psycopg[binary,pool]>=3.1       # Supabase Postgres
+pgvector>=0.2                   # pgvector adapter
+redis>=4.2                      # optional: agent message queue

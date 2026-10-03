@@ -1,0 +1,191 @@
+/* Admin console, in the learner app's language: the sky backdrop with petals, sticker cards with an ink outline and a
+   coloured offset shadow, Fraunces headings with a marker word, a gold pill for the current page, and buttons that
+   press in on hover and rise back. Everything is scoped under .admin; charts use the validated dataviz slots. */
+
+.admin {
+    --a-surface: rgb(255 252 244 / 0.92);
+    --a-surface-2: rgb(var(--c-navy) / 0.04);
+    --a-line: rgb(var(--c-navy) / 0.1);
+    --a-line-strong: rgb(var(--c-navy) / 0.22);
+    --a-ink: rgb(var(--c-navy));
+    --a-ink-2: rgb(var(--c-warm-500));
+    --a-muted: rgb(var(--c-warm-400));
+    --a-gold: #9a6f12;
+    --a-gold-soft: rgb(243 220 143 / 0.45);
+    --a-mint: #12805c;
+    /* chart slots (dataviz reference palette, validated on these surfaces) */
+    --s-1: #2a78d6;
+    --s-2: #eb6834;
+    --s-3: #1baf7a;
+    --seq-0: rgb(var(--c-navy) / 0.06);
+    --seq-1: #b7d3f6;
+    --seq-2: #6da7ec;
+    --seq-3: #2a78d6;
+    --seq-4: #184f95;
+    --good: #0ca30c;
+    --warning: #fab219;
+    --serious: #ec835a;
+    --critical: #d03b3b;
+    --seq-ink-hi: #ffffff;                               /* text on the two deepest heatmap steps */
+    color: var(--a-ink);
+}
+:root[data-theme='dark'] .admin {
+    --a-surface: rgb(12 29 36 / 0.93);
+    --a-surface-2: rgb(255 255 255 / 0.04);
+    --a-line: rgb(255 255 255 / 0.08);
+    --a-line-strong: rgb(255 255 255 / 0.18);
+    --a-gold: #f3dc8f;
+    --a-gold-soft: rgb(243 220 143 / 0.16);
+    --a-mint: #3fd3a0;
+    --s-1: #3987e5;
+    --s-2: #d95926;
+    --s-3: #199e70;
+    --seq-0: rgb(255 255 255 / 0.06);
+    --seq-1: #1c5cab;
+    --seq-2: #2a78d6;
+    --seq-3: #5598e7;
+    --seq-4: #9ec5f4;
+    --seq-ink-hi: #0c1d24;
+}
+
+.admin .a-head { font-family: 'Fraunces', Georgia, serif; letter-spacing: -0.01em; }
+.admin .a-num { font-family: 'JetBrains Mono', Consolas, monospace; font-variant-numeric: tabular-nums; }
+.admin .a-cap {
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--a-ink-2);
+}
+.admin .a-ink { color: var(--a-ink); }
+.admin .a-ink-2 { color: var(--a-ink-2); }
+.admin .a-muted { color: var(--a-muted); }
+.admin .a-gold { color: var(--a-gold); }
+
+/* ── page heading: the app's serif with a soft glow, the last word on a marker ── */
+.admin .a-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    font-size: clamp(1.5rem, 2.2vw, 2rem);
+    text-shadow: 0 0 18px color-mix(in srgb, var(--max, #f3dc8f) 55%, transparent);
+}
+
+/* ── rail: the app's nav items, a gold pill under the current page ── */
+.admin .a-nav {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgb(var(--c-warm-500));
+    isolation: isolate;                                  /* keeps the gold pill above the rail */
+    transition: color 0.15s, background-color 0.15s;
+}
+.admin .a-nav:hover { color: var(--a-ink); background: rgb(var(--c-navy) / 0.05); }
+.admin .a-nav[aria-current='page'] { color: #1b1405; background: transparent; }
+
+/* ── panels: stickers with the section's colour as the offset shadow ── */
+.admin .a-panel {
+    background: var(--a-surface);
+    border: 2.5px solid var(--max-line);
+    box-shadow: 6px 6px 0 var(--max, #f3dc8f);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.admin .a-panel:hover { transform: translate(2px, 2px); box-shadow: 4px 4px 0 var(--max, #f3dc8f); }   /* presses in */
+
+/* ── number tiles: small stickers that press in on hover and rise back ── */
+.admin .a-tile {
+    background: var(--a-surface);
+    border: 2px solid var(--max-line);
+    border-radius: 18px 8px 18px 8px;
+    box-shadow: 4px 4px 0 var(--max, #f3dc8f);
+    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease;
+}
+.admin .a-tile:hover { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--max, #f3dc8f); }
+.admin .a-row {
+    border-radius: 14px;
+    padding: 0.5rem 0.7rem;
+    background: var(--a-surface-2);
+    border: 1.5px solid var(--a-line);
+}
+
+/* ── buttons: the app's glass pill with an ink edge; gold for the main action ── */
+.admin .a-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 9999px;
+    border: 2px solid var(--max-line);
+    background: rgb(255 252 244 / 0.85);
+    color: var(--a-ink);
+    font-size: 12px;
+    font-weight: 700;
+    box-shadow: 3px 3px 0 var(--max-line);
+    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease;
+}
+:root[data-theme='dark'] .admin .a-btn { background: rgb(12 29 36 / 0.85); }
+.admin .a-btn:hover:not(:disabled) { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--max-line); }
+.admin .a-btn:active:not(:disabled) { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--max-line); transition-duration: 0.06s; }
+.admin .a-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.admin .a-btn-gold, :root[data-theme='dark'] .admin .a-btn-gold { background: linear-gradient(180deg, #fbe9a8, #f0cf6a 55%, #dcb24a); color: #1b1405; }
+
+.admin .a-seg { display: inline-flex; padding: 3px; gap: 2px; border-radius: 9999px; border: 2px solid var(--max-line); background: var(--a-surface); }
+.admin .a-seg button { position: relative; height: 26px; padding: 0 12px; border-radius: 9999px; font-size: 11px; font-weight: 700; color: var(--a-ink-2); }
+.admin .a-seg button[aria-pressed='true'] { color: #1b1405; background: linear-gradient(180deg, #fbe9a8, #f0cf6a 55%, #dcb24a); }
+.admin .a-input {
+    height: 34px;
+    width: 100%;
+    border-radius: 9999px;
+    border: 2px solid var(--a-line-strong);
+    background: var(--a-surface-2);
+    color: var(--a-ink);
+    padding: 0 12px 0 32px;
+    font-size: 12px;
+    outline: none;
+}
+.admin .a-input:focus { border-color: var(--max-line); box-shadow: 3px 3px 0 var(--max, #f3dc8f); }
+
+/* ── status: colour + icon + word, never colour alone ── */
+.admin .a-status { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; }
+.admin .a-status i { width: 8px; height: 8px; border-radius: 99px; display: inline-block; flex-shrink: 0; }
+.admin .a-good i { background: var(--good); box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 22%, transparent); }
+.admin .a-warning i { background: var(--warning); }
+.admin .a-serious i { background: var(--serious); }
+.admin .a-critical i { background: var(--critical); box-shadow: 0 0 0 3px color-mix(in srgb, var(--critical) 22%, transparent); }
+.admin .a-idle i { background: var(--a-muted); }
+
+/* charts: recessive chrome */
+.admin .recharts-cartesian-grid line { stroke: var(--a-line); }
+.admin .recharts-text { fill: var(--a-ink-2); font-size: 10px; font-family: 'JetBrains Mono', Consolas, monospace; }
+.admin .recharts-cartesian-axis-line, .admin .recharts-cartesian-axis-tick-line { stroke: var(--a-line-strong); }
+.admin .a-tip {
+    background: var(--a-surface);
+    border: 2px solid var(--max-line);
+    border-radius: 14px 6px 14px 6px;
+    padding: 8px 10px;
+    font-size: 11px;
+    color: var(--a-ink);
+    box-shadow: 3px 3px 0 var(--max, #f3dc8f);
+}
+
+.admin .a-scroll { scrollbar-width: none; }
+.admin .a-scroll::-webkit-scrollbar { display: none; }
+
+html[data-motion='reduce'] .admin .a-tile, html[data-motion='reduce'] .admin .a-btn, html[data-motion='reduce'] .admin .a-panel { transition: none; }
+
+/* dialogs (palette, drawers): solid card over a dimmed, blurred page; they never press in */
+.admin .a-scrim { background: rgb(8 18 24 / 0.5); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+.admin .a-dialog { background: rgb(255 252 244); }
+:root[data-theme='dark'] .admin .a-dialog { background: rgb(12 29 36); }
+.admin .a-dialog:hover { transform: none; box-shadow: 6px 6px 0 var(--max, #f3dc8f); }

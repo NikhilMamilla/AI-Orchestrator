@@ -1,0 +1,412 @@
+{
+ "docs": 14,
+ "summary": {
+  "good": {
+   "n": 14,
+   "graded": 14,
+   "mean_score": 0.474,
+   "mean_accuracy": 0.806,
+   "mean_coverage": 0.143,
+   "pass_rate": 0.214
+  },
+  "thin": {
+   "n": 14,
+   "graded": 14,
+   "mean_score": 0.509,
+   "mean_accuracy": 0.875,
+   "mean_coverage": 0.143,
+   "pass_rate": 0.357
+  },
+  "wrong": {
+   "n": 14,
+   "graded": 14,
+   "mean_score": 0.366,
+   "mean_accuracy": 0.679,
+   "mean_coverage": 0.054,
+   "pass_rate": 0.071
+  }
+ },
+ "auc_good_vs_wrong": 0.776,
+ "auc_good_vs_thin": 0.416,
+ "auc_thin_vs_wrong_accuracy": 0.796,
+ "rows": [
+  {
+   "doc": "arrays",
+   "kind": "good",
+   "graded": true,
+   "score": 0.425,
+   "accuracy": 0.6,
+   "coverage": 0.25,
+   "passed": false
+  },
+  {
+   "doc": "arrays",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.625,
+   "accuracy": 1.0,
+   "coverage": 0.25,
+   "passed": true
+  },
+  {
+   "doc": "arrays",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.312,
+   "accuracy": 0.625,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "binary-search",
+   "kind": "good",
+   "graded": true,
+   "score": 0.35,
+   "accuracy": 0.7,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "binary-search",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.5,
+   "accuracy": 1.0,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "binary-search",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.25,
+   "accuracy": 0.5,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "hash-table",
+   "kind": "good",
+   "graded": true,
+   "score": 0.625,
+   "accuracy": 1.0,
+   "coverage": 0.25,
+   "passed": true
+  },
+  {
+   "doc": "hash-table",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.5,
+   "accuracy": 1.0,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "hash-table",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.312,
+   "accuracy": 0.625,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "linked-list",
+   "kind": "good",
+   "graded": true,
+   "score": 0.4,
+   "accuracy": 0.8,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "linked-list",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.5,
+   "accuracy": 1.0,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "linked-list",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.375,
+   "accuracy": 0.75,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "queue",
+   "kind": "good",
+   "graded": true,
+   "score": 0.75,
+   "accuracy": 1.0,
+   "coverage": 0.5,
+   "passed": true
+  },
+  {
+   "doc": "queue",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.625,
+   "accuracy": 1.0,
+   "coverage": 0.25,
+   "passed": true
+  },
+  {
+   "doc": "queue",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.562,
+   "accuracy": 0.625,
+   "coverage": 0.5,
+   "passed": true
+  },
+  {
+   "doc": "recursion",
+   "kind": "good",
+   "graded": true,
+   "score": 0.583,
+   "accuracy": 0.917,
+   "coverage": 0.25,
+   "passed": true
+  },
+  {
+   "doc": "recursion",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.75,
+   "accuracy": 1.0,
+   "coverage": 0.5,
+   "passed": true
+  },
+  {
+   "doc": "recursion",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.375,
+   "accuracy": 0.75,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "stack",
+   "kind": "good",
+   "graded": true,
+   "score": 0.525,
+   "accuracy": 0.8,
+   "coverage": 0.25,
+   "passed": false
+  },
+  {
+   "doc": "stack",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.5,
+   "accuracy": 0.75,
+   "coverage": 0.25,
+   "passed": false
+  },
+  {
+   "doc": "stack",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.312,
+   "accuracy": 0.625,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "big-o-complexity",
+   "kind": "good",
+   "graded": true,
+   "score": 0.4,
+   "accuracy": 0.8,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "big-o-complexity",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.375,
+   "accuracy": 0.75,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "big-o-complexity",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.312,
+   "accuracy": 0.625,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "binary-search-tree",
+   "kind": "good",
+   "graded": true,
+   "score": 0.45,
+   "accuracy": 0.9,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "binary-search-tree",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.25,
+   "accuracy": 0.5,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "binary-search-tree",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.438,
+   "accuracy": 0.875,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "binary-tree",
+   "kind": "good",
+   "graded": true,
+   "score": 0.525,
+   "accuracy": 0.8,
+   "coverage": 0.25,
+   "passed": false
+  },
+  {
+   "doc": "binary-tree",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.625,
+   "accuracy": 1.0,
+   "coverage": 0.25,
+   "passed": true
+  },
+  {
+   "doc": "binary-tree",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.375,
+   "accuracy": 0.75,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "bit-manipulation",
+   "kind": "good",
+   "graded": true,
+   "score": 0.333,
+   "accuracy": 0.667,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "bit-manipulation",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.25,
+   "accuracy": 0.5,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "bit-manipulation",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.4,
+   "accuracy": 0.8,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "breadth-first-search",
+   "kind": "good",
+   "graded": true,
+   "score": 0.4,
+   "accuracy": 0.8,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "breadth-first-search",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.625,
+   "accuracy": 1.0,
+   "coverage": 0.25,
+   "passed": true
+  },
+  {
+   "doc": "breadth-first-search",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.2,
+   "accuracy": 0.4,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "depth-first-search",
+   "kind": "good",
+   "graded": true,
+   "score": 0.35,
+   "accuracy": 0.7,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "depth-first-search",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.5,
+   "accuracy": 1.0,
+   "coverage": 0.0,
+   "passed": false
+  },
+  {
+   "doc": "depth-first-search",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.525,
+   "accuracy": 0.8,
+   "coverage": 0.25,
+   "passed": false
+  },
+  {
+   "doc": "graph-basics",
+   "kind": "good",
+   "graded": true,
+   "score": 0.525,
+   "accuracy": 0.8,
+   "coverage": 0.25,
+   "passed": false
+  },
+  {
+   "doc": "graph-basics",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.5,
+   "accuracy": 0.75,
+   "coverage": 0.25,
+   "passed": false
+  },
+  {
+   "doc": "graph-basics",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.375,
+   "accuracy": 0.75,
+   "coverage": 0.0,
+   "passed": false
+  }
+ ]
+}

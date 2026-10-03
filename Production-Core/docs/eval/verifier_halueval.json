@@ -1,0 +1,74 @@
+{
+  "dataset": "HaluEval summarization",
+  "documents": 120,
+  "summaries": 239,
+  "faithful": 119,
+  "hallucinated": 120,
+  "nli": "cross-encoder/nli-deberta-v3-xsmall",
+  "variants": {
+    "lexical+embedding (v1) / mean": {
+      "auroc": 0.7163,
+      "threshold": 0.7,
+      "accuracy": 0.6583,
+      "halluc_precision": 0.597,
+      "halluc_recall": 0.7407,
+      "halluc_f1": 0.6612
+    },
+    "lexical+embedding (v1) / min": {
+      "auroc": 0.6511,
+      "threshold": 0.587,
+      "accuracy": 0.6083,
+      "halluc_precision": 0.5507,
+      "halluc_recall": 0.7037,
+      "halluc_f1": 0.6179
+    },
+    "NLI entailment / mean": {
+      "auroc": 0.6746,
+      "threshold": 0.275,
+      "accuracy": 0.6583,
+      "halluc_precision": 0.614,
+      "halluc_recall": 0.6481,
+      "halluc_f1": 0.6306
+    },
+    "NLI entailment / min": {
+      "auroc": 0.6876,
+      "threshold": 0.002,
+      "accuracy": 0.6083,
+      "halluc_precision": 0.5636,
+      "halluc_recall": 0.5741,
+      "halluc_f1": 0.5688
+    },
+    "blend 0.35 lex + 0.65 NLI / mean": {
+      "auroc": 0.6961,
+      "threshold": 0.389,
+      "accuracy": 0.675,
+      "halluc_precision": 0.6415,
+      "halluc_recall": 0.6296,
+      "halluc_f1": 0.6355
+    },
+    "blend 0.35 lex + 0.65 NLI / min": {
+      "auroc": 0.7254,
+      "threshold": 0.212,
+      "accuracy": 0.6583,
+      "halluc_precision": 0.6182,
+      "halluc_recall": 0.6296,
+      "halluc_f1": 0.6239
+    },
+    "blend 0.15 lex + 0.85 NLI / mean": {
+      "auroc": 0.6847,
+      "threshold": 0.351,
+      "accuracy": 0.6667,
+      "halluc_precision": 0.6207,
+      "halluc_recall": 0.6667,
+      "halluc_f1": 0.6429
+    },
+    "blend 0.15 lex + 0.85 NLI / min": {
+      "auroc": 0.7239,
+      "threshold": 0.108,
+      "accuracy": 0.6333,
+      "halluc_precision": 0.5714,
+      "halluc_recall": 0.7407,
+      "halluc_f1": 0.6452
+    }
+  }
+}

@@ -1,0 +1,32 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [develop, main]
+    paths: ['Production-Core/backend/**', 'Production-Core/data/**', 'Production-Core/pytest.ini', 'Production-Core/supabase/**', '.github/workflows/ci-backend.yml']
+  pull_request:
+    branches: [develop, main]
+    paths: ['Production-Core/backend/**', 'Production-Core/data/**', 'Production-Core/pytest.ini', 'Production-Core/supabase/**', '.github/workflows/ci-backend.yml']
+
+defaults:
+  run:
+    working-directory: Production-Core
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: Production-Core/backend/requirements.txt
+      # The suite is fully offline (SQLite store + hashing embedder + mocked LLM/HTTP), so CI needs no
+      # secrets, no database and no model download. CPU-only torch keeps the install small.
+      - name: Install dependencies
+        run: |
+          pip install --extra-index-url https://download.pytorch.org/whl/cpu torch
+          pip install -r backend/requirements-dev.txt
+      - name: Tests
+        run: python -m pytest -q

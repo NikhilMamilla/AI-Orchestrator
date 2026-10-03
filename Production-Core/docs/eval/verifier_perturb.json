@@ -1,0 +1,40 @@
+{
+  "dataset": "planted errors on data/knowledge (synthetic perturbations of real sentences)",
+  "pairs": 98,
+  "claims": 196,
+  "nli": "cross-encoder/nli-deberta-v3-xsmall",
+  "variants": {
+    "lexical+embedding": {
+      "auroc": 0.607,
+      "threshold": 0.872,
+      "accuracy": 0.561,
+      "halluc_precision": 0.586,
+      "halluc_recall": 0.354,
+      "halluc_f1": 0.442
+    },
+    "NLI entailment": {
+      "auroc": 0.834,
+      "threshold": 0.017,
+      "accuracy": 0.786,
+      "halluc_precision": 0.814,
+      "halluc_recall": 0.729,
+      "halluc_f1": 0.769
+    },
+    "blend 0.35 lex + 0.65 NLI": {
+      "auroc": 0.821,
+      "threshold": 0.37,
+      "accuracy": 0.796,
+      "halluc_precision": 0.733,
+      "halluc_recall": 0.917,
+      "halluc_f1": 0.815
+    },
+    "blend 0.15 lex + 0.85 NLI": {
+      "auroc": 0.836,
+      "threshold": 0.169,
+      "accuracy": 0.776,
+      "halluc_precision": 0.75,
+      "halluc_recall": 0.812,
+      "halluc_f1": 0.78
+    }
+  }
+}

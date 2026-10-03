@@ -1,0 +1,1833 @@
+{
+  "summary": {
+    "n_scoped": 40,
+    "n_oos": 10,
+    "judged_raw": 38,
+    "judged_shipped": 9,
+    "answer_rate": 0.225,
+    "oos_refusal_rate": 1.0,
+    "faithfulness_raw": 0.9704,
+    "faithfulness_shipped": 0.913,
+    "unfaithful_answer_rate_raw": 0.1316,
+    "unfaithful_answer_rate_shipped": 0.3333,
+    "verifier_recall_on_unfaithful": 1.0,
+    "relevance_mean_1to5": 4.9474,
+    "citation_accuracy": 0.8519,
+    "latency_ms_p50": 14497.0,
+    "tokens_mean": 636.0,
+    "verifier": "nli+lexical"
+  },
+  "rows": [
+    {
+      "q": "What is the time complexity of binary search?",
+      "kind": "direct",
+      "status": "grounded",
+      "ms": 10694.932799960952,
+      "tokens": 572,
+      "confidence": 0.504,
+      "flagged": 1,
+      "verifier": "nli+lexical",
+      "citation_acc": 1.0,
+      "raw_text": "The time complexity of binary search is **O(log n)**.\nThis is because it repeatedly halves the search space by comparing the target with the middle element of the sorted array [3][4].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Time is O(V + E) with an adjacency list. Space is O(V) for the visited set plus O(depth) for the recursion stack, which can reach O(V) on a long path."
+        },
+        {
+          "ref": 2,
+          "text": "Time is O(V + E) with an adjacency list. Space is O(V) for the queue and visited set."
+        },
+        {
+          "ref": 3,
+          "text": "Binary search finds a target in a sorted array by repeatedly comparing it with the middle element and discarding the half that cannot contain the target. Each step halves the search space, so it runs in O(log n) time instead of the O(n) of linear search."
+        },
+        {
+          "ref": 4,
+          "text": "```python\ndef binary_search(a, target):\n    lo, hi = 0, len(a) - 1\n    while lo <= hi:\n        mid = lo + (hi - lo) // 2\n        if a[mid] == target:\n            return mid\n        if a[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1\n```\n\nTime is O(log n) and space is O(1). A recursive version uses O(log n) stack space."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      },
+      "shipped": {
+        "faithfulness": 0.75,
+        "all_supported": false,
+        "relevance": 5.0,
+        "claims": 4
+      }
+    },
+    {
+      "q": "Why does binary search require a sorted array?",
+      "kind": "direct",
+      "status": "grounded",
+      "ms": 14380.86769997608,
+      "tokens": 554,
+      "confidence": 0.494,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": 1.0,
+      "raw_text": "Binary search needs a sorted array because it depends on the order of elements to eliminate half of the search space at each step. If the array is unsorted, the middle element might not be the largest or smallest in its half, so the algorithm could skip the target by mistake. For example, if the middle element is smaller than the target, all elements to its left are also smaller only if the array is sorted [1]. This ensures the algorithm can safely discard the left half [1][2].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "The algorithm relies on ordering: if the middle element is smaller than the target, everything to its left is also smaller, so the left half can be eliminated safely. Without sorting, that conclusion is invalid and the algorithm can miss the target."
+        },
+        {
+          "ref": 2,
+          "text": "Binary search finds a target in a sorted array by repeatedly comparing it with the middle element and discarding the half that cannot contain the target. Each step halves the search space, so it runs in O(log n) time instead of the O(n) of linear search."
+        },
+        {
+          "ref": 3,
+          "text": "An inorder traversal of a valid BST yields keys in ascending order, which is the basis for validating a BST and finding the k-th smallest element."
+        },
+        {
+          "ref": 4,
+          "text": "Validating a BST by only comparing a node with its immediate children is wrong; each node must lie within bounds inherited from all ancestors. Inserting sorted data into a plain BST creates a skewed tree."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      }
+    },
+    {
+      "q": "How do I avoid integer overflow when computing the midpoint?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 6965.735899982974,
+      "tokens": 592,
+      "confidence": 0.0,
+      "flagged": 1,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "Use `lo + (hi - lo) / 2` instead of `(lo + hi) / 2` to avoid integer overflow when computing the midpoint [1].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Computing mid as (lo + hi) / 2 can overflow in fixed-width integers, so use lo + (hi - lo) / 2. Wrong loop conditions (lo < hi versus lo <= hi) and not shrinking the range (lo = mid instead of mid + 1) cause off-by-one errors and infinite loops. Binary search requires random access, so it is not efficient on a linked list."
+        },
+        {
+          "ref": 2,
+          "text": "Any recursion can be rewritten with a loop and an explicit stack. Recursion is clearer for trees, graphs and divide-and-conquer. Iteration avoids call overhead and stack overflow. Fibonacci written naively as fib(n-1) + fib(n-2) is O(2^n) because it recomputes the same subproblems; memoization fixes this and leads into dynamic programming."
+        },
+        {
+          "ref": 3,
+          "text": "A missing or unreachable base case causes infinite recursion and a stack overflow (RecursionError in Python, default limit about 1000). Make sure every recursive call makes progress toward the base case. Recursion is not always faster than loops; it usually carries extra overhead from stack frames."
+        },
+        {
+          "ref": 4,
+          "text": "Deep recursion can overflow the stack on large graphs, so convert to an iterative version. Forgetting the visited set loops forever on cycles. Mixing up the on-stack check for directed cycle detection with the simple visited check."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 1
+      },
+      "shipped": null
+    },
+    {
+      "q": "How does Floyd's tortoise and hare detect a cycle?",
+      "kind": "direct",
+      "status": "grounded",
+      "ms": 10066.76250003511,
+      "tokens": 642,
+      "confidence": 0.467,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": 1.0,
+      "raw_text": "Floyd's tortoise and hare uses two pointers on a linked list: a slow pointer that moves one step at a time and a fast pointer that moves two steps at a time [1]. If there is a cycle, the fast pointer will eventually catch up to the slow pointer inside the cycle, meaning they meet at the same node [1]. If the fast pointer reaches the end (null), there is no cycle [1]. This method works because the fast pointer moves twice as fast, so it will loop around the cycle and meet the slow pointer if one exists.",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Floyd's tortoise and hare uses two pointers: slow moves one step and fast moves two. If there is a cycle they eventually meet; if fast reaches null there is no cycle. It uses O(1) space. The middle node is found the same way: when fast reaches the end, slow is at the middle."
+        },
+        {
+          "ref": 2,
+          "text": "Kruskal's minimum spanning tree algorithm, counting connected components, detecting a cycle in an undirected graph (a union that returns false means the edge closes a cycle), and grouping equivalent items."
+        },
+        {
+          "ref": 3,
+          "text": "Finding connected components, detecting cycles, topological sorting, solving mazes and flood fill, and exploring all possibilities in backtracking. In a directed graph a cycle exists if DFS reaches a vertex that is currently on the recursion stack (a back edge). In an undirected graph a cycle exists if DFS reaches a visited vertex that is not the parent."
+        },
+        {
+          "ref": 4,
+          "text": "Deep recursion can overflow the stack on large graphs, so convert to an iterative version. Forgetting the visited set loops forever on cycles. Mixing up the on-stack check for directed cycle detection with the simple visited check."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      }
+    },
+    {
+      "q": "Why is inserting at the front of an array slow?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 17214.388699969277,
+      "tokens": 698,
+      "confidence": 0.0,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "Inserting at the front of an array is slow (O(n)) because every existing element must shift one position to the right to make space for the new element. This shifting happens for each insertion, turning a loop of insertions into O(n^2) time [1][2].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Index out of range errors and off-by-one mistakes are the most common bugs: valid indices are 0 to n-1. Copying with slicing creates a new O(n) array. Inserting at the front in a loop turns an O(n) task into O(n^2). Arrays have fixed element types in low-level languages but not in Python."
+        },
+        {
+          "ref": 2,
+          "text": "- Access by index: O(1).\n- Search an unsorted array: O(n) by linear scan.\n- Insert or delete at the end: O(1) amortized for a dynamic array.\n- Insert or delete in the middle or at the front: O(n), because later elements must shift.\n- Traversal: O(n)."
+        },
+        {
+          "ref": 3,
+          "text": "Two pointers uses two indices that move through an array to avoid a nested loop. On a sorted array, put one pointer at each end: if the sum is too small move the left pointer right, if too large move the right pointer left. This finds a pair with a target sum in O(n) instead of O(n^2). A fast and slow pointer pair detects cycles and removes duplicates in place.\n\n```python\ndef pair_sum_sorted(a, target):\n    l, r = 0, len(a) - 1\n    while l < r:\n        s = a[l] + a[r]\n        if s == target:\n            return (l, r)\n        l, r = (l + 1, r) if s < target else (l, r - 1)\n```"
+        },
+        {
+          "ref": 4,
+          "text": "The algorithm relies on ordering: if the middle element is smaller than the target, everything to its left is also smaller, so the left half can be eliminated safely. Without sorting, that conclusion is invalid and the algorithm can miss the target."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 2
+      },
+      "shipped": null
+    },
+    {
+      "q": "How do I reverse a linked list in place?",
+      "kind": "direct",
+      "status": "grounded",
+      "ms": 25648.877300031018,
+      "tokens": 645,
+      "confidence": 0.622,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": 1.0,
+      "raw_text": "To reverse a singly linked list in place, use this method:\n\n1. Start with `prev = None` and `head` at the list\u2019s start.\n2. Loop through each node:\n   - Store the `next` node (`nxt = head.next`).\n   - Reverse the `head.next` pointer to point to `prev`.\n   - Move `prev` and `head` forward (`prev = head`, `head = nxt`).\n3. When `head` becomes `None`, `prev` is the new head.\n\nThis works in **O(n) time** and **O(1) space** by re-pointing nodes [1].\n\nHandle edge cases: empty list (return `None`) and single-node list (return the node) [4].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "```python\ndef reverse(head):\n    prev = None\n    while head:\n        nxt = head.next\n        head.next = prev\n        prev, head = head, nxt\n    return prev\n```\n\nThis runs in O(n) time and O(1) extra space by re-pointing each node."
+        },
+        {
+          "ref": 2,
+          "text": "A singly linked list has one next pointer per node. A doubly linked list also stores a previous pointer, allowing backward traversal and O(1) deletion given a node. A circular linked list links the last node back to the first."
+        },
+        {
+          "ref": 3,
+          "text": "A linked list is a chain of nodes. Each node stores a value and a reference (pointer) to the next node. Unlike an array, nodes need not be contiguous in memory, so there is no O(1) indexing, but insertion and deletion at a known node are cheap."
+        },
+        {
+          "ref": 4,
+          "text": "Losing the reference to the rest of the list during pointer updates, forgetting to handle the empty list and single-node cases, and null pointer dereferences. A dummy head node simplifies edge cases."
+        }
+      ],
+      "raw": {
+        "faithfulness": 0.8571428571428571,
+        "all_supported": false,
+        "relevance": 5.0,
+        "claims": 7
+      },
+      "shipped": {
+        "faithfulness": 0.6666666666666666,
+        "all_supported": false,
+        "relevance": 5.0,
+        "claims": 9
+      }
+    },
+    {
+      "q": "Why is appending to a dynamic array O(1) amortized?",
+      "kind": "direct",
+      "status": "grounded",
+      "ms": 8750.858300016262,
+      "tokens": 652,
+      "confidence": 0.674,
+      "flagged": 1,
+      "verifier": "nli+lexical",
+      "citation_acc": 0.6666666666666666,
+      "raw_text": "Appending to a dynamic array is O(1) amortized because most of the time, the array has free space, so adding an element takes constant time [2][3]. However, when the array is full, it must resize (copy all elements to a larger block), which takes O(n) time [2]. By doubling the capacity during resizes, the expensive O(n) operations are spread out over many O(1) operations, averaging to O(1) per append [1][2].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Worst case is the most expensive input, average case is the expected cost over inputs, and amortized cost spreads an occasional expensive operation over many cheap ones. Appending to a dynamic array is O(1) amortized even though a resize costs O(n)."
+        },
+        {
+          "ref": 2,
+          "text": "Python lists, Java ArrayList and C++ vector are dynamic arrays. When capacity is full they allocate a larger block (usually double), copy the elements, and continue. A single resize costs O(n), but doubling makes append O(1) amortized."
+        },
+        {
+          "ref": 3,
+          "text": "- Access by index: O(1).\n- Search an unsorted array: O(n) by linear scan.\n- Insert or delete at the end: O(1) amortized for a dynamic array.\n- Insert or delete in the middle or at the front: O(n), because later elements must shift.\n- Traversal: O(n)."
+        },
+        {
+          "ref": 4,
+          "text": "```python\narr = [4, 8, 15, 16, 23, 42]\nprint(arr[2])        # 15, O(1)\narr.append(99)       # O(1) amortized\narr.insert(0, 1)     # O(n): shifts every element right\n```"
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      },
+      "shipped": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      }
+    },
+    {
+      "q": "How do hash tables handle collisions?",
+      "kind": "direct",
+      "status": "grounded",
+      "ms": 13194.951799989212,
+      "tokens": 617,
+      "confidence": 0.688,
+      "flagged": 1,
+      "verifier": "nli+lexical",
+      "citation_acc": 1.0,
+      "raw_text": "Hash tables handle collisions in two main ways:\n\n1. **Chaining**: Stores colliding keys in a small list at the same bucket. This keeps all items in one place [1].\n2. **Open addressing**: Finds another free slot in the array (using linear probing, quadratic probing, or double hashing) to store the colliding item [1].\n\nA good hash function spreads keys evenly to minimize collisions [1].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Two keys can hash to the same bucket. Chaining stores a small list in each bucket. Open addressing (linear probing, quadratic probing, double hashing) stores the item in another free slot in the array. A good hash function spreads keys uniformly to keep collisions rare."
+        },
+        {
+          "ref": 2,
+          "text": "Rabin-Karp compares a rolling hash of each text window with the pattern's hash. The hash of the next window is computed from the previous one in O(1), by removing the leading character and adding the new one. Expected time is O(n + m); worst case is O(n * m) when many hash collisions force full comparisons. On a hash match, verify the characters to rule out collisions. It extends naturally to searching for multiple patterns."
+        },
+        {
+          "ref": 3,
+          "text": "Average case for get, put and delete is O(1). Worst case is O(n) when many keys collide into one bucket, for example with a poor hash function or adversarial input. Hash maps do not keep keys sorted."
+        },
+        {
+          "ref": 4,
+          "text": "A hash table maps keys to values. A hash function converts a key to an integer, which is reduced modulo the table size to pick a bucket index. Lookup, insert and delete are O(1) on average."
+        }
+      ],
+      "raw": {
+        "faithfulness": 0.8,
+        "all_supported": false,
+        "relevance": 5.0,
+        "claims": 5
+      },
+      "shipped": {
+        "faithfulness": 0.8,
+        "all_supported": false,
+        "relevance": 5.0,
+        "claims": 5
+      }
+    },
+    {
+      "q": "Find two numbers that add up to a target in O(n)",
+      "kind": "paraphrase",
+      "status": "insufficient_evidence",
+      "ms": 3581.665600009728,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null,
+      "raw_text": "",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "```python\ndef two_sum(nums, target):\n    seen = {}\n    for i, x in enumerate(nums):\n        if target - x in seen:\n            return [seen[target - x], i]\n        seen[x] = i\n```\n\nThis finds a pair in O(n) time using O(n) space, replacing an O(n^2) double loop."
+        },
+        {
+          "ref": 2,
+          "text": "Two pointers uses two indices that move through an array to avoid a nested loop. On a sorted array, put one pointer at each end: if the sum is too small move the left pointer right, if too large move the right pointer left. This finds a pair with a target sum in O(n) instead of O(n^2). A fast and slow pointer pair detects cycles and removes duplicates in place.\n\n```python\ndef pair_sum_sorted(a, target):\n    l, r = 0, len(a) - 1\n    while l < r:\n        s = a[l] + a[r]\n        if s == target:\n            return (l, r)\n        l, r = (l + 1, r) if s < target else (l, r - 1)\n```"
+        },
+        {
+          "ref": 3,
+          "text": "Binary search finds a target in a sorted array by repeatedly comparing it with the middle element and discarding the half that cannot contain the target. Each step halves the search space, so it runs in O(log n) time instead of the O(n) of linear search."
+        },
+        {
+          "ref": 4,
+          "text": "```python\ndef binary_search(a, target):\n    lo, hi = 0, len(a) - 1\n    while lo <= hi:\n        mid = lo + (hi - lo) // 2\n        if a[mid] == target:\n            return mid\n        if a[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1\n```\n\nTime is O(log n) and space is O(1). A recursive version uses O(log n) stack space."
+        }
+      ]
+    },
+    {
+      "q": "What is the load factor of a hash table?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 14229.850200004876,
+      "tokens": 544,
+      "confidence": 0.0,
+      "flagged": 3,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "The load factor of a hash table is calculated by dividing the number of **items** (key-value pairs) by the number of **buckets** in the table [1].\n\nIt measures how full the table is. When this ratio exceeds a set threshold (like 0.75), the table resizes to maintain efficiency [1].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "The load factor is items divided by buckets. When it exceeds a threshold (for example 0.75) the table doubles in size and rehashes every key. Resizing is O(n) but amortizes to O(1) per insert."
+        },
+        {
+          "ref": 2,
+          "text": "A hash table maps keys to values. A hash function converts a key to an integer, which is reduced modulo the table size to pick a bucket index. Lookup, insert and delete are O(1) on average."
+        },
+        {
+          "ref": 3,
+          "text": "Two keys can hash to the same bucket. Chaining stores a small list in each bucket. Open addressing (linear probing, quadratic probing, double hashing) stores the item in another free slot in the array. A good hash function spreads keys uniformly to keep collisions rare."
+        },
+        {
+          "ref": 4,
+          "text": "Average case for get, put and delete is O(1). Worst case is O(n) when many keys collide into one bucket, for example with a poor hash function or adversarial input. Hash maps do not keep keys sorted."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      },
+      "shipped": null
+    },
+    {
+      "q": "How do I check balanced brackets with a stack?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 24563.1418999983,
+      "tokens": 633,
+      "confidence": 0.0,
+      "flagged": 4,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "To check balanced brackets with a stack, follow these steps:\n\n1. Use a stack to track opening brackets (`(`, `[`, `{`).\n2. When you see an opening bracket, push it onto the stack [1].\n3. When you see a closing bracket (`)`, `]`, `}`), check if the stack is empty or if the top of the stack does not match the corresponding opening bracket [1].\n4. If it matches, pop the stack; otherwise, the brackets are unbalanced [1].\n5. After processing all characters, the stack should be empty for the brackets to be balanced [1].\n\nThis works because a stack follows LIFO order, ensuring the most recent opening bracket must match the next closing bracket [4].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "```python\ndef is_balanced(s):\n    pairs = {')': '(', ']': '[', '}': '{'}\n    st = []\n    for ch in s:\n        if ch in '([{':\n            st.append(ch)\n        elif ch in pairs:\n            if not st or st.pop() != pairs[ch]:\n                return False\n    return not st\n```\n\nEach character is processed once, so time is O(n) and space is O(n)."
+        },
+        {
+          "ref": 2,
+          "text": "The function call stack, undo and redo, browser back navigation, depth-first search, expression evaluation, and matching brackets."
+        },
+        {
+          "ref": 3,
+          "text": "push, pop and peek (look at the top) are all O(1) when the stack is backed by a dynamic array or a linked list. Checking whether the stack is empty is O(1)."
+        },
+        {
+          "ref": 4,
+          "text": "A stack is a last-in, first-out (LIFO) collection. You only add (push) and remove (pop) at one end, the top. Think of a pile of plates: the last plate placed is the first one taken."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 6
+      },
+      "shipped": null
+    },
+    {
+      "q": "Why does a monotonic stack solve next greater element in linear time?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 23477.214400016237,
+      "tokens": 656,
+      "confidence": 0.0,
+      "flagged": 3,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "A monotonic stack solves the next-greater-element problem in O(n) time because each element is pushed and popped **at most once** [1].\n\nAs you iterate through the array, you maintain a stack of elements in decreasing order. When a new element is larger than the top of the stack, it becomes the next greater element for that top element, which is then popped. This ensures no element stays in the stack longer than necessary, keeping operations efficient. The process guarantees each element is handled exactly once [1].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "A monotonic stack keeps elements in increasing or decreasing order. It solves next-greater-element and daily-temperatures problems in O(n) because each element is pushed and popped at most once."
+        },
+        {
+          "ref": 2,
+          "text": "Choose a pivot, partition the array so smaller elements are on the left and larger on the right, then recurse on both sides. Average time is O(n log n), worst case O(n^2) when the pivot is consistently the smallest or largest element, for example a sorted array with a naive first-element pivot. A random or median-of-three pivot makes the worst case unlikely. It is in-place with O(log n) stack space and is not stable."
+        },
+        {
+          "ref": 3,
+          "text": "Space complexity counts the extra memory an algorithm uses beyond its input. An in-place reversal uses O(1) extra space. Building a copy of the array uses O(n). Recursion uses stack space proportional to recursion depth."
+        },
+        {
+          "ref": 4,
+          "text": "```python\ndef factorial(n):\n    if n <= 1:          # base case\n        return 1\n    return n * factorial(n - 1)   # recursive case\n```\n\nfactorial(4) expands to 4 * 3 * 2 * 1. It makes n calls, so time is O(n) and stack space is O(n)."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 5
+      },
+      "shipped": null
+    },
+    {
+      "q": "What is a circular buffer?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 15826.96490001399,
+      "tokens": 510,
+      "confidence": 0.0,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "A circular buffer is a fixed-size data structure that uses **modulo arithmetic** to wrap around its indices for **head** (front) and **tail** (back) pointers.\nIt allows **O(1) enqueue and dequeue** operations by reusing empty slots after the tail passes the head.\nIt avoids shifting elements like a naive array queue [1][2].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "A circular (ring) buffer keeps head and tail indices and wraps them with modulo arithmetic, giving O(1) enqueue and dequeue in fixed memory."
+        },
+        {
+          "ref": 2,
+          "text": "enqueue, dequeue and peek are O(1) when implemented with a linked list or a circular buffer. A naive array implementation that removes from index 0 costs O(n) per dequeue because every element shifts."
+        },
+        {
+          "ref": 3,
+          "text": "Confusing queue order with stack order, dequeuing from an empty queue, and in a circular buffer failing to distinguish full from empty."
+        },
+        {
+          "ref": 4,
+          "text": "A singly linked list has one next pointer per node. A doubly linked list also stores a previous pointer, allowing backward traversal and O(1) deletion given a node. A circular linked list links the last node back to the first."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      },
+      "shipped": null
+    },
+    {
+      "q": "Why shouldn't I use list.pop(0) as a queue in Python?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 17990.891599969473,
+      "tokens": 659,
+      "confidence": 0.0,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "Using `list.pop(0)` as a queue is inefficient because it has a time complexity of **O(n)** for each operation, since all remaining elements must shift left [2].\n\nFor queues, use `collections.deque` instead, as its `popleft()` operation runs in **O(1)** time [2]. This is why BFS and other queue-based algorithms (like in evidence 3) use `deque` for efficiency [3][4].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Popping from an empty stack raises an error, so check emptiness first. Using a Python list's pop(0) is O(n) and is a queue operation, not a stack operation."
+        },
+        {
+          "ref": 2,
+          "text": "```python\nfrom collections import deque\nq = deque()\nq.append(1)        # enqueue\nq.append(2)\nfront = q.popleft()  # dequeue, O(1)\n```\n\nUse collections.deque in Python, not a list, because list.pop(0) is O(n)."
+        },
+        {
+          "ref": 3,
+          "text": "Push the start vertex into a queue and mark it visited. While the queue is not empty, dequeue a vertex and enqueue each unvisited neighbour, marking it visited at the moment it is enqueued.\n\n```python\nfrom collections import deque\n\ndef bfs(graph, start):\n    dist = {start: 0}\n    q = deque([start])\n    while q:\n        u = q.popleft()\n        for v in graph[u]:\n            if v not in dist:\n                dist[v] = dist[u] + 1\n                q.append(v)\n    return dist\n```"
+        },
+        {
+          "ref": 4,
+          "text": "Breadth-first search, task scheduling, print spooling, buffering streaming data and level-order tree traversal. A sliding-window maximum uses a monotonic deque to achieve O(n)."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      },
+      "shipped": null
+    },
+    {
+      "q": "What causes a stack overflow in recursion?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 5840.623700001743,
+      "tokens": 567,
+      "confidence": 0.0,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "A missing or unreachable base case causes infinite recursion, which fills the call stack until it overflows [1].\n\nEach recursive call adds a new frame to the stack, and if recursion never stops, the stack eventually runs out of space [1][4].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "A missing or unreachable base case causes infinite recursion and a stack overflow (RecursionError in Python, default limit about 1000). Make sure every recursive call makes progress toward the base case. Recursion is not always faster than loops; it usually carries extra overhead from stack frames."
+        },
+        {
+          "ref": 2,
+          "text": "Deep recursion can overflow the stack on large graphs, so convert to an iterative version. Forgetting the visited set loops forever on cycles. Mixing up the on-stack check for directed cycle detection with the simple visited check."
+        },
+        {
+          "ref": 3,
+          "text": "Any recursion can be rewritten with a loop and an explicit stack. Recursion is clearer for trees, graphs and divide-and-conquer. Iteration avoids call overhead and stack overflow. Fibonacci written naively as fib(n-1) + fib(n-2) is O(2^n) because it recomputes the same subproblems; memoization fixes this and leads into dynamic programming."
+        },
+        {
+          "ref": 4,
+          "text": "Each call pushes a frame holding its parameters and local variables onto the call stack. When a call returns, its frame is popped. The maximum depth of the stack determines the space cost: recursion depth d uses O(d) stack space."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 2
+      },
+      "shipped": null
+    },
+    {
+      "q": "What does Big-O notation describe?",
+      "kind": "direct",
+      "status": "grounded",
+      "ms": 13547.452999977395,
+      "tokens": 662,
+      "confidence": 0.575,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": 1.0,
+      "raw_text": "Big-O notation describes how an algorithm's **running time or memory usage** grows as the input size (n) increases, focusing on the worst-case scenario [1].\nIt ignores constant factors and lower-order terms, providing an **upper bound** of growth [1].\nFor example, O(n) means the time/memory grows at most linearly with input size [1][3].\nIt does not mean \"exactly n steps\" or represent the best case [2].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Big-O notation describes how an algorithm's running time or memory grows as the input size n grows, ignoring constant factors and lower-order terms. It gives an upper bound, most often used for the worst case. Big-Omega gives a lower bound and Big-Theta a tight bound."
+        },
+        {
+          "ref": 2,
+          "text": "Big-O hides constants, so an O(n) algorithm with a huge constant can lose to O(n log n) for realistic n. O(n) does not mean \"exactly n steps\". Do not confuse worst case with Big-O: Big-O is a bound, and the worst case is a scenario."
+        },
+        {
+          "ref": 3,
+          "text": "Count how many times the dominant operation runs. A single loop over n items is O(n). Two nested loops over n items is O(n^2). A loop that halves the problem each step is O(log n). Sequential blocks add, so O(n) followed by O(n^2) is O(n^2). Drop constants: 3n + 5 is O(n)."
+        },
+        {
+          "ref": 4,
+          "text": "Space complexity counts the extra memory an algorithm uses beyond its input. An in-place reversal uses O(1) extra space. Building a copy of the array uses O(n). Recursion uses stack space proportional to recursion depth."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      }
+    },
+    {
+      "q": "Why is naive fibonacci exponential time?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 23417.11059998488,
+      "tokens": 719,
+      "confidence": 0.0,
+      "flagged": 4,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "Naive Fibonacci is exponential time (O(2^n)) because it recalculates the same subproblems repeatedly. For example, to compute `fib(5)`, it calculates `fib(3)` twice, `fib(2)` three times, and so on. Each call branches into two more calls, leading to a binary tree of computations with roughly 2^n nodes [1][4].\n\nMemoization fixes this by caching results, reducing time to O(n) [2].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Any recursion can be rewritten with a loop and an explicit stack. Recursion is clearer for trees, graphs and divide-and-conquer. Iteration avoids call overhead and stack overflow. Fibonacci written naively as fib(n-1) + fib(n-2) is O(2^n) because it recomputes the same subproblems; memoization fixes this and leads into dynamic programming."
+        },
+        {
+          "ref": 2,
+          "text": "Write the natural recursion and cache results. Naive Fibonacci is O(2^n); with a cache it is O(n).\n\n```python\nfrom functools import lru_cache\n\n@lru_cache(None)\ndef fib(n):\n    return n if n < 2 else fib(n - 1) + fib(n - 2)\n```"
+        },
+        {
+          "ref": 3,
+          "text": "Choose a pivot, partition the array so smaller elements are on the left and larger on the right, then recurse on both sides. Average time is O(n log n), worst case O(n^2) when the pivot is consistently the smallest or largest element, for example a sorted array with a naive first-element pivot. A random or median-of-three pivot makes the worst case unlikely. It is in-place with O(log n) stack space and is not stable."
+        },
+        {
+          "ref": 4,
+          "text": "From fastest to slowest growth: O(1) constant, O(log n) logarithmic, O(n) linear, O(n log n) linearithmic, O(n^2) quadratic, O(2^n) exponential, O(n!) factorial. Doubling n doubles the work for O(n), quadruples it for O(n^2), and adds only one step for O(log n)."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": null
+    },
+    {
+      "q": "When does quick sort degrade to O(n^2)?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 15751.096399966627,
+      "tokens": 607,
+      "confidence": 0.0,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "Quick sort degrades to **O(n\u00b2)** when the pivot selection consistently results in highly unbalanced partitions.\nThis happens if the pivot is always the smallest or largest element, like in a sorted array with a naive first-element pivot.\nUsing a random or median-of-three pivot reduces this risk [1].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Choose a pivot, partition the array so smaller elements are on the left and larger on the right, then recurse on both sides. Average time is O(n log n), worst case O(n^2) when the pivot is consistently the smallest or largest element, for example a sorted array with a naive first-element pivot. A random or median-of-three pivot makes the worst case unlikely. It is in-place with O(log n) stack space and is not stable."
+        },
+        {
+          "ref": 2,
+          "text": "Assuming quick sort is always O(n log n), and forgetting that merge sort needs extra memory."
+        },
+        {
+          "ref": 3,
+          "text": "Repeatedly swaps adjacent out-of-order elements. It is O(n^2) in the average and worst case, O(n) on already sorted input with an early-exit flag, in-place and stable. It is mainly educational."
+        },
+        {
+          "ref": 4,
+          "text": "Search, insert and delete take O(h), where h is the tree height. In a balanced tree h is about log n, so operations are O(log n). In a degenerate tree built from sorted insertions h is n and operations degrade to O(n).\n\n```python\ndef search(node, key):\n    if not node or node.val == key:\n        return node\n    return search(node.left, key) if key < node.val else search(node.right, key)\n```"
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      },
+      "shipped": null
+    },
+    {
+      "q": "What is the difference between worst case and amortized cost?",
+      "kind": "direct",
+      "status": "grounded",
+      "ms": 16466.95530001307,
+      "tokens": 610,
+      "confidence": 0.609,
+      "flagged": 1,
+      "verifier": "nli+lexical",
+      "citation_acc": 0.5,
+      "raw_text": "Worst case is the highest cost for any single input, like a hash table collision causing O(n) time [3]. Amortized cost spreads out occasional expensive operations (like resizing a dynamic array) over many cheap ones, so the *average* per-operation cost is low\u2014like O(1) for appending to a dynamic array [1]. Worst case focuses on a single bad input; amortized cost considers the total cost over many operations.",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Worst case is the most expensive input, average case is the expected cost over inputs, and amortized cost spreads an occasional expensive operation over many cheap ones. Appending to a dynamic array is O(1) amortized even though a resize costs O(n)."
+        },
+        {
+          "ref": 2,
+          "text": "Backtracking is exponential in the worst case, for example O(n!) for permutations; pruning improves the practical running time but not the worst-case bound. Space is O(depth) plus the output."
+        },
+        {
+          "ref": 3,
+          "text": "Average case for get, put and delete is O(1). Worst case is O(n) when many keys collide into one bucket, for example with a poor hash function or adversarial input. Hash maps do not keep keys sorted."
+        },
+        {
+          "ref": 4,
+          "text": "Big-O hides constants, so an O(n) algorithm with a huge constant can lose to O(n log n) for realistic n. O(n) does not mean \"exactly n steps\". Do not confuse worst case with Big-O: Big-O is a bound, and the worst case is a scenario."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      }
+    },
+    {
+      "q": "Which sorting algorithm is best for nearly sorted data?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 14613.878200005274,
+      "tokens": 507,
+      "confidence": 0.0,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "Insertion sort is best for nearly sorted data because it runs in **O(n)** time when the input is almost sorted.\nThis is because it only needs to shift elements a little to build the sorted prefix [1].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Builds the sorted prefix by inserting each element into place. O(n^2) worst case but O(n) on nearly sorted data, so it is used for small arrays. In-place and stable."
+        },
+        {
+          "ref": 2,
+          "text": "Use the built-in sort (Timsort in Python, a stable hybrid of merge and insertion sort) in practice. Counting sort and radix sort run in linear time for bounded integer keys."
+        },
+        {
+          "ref": 3,
+          "text": "Repeatedly swaps adjacent out-of-order elements. It is O(n^2) in the average and worst case, O(n) on already sorted input with an early-exit flag, in-place and stable. It is mainly educational."
+        },
+        {
+          "ref": 4,
+          "text": "Sorting arranges elements in order. Comparison-based sorts cannot beat O(n log n) in the worst case. Two properties matter: stability (equal elements keep their original relative order) and whether the sort is in-place."
+        }
+      ],
+      "raw": {
+        "faithfulness": 0.6666666666666666,
+        "all_supported": false,
+        "relevance": 3.0,
+        "claims": 3
+      },
+      "shipped": null
+    },
+    {
+      "q": "Is merge sort stable and how much extra memory does it use?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 18959.541899967007,
+      "tokens": 623,
+      "confidence": 0.0,
+      "flagged": 3,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "Merge sort is **stable**\u2014it preserves the relative order of equal elements [2].\n\nIt uses **O(n) extra memory** for merging the sorted halves [2]. The code creates temporary arrays (`l`, `r`, `out`) during recursion, requiring space proportional to the input size.",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Assuming quick sort is always O(n log n), and forgetting that merge sort needs extra memory."
+        },
+        {
+          "ref": 2,
+          "text": "Divide and conquer: split the array in half, sort each half recursively, then merge the two sorted halves. Time is O(n log n) in every case. It needs O(n) extra space and is stable.\n\n```python\ndef merge_sort(a):\n    if len(a) <= 1:\n        return a\n    mid = len(a) // 2\n    l, r = merge_sort(a[:mid]), merge_sort(a[mid:])\n    out, i, j = [], 0, 0\n    while i < len(l) and j < len(r):\n        if l[i] <= r[j]:\n            out.append(l[i]); i += 1\n        else:\n            out.append(r[j]); j += 1\n    return out + l[i:] + r[j:]\n```"
+        },
+        {
+          "ref": 3,
+          "text": "Use the built-in sort (Timsort in Python, a stable hybrid of merge and insertion sort) in practice. Counting sort and radix sort run in linear time for bounded integer keys."
+        },
+        {
+          "ref": 4,
+          "text": "Top-k elements using a size-k min-heap in O(n log k), merging k sorted lists, Dijkstra's algorithm, heap sort (O(n log n), in-place, not stable) and running median with two heaps."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      },
+      "shipped": null
+    },
+    {
+      "q": "How do you delete a node with two children from a BST?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 19164.733899990097,
+      "tokens": 561,
+      "confidence": 0.0,
+      "flagged": 3,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "To delete a node with two children in a BST, you replace it with its **inorder successor** (the smallest key in its right subtree) or its **inorder predecessor** (the largest key in its left subtree). Then, you delete that successor or predecessor node (which will have at most one child) from its original position.\n\nThis maintains the BST property.\n[1]",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Deleting a leaf removes it. A node with one child is replaced by that child. A node with two children is replaced by its inorder successor (smallest key in the right subtree) or predecessor, and then that node is deleted."
+        },
+        {
+          "ref": 2,
+          "text": "Validating a BST by only comparing a node with its immediate children is wrong; each node must lie within bounds inherited from all ancestors. Inserting sorted data into a plain BST creates a skewed tree."
+        },
+        {
+          "ref": 3,
+          "text": "A binary search tree (BST) is a binary tree where, for every node, all keys in the left subtree are smaller and all keys in the right subtree are larger. This ordering lets you search by comparing with the current node and going left or right, like binary search."
+        },
+        {
+          "ref": 4,
+          "text": "A binary tree is a hierarchical structure in which each node has at most two children, called left and right. The top node is the root; a node with no children is a leaf. The height is the number of edges on the longest root-to-leaf path."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": null
+    },
+    {
+      "q": "What does an inorder traversal of a BST give?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 24278.150199970696,
+      "tokens": 620,
+      "confidence": 0.0,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "An inorder traversal of a BST gives the node values in **ascending order** (sorted order).\nThis happens because the BST property ensures all left subtree values are smaller than the current node, and all right subtree values are larger.\nThe traversal visits left subtree \u2192 node \u2192 right subtree, producing a sorted sequence [1].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "An inorder traversal of a valid BST yields keys in ascending order, which is the basis for validating a BST and finding the k-th smallest element."
+        },
+        {
+          "ref": 2,
+          "text": "Depth-first traversals visit nodes recursively: preorder is node, left, right; inorder is left, node, right; postorder is left, right, node. Level-order (breadth-first) visits nodes row by row using a queue. All traversals take O(n) time. Recursive depth-first traversal uses O(h) stack space where h is the height.\n\n```python\ndef inorder(node):\n    if not node:\n        return []\n    return inorder(node.left) + [node.val] + inorder(node.right)\n\ndef height(node):\n    return 0 if not node else 1 + max(height(node.left), height(node.right))\n```"
+        },
+        {
+          "ref": 3,
+          "text": "A binary search tree (BST) is a binary tree where, for every node, all keys in the left subtree are smaller and all keys in the right subtree are larger. This ordering lets you search by comparing with the current node and going left or right, like binary search."
+        },
+        {
+          "ref": 4,
+          "text": "Validating a BST by only comparing a node with its immediate children is wrong; each node must lie within bounds inherited from all ancestors. Inserting sorted data into a plain BST creates a skewed tree."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      },
+      "shipped": null
+    },
+    {
+      "q": "Why can a binary search tree become O(n)?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 21866.87929998152,
+      "tokens": 632,
+      "confidence": 0.0,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "A binary search tree (BST) can degrade to **O(n)** time for operations (search, insert, delete) when it becomes **degenerate**, meaning it turns into a linked list due to unbalanced insertions (e.g., inserting sorted data repeatedly).\nThis happens because the tree height **h** becomes **n** (like a straight line), making operations linear instead of logarithmic.\nThe example in evidence shows search takes **O(h)**, which becomes **O(n)** in this case [1].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Search, insert and delete take O(h), where h is the tree height. In a balanced tree h is about log n, so operations are O(log n). In a degenerate tree built from sorted insertions h is n and operations degrade to O(n).\n\n```python\ndef search(node, key):\n    if not node or node.val == key:\n        return node\n    return search(node.left, key) if key < node.val else search(node.right, key)\n```"
+        },
+        {
+          "ref": 2,
+          "text": "Binary search finds a target in a sorted array by repeatedly comparing it with the middle element and discarding the half that cannot contain the target. Each step halves the search space, so it runs in O(log n) time instead of the O(n) of linear search."
+        },
+        {
+          "ref": 3,
+          "text": "AVL trees and red-black trees rotate nodes after insertions and deletions to keep height O(log n), guaranteeing O(log n) worst-case operations. Standard library ordered maps are typically red-black trees."
+        },
+        {
+          "ref": 4,
+          "text": "A binary search tree (BST) is a binary tree where, for every node, all keys in the left subtree are smaller and all keys in the right subtree are larger. This ordering lets you search by comparing with the current node and going left or right, like binary search."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 5
+      },
+      "shipped": null
+    },
+    {
+      "q": "What is the difference between preorder, inorder and postorder?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 22544.388199981768,
+      "tokens": 671,
+      "confidence": 0.0,
+      "flagged": 4,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "Preorder traversal visits the **node first**, then its **left subtree**, then its **right subtree** (order: node, left, right) [1].\nInorder traversal visits the **left subtree first**, then the **node**, then the **right subtree** (order: left, node, right) [1].\nPostorder traversal visits the **left subtree first**, then the **right subtree**, then the **node** (order: left, right, node) [1].\n\nAll three are depth-first traversals, but their order of visiting nodes differs.",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Depth-first traversals visit nodes recursively: preorder is node, left, right; inorder is left, node, right; postorder is left, right, node. Level-order (breadth-first) visits nodes row by row using a queue. All traversals take O(n) time. Recursive depth-first traversal uses O(h) stack space where h is the height.\n\n```python\ndef inorder(node):\n    if not node:\n        return []\n    return inorder(node.left) + [node.val] + inorder(node.right)\n\ndef height(node):\n    return 0 if not node else 1 + max(height(node.left), height(node.right))\n```"
+        },
+        {
+          "ref": 2,
+          "text": "An inorder traversal of a valid BST yields keys in ascending order, which is the basis for validating a BST and finding the k-th smallest element."
+        },
+        {
+          "ref": 3,
+          "text": "A queue is a first-in, first-out (FIFO) collection. Elements are added at the back (enqueue) and removed from the front (dequeue), like people waiting in line. A deque (double-ended queue) allows insertion and removal at both ends."
+        },
+        {
+          "ref": 4,
+          "text": "Two-dimensional prefix sums answer rectangle-sum queries in O(1). A difference array is the inverse idea: it applies range updates in O(1) each and is reconstructed with a prefix sum."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": null
+    },
+    {
+      "q": "How are heap parent and child indices computed in an array?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 10918.054100009613,
+      "tokens": 608,
+      "confidence": 0.0,
+      "flagged": 3,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "For a node at index **i** (0-based) in a heap stored as an array:\n- The **parent** index is `(i - 1) // 2` [1].\n- The **left child** index is `2i + 1` [1].\n- The **right child** index is `2i + 2` [1].\n\nNo pointers are needed because the array layout enforces this structure [1].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "For a node at index i (0-based), the parent is (i - 1) // 2, the left child is 2i + 1 and the right child is 2i + 2. No pointers are needed."
+        },
+        {
+          "ref": 2,
+          "text": "A heap is a complete binary tree stored in an array that satisfies the heap property. In a min-heap every parent is less than or equal to its children, so the smallest element is at the root; a max-heap is the opposite. A priority queue is the abstract data type that always serves the highest-priority element, and a heap is the standard implementation."
+        },
+        {
+          "ref": 3,
+          "text": "Index out of range errors and off-by-one mistakes are the most common bugs: valid indices are 0 to n-1. Copying with slicing creates a new O(n) array. Inserting at the front in a loop turns an O(n) task into O(n^2). Arrays have fixed element types in low-level languages but not in Python."
+        },
+        {
+          "ref": 4,
+          "text": "An array stores elements in contiguous memory. Because the address of element i is base + i * element_size, reading or writing any index is O(1). This random access is the defining strength of arrays."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": null
+    },
+    {
+      "q": "What is a complete binary tree?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 17898.417599964887,
+      "tokens": 538,
+      "confidence": 0.0,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "A complete binary tree fills every level except possibly the last, which must be filled from left to right.\nThis means all levels are fully filled until the last one, where nodes are packed to the left as much as possible.\nIt is also described as a heap structure.\n[1]",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "A complete tree fills every level except possibly the last, which fills left to right; heaps are complete trees. A perfect tree has all levels full and 2^h - 1 nodes for h levels. A balanced tree keeps height near log n. A degenerate (skewed) tree behaves like a linked list with height n."
+        },
+        {
+          "ref": 2,
+          "text": "A binary tree is a hierarchical structure in which each node has at most two children, called left and right. The top node is the root; a node with no children is a leaf. The height is the number of edges on the longest root-to-leaf path."
+        },
+        {
+          "ref": 3,
+          "text": "A binary search tree (BST) is a binary tree where, for every node, all keys in the left subtree are smaller and all keys in the right subtree are larger. This ordering lets you search by comparing with the current node and going left or right, like binary search."
+        },
+        {
+          "ref": 4,
+          "text": "Forgetting the null base case, mixing up height measured in nodes versus edges, and assuming a binary tree is ordered (only a binary search tree is)."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      },
+      "shipped": null
+    },
+    {
+      "q": "What is the complexity of building a heap with heapify?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 13733.7154999841,
+      "tokens": 695,
+      "confidence": 0.0,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "The complexity of building a heap from **n** elements using **heapify** is **O(n)**, not **O(n log n)** [1].\n\nThis is more efficient than inserting elements one by one (which would be **O(n log n)**). The heapify process starts from the last non-leaf node and works upward, ensuring the heap property in linear time [1].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "- Peek the min or max: O(1).\n- Insert: add at the end and sift up, O(log n).\n- Extract the min or max: swap the root with the last element, remove it, and sift down, O(log n).\n- Build a heap from n elements with heapify: O(n), not O(n log n).\n\n```python\nimport heapq\nh = []\nfor x in [5, 1, 8, 3]:\n    heapq.heappush(h, x)\nprint(heapq.heappop(h))   # 1\n```\n\nPython's heapq is a min-heap; push negated values to simulate a max-heap."
+        },
+        {
+          "ref": 2,
+          "text": "A heap is a complete binary tree stored in an array that satisfies the heap property. In a min-heap every parent is less than or equal to its children, so the smallest element is at the root; a max-heap is the opposite. A priority queue is the abstract data type that always serves the highest-priority element, and a heap is the standard implementation."
+        },
+        {
+          "ref": 3,
+          "text": "Space complexity counts the extra memory an algorithm uses beyond its input. An in-place reversal uses O(1) extra space. Building a copy of the array uses O(n). Recursion uses stack space proportional to recursion depth."
+        },
+        {
+          "ref": 4,
+          "text": "Top-k elements using a size-k min-heap in O(n log k), merging k sorted lists, Dijkstra's algorithm, heap sort (O(n log n), in-place, not stable) and running median with two heaps."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      },
+      "shipped": null
+    },
+    {
+      "q": "How do I get the top k largest elements efficiently?",
+      "kind": "paraphrase",
+      "status": "insufficient_evidence",
+      "ms": 23781.307800032664,
+      "tokens": 603,
+      "confidence": 0.0,
+      "flagged": 5,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "Use a size-**k** min-heap to track the top **k** elements efficiently in **O(n log k)** time.\n\nHere\u2019s how:\n1. Insert all elements into the heap.\n2. If the heap size exceeds **k**, remove the smallest element (root).\n3. After processing, the heap contains the **k** largest elements.\n\nThis works because the min-heap keeps only the **k** largest seen so far at its root [1].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Top-k elements using a size-k min-heap in O(n log k), merging k sorted lists, Dijkstra's algorithm, heap sort (O(n log n), in-place, not stable) and running median with two heaps."
+        },
+        {
+          "ref": 2,
+          "text": "Choose a pivot, partition the array so smaller elements are on the left and larger on the right, then recurse on both sides. Average time is O(n log n), worst case O(n^2) when the pivot is consistently the smallest or largest element, for example a sorted array with a naive first-element pivot. A random or median-of-three pivot makes the worst case unlikely. It is in-place with O(log n) stack space and is not stable."
+        },
+        {
+          "ref": 3,
+          "text": "- Access the k-th element: O(k), since you must walk from the head.\n- Insert or delete at the head: O(1).\n- Insert or delete after a known node: O(1).\n- Search: O(n)."
+        },
+        {
+          "ref": 4,
+          "text": "An inorder traversal of a valid BST yields keys in ascending order, which is the basis for validating a BST and finding the k-th smallest element."
+        }
+      ],
+      "raw": {
+        "faithfulness": 0.8,
+        "all_supported": false,
+        "relevance": 5.0,
+        "claims": 5
+      },
+      "shipped": null
+    },
+    {
+      "q": "Adjacency list versus adjacency matrix: space usage?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 19422.831399948336,
+      "tokens": 646,
+      "confidence": 0.0,
+      "flagged": 4,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "An adjacency list uses **O(V + E)** space, where V is the number of vertices and E is the number of edges. It is efficient for sparse graphs (few edges) [1].\n\nAn adjacency matrix uses **O(V\u00b2)** space, as it stores a V x V table regardless of edges. It is better for dense graphs (many edges) [1].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "An adjacency list stores, for each vertex, a list of its neighbours. It uses O(V + E) space and is best for sparse graphs. An adjacency matrix is a V x V table where cell (i, j) records an edge; it uses O(V^2) space, tests whether an edge exists in O(1), and suits dense graphs.\n\n```python\nfrom collections import defaultdict\ng = defaultdict(list)\nfor u, v in [(0, 1), (0, 2), (1, 3)]:\n    g[u].append(v)\n    g[v].append(u)      # omit for a directed graph\n```"
+        },
+        {
+          "ref": 2,
+          "text": "Time is O(V + E) with an adjacency list. Space is O(V) for the visited set plus O(depth) for the recursion stack, which can reach O(V) on a long path."
+        },
+        {
+          "ref": 3,
+          "text": "Time is O(V + E) with an adjacency list. Space is O(V) for the queue and visited set."
+        },
+        {
+          "ref": 4,
+          "text": "Space complexity counts the extra memory an algorithm uses beyond its input. An in-place reversal uses O(1) extra space. Building a copy of the array uses O(n). Recursion uses stack space proportional to recursion depth."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": null
+    },
+    {
+      "q": "How does BFS find shortest paths in an unweighted graph?",
+      "kind": "direct",
+      "status": "grounded",
+      "ms": 19347.023600013927,
+      "tokens": 616,
+      "confidence": 0.464,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": 0.5,
+      "raw_text": "BFS finds the shortest path in an unweighted graph by exploring all vertices level by level, starting from the source. It discovers vertices in order of their distance from the source, ensuring the first time a vertex is reached, it is via the shortest path (fewest edges). This works because BFS uses a queue to process nodes in the order they are discovered, guaranteeing that closer nodes are processed before farther ones [1].\n\nFor weighted graphs, BFS is incorrect\u2014use Dijkstra\u2019s instead [1][4].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "In an unweighted graph BFS finds the shortest path (fewest edges) from the source to every reachable vertex, because vertices are discovered in increasing distance order. It does not work for weighted edges; use Dijkstra's algorithm instead. Multi-source BFS starts with several sources in the queue and solves problems such as rotting oranges or nearest gate."
+        },
+        {
+          "ref": 2,
+          "text": "DFS uses less memory on wide graphs and is natural for exhaustive search and recursion. BFS finds shortest paths in unweighted graphs. DFS does not guarantee shortest paths."
+        },
+        {
+          "ref": 3,
+          "text": "Marking visited when dequeuing instead of when enqueuing lets the same vertex enter the queue many times. Using BFS for weighted shortest paths is incorrect. On grids, forgetting boundary checks."
+        },
+        {
+          "ref": 4,
+          "text": "Using Dijkstra with negative edges, forgetting to skip stale heap entries, and using BFS when weights differ. For unweighted graphs BFS is simpler and faster."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      }
+    },
+    {
+      "q": "Should I mark nodes visited when enqueuing or dequeuing in BFS?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 21803.30909998156,
+      "tokens": 659,
+      "confidence": 0.0,
+      "flagged": 3,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "Mark nodes **visited when enqueuing** in BFS.\nThis prevents the same node from being added to the queue multiple times, ensuring efficiency and correctness.\nMarking when dequeuing allows duplicates, wasting time and space.\nThe correct approach is shown in the algorithm:\n```python\nif v not in dist:  # Mark visited (enqueue) before adding to queue\n    dist[v] = dist[u] + 1\n    q.append(v)\n```\n[2]",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Marking visited when dequeuing instead of when enqueuing lets the same vertex enter the queue many times. Using BFS for weighted shortest paths is incorrect. On grids, forgetting boundary checks."
+        },
+        {
+          "ref": 2,
+          "text": "Push the start vertex into a queue and mark it visited. While the queue is not empty, dequeue a vertex and enqueue each unvisited neighbour, marking it visited at the moment it is enqueued.\n\n```python\nfrom collections import deque\n\ndef bfs(graph, start):\n    dist = {start: 0}\n    q = deque([start])\n    while q:\n        u = q.popleft()\n        for v in graph[u]:\n            if v not in dist:\n                dist[v] = dist[u] + 1\n                q.append(v)\n    return dist\n```"
+        },
+        {
+          "ref": 3,
+          "text": "Time is O(V + E) with an adjacency list. Space is O(V) for the queue and visited set."
+        },
+        {
+          "ref": 4,
+          "text": "BFS explores a graph level by level: first the start vertex, then all its neighbours, then their neighbours, and so on. It uses a queue to process vertices in the order they were discovered."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": null
+    },
+    {
+      "q": "How do I detect a cycle in a directed graph with DFS?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 16127.872299985029,
+      "tokens": 634,
+      "confidence": 0.0,
+      "flagged": 3,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "To detect a cycle in a **directed graph** using DFS, you check if DFS reaches a vertex that is **currently on the recursion stack** (a back edge).\nThis means if you encounter a vertex that is being processed (not fully explored) in the current DFS path, a cycle exists.\nAlways track vertices on the recursion stack separately from visited vertices [1].\n\n**Pitfall:** Forgetting to reset the recursion stack after finishing a branch can cause false positives [2].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Finding connected components, detecting cycles, topological sorting, solving mazes and flood fill, and exploring all possibilities in backtracking. In a directed graph a cycle exists if DFS reaches a vertex that is currently on the recursion stack (a back edge). In an undirected graph a cycle exists if DFS reaches a visited vertex that is not the parent."
+        },
+        {
+          "ref": 2,
+          "text": "Deep recursion can overflow the stack on large graphs, so convert to an iterative version. Forgetting the visited set loops forever on cycles. Mixing up the on-stack check for directed cycle detection with the simple visited check."
+        },
+        {
+          "ref": 3,
+          "text": "A path is a sequence of connected vertices. A cycle returns to its start. A graph is connected if every vertex is reachable from every other. A directed acyclic graph (DAG) has directed edges and no cycles. The degree of a vertex is its number of edges."
+        },
+        {
+          "ref": 4,
+          "text": "Floyd's tortoise and hare uses two pointers: slow moves one step and fast moves two. If there is a cycle they eventually meet; if fast reaches null there is no cycle. It uses O(1) space. The middle node is found the same way: when fast reaches the end, slow is at the middle."
+        }
+      ],
+      "raw": {
+        "faithfulness": 0.75,
+        "all_supported": false,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": null
+    },
+    {
+      "q": "Why does Dijkstra fail with negative edge weights?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 12887.298800051212,
+      "tokens": 608,
+      "confidence": 0.0,
+      "flagged": 4,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "Dijkstra fails with negative edge weights because once a vertex is marked as finalized, its distance is assumed correct. However, a negative edge later could provide a shorter path to that vertex, making the earlier distance incorrect. This breaks Dijkstra\u2019s greedy approach of always picking the next closest vertex [1].\n\nFor graphs with negative weights, use Bellman-Ford instead, as it can handle them and detect negative cycles [1].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Once a vertex is popped, its distance is final because any other route to it would have to pass through vertices with distance at least as large. A negative edge could later reduce that distance and break the argument. For negative weights use Bellman-Ford, which is O(V * E) and detects negative cycles."
+        },
+        {
+          "ref": 2,
+          "text": "Using Dijkstra with negative edges, forgetting to skip stale heap entries, and using BFS when weights differ. For unweighted graphs BFS is simpler and faster."
+        },
+        {
+          "ref": 3,
+          "text": "Dijkstra's algorithm finds the shortest path from a source vertex to all other vertices in a graph with non-negative edge weights. It is a greedy algorithm: it repeatedly finalizes the unvisited vertex with the smallest known distance."
+        },
+        {
+          "ref": 4,
+          "text": "In an unweighted graph BFS finds the shortest path (fewest edges) from the source to every reachable vertex, because vertices are discovered in increasing distance order. It does not work for weighted edges; use Dijkstra's algorithm instead. Multi-source BFS starts with several sources in the queue and solves problems such as rotting oranges or nearest gate."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 5
+      },
+      "shipped": null
+    },
+    {
+      "q": "What is the time complexity of Dijkstra with a binary heap?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 11651.10650000861,
+      "tokens": 647,
+      "confidence": 0.0,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "The time complexity of Dijkstra's algorithm with a **binary heap** is **O((V + E) log V)**.\nThis accounts for heap operations (insertions and extractions) across all vertices (V) and edges (E) in the graph.\n[1]",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "With a binary heap the time is O((V + E) log V) and space is O(V + E)."
+        },
+        {
+          "ref": 2,
+          "text": "Using Dijkstra with negative edges, forgetting to skip stale heap entries, and using BFS when weights differ. For unweighted graphs BFS is simpler and faster."
+        },
+        {
+          "ref": 3,
+          "text": "Set the distance of the source to 0 and all others to infinity. Use a min-heap keyed by distance. Pop the vertex u with the smallest distance; for each edge (u, v, w), relax it: if dist[u] + w < dist[v], update dist[v] and push v.\n\n```python\nimport heapq\n\ndef dijkstra(graph, src):\n    dist = {src: 0}\n    pq = [(0, src)]\n    while pq:\n        d, u = heapq.heappop(pq)\n        if d > dist.get(u, float('inf')):\n            continue                       # stale entry\n        for v, w in graph[u]:\n            nd = d + w\n            if nd < dist.get(v, float('inf')):\n                dist[v] = nd\n                heapq.heappush(pq, (nd, v))\n    return dist\n```"
+        },
+        {
+          "ref": 4,
+          "text": "Top-k elements using a size-k min-heap in O(n log k), merging k sorted lists, Dijkstra's algorithm, heap sort (O(n log n), in-place, not stable) and running median with two heaps."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 2
+      },
+      "shipped": null
+    },
+    {
+      "q": "How can I tell a cycle exists using topological sorting?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 18520.364300056826,
+      "tokens": 689,
+      "confidence": 0.0,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "Using topological sorting, a cycle exists if the algorithm does not produce a full ordering (i.e., the length of the returned order is less than the number of vertices).\n\nIn Kahn's algorithm, if the final `order` list has fewer than `n` nodes, it means some nodes were never processed due to cyclic dependencies, indicating a cycle [4].\n\nThis works because a topological order only exists in a directed acyclic graph (DAG) [2].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Finding connected components, detecting cycles, topological sorting, solving mazes and flood fill, and exploring all possibilities in backtracking. In a directed graph a cycle exists if DFS reaches a vertex that is currently on the recursion stack (a back edge). In an undirected graph a cycle exists if DFS reaches a visited vertex that is not the parent."
+        },
+        {
+          "ref": 2,
+          "text": "A topological ordering of a directed acyclic graph (DAG) lists the vertices so that for every edge u -> v, u appears before v. It is used for task scheduling, build systems, and course prerequisites. A topological order exists if and only if the graph has no cycle."
+        },
+        {
+          "ref": 3,
+          "text": "Topological order is generally not unique. Running it on a graph with a cycle silently produces a partial order unless you check the count."
+        },
+        {
+          "ref": 4,
+          "text": "```python\nfrom collections import deque\n\ndef topo_sort(n, edges):\n    adj, indeg = [[] for _ in range(n)], [0] * n\n    for u, v in edges:\n        adj[u].append(v)\n        indeg[v] += 1\n    q = deque(i for i in range(n) if indeg[i] == 0)\n    order = []\n    while q:\n        u = q.popleft()\n        order.append(u)\n        for v in adj[u]:\n            indeg[v] -= 1\n            if indeg[v] == 0:\n                q.append(v)\n    return order if len(order) == n else []     # [] means a cycle\n```"
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      },
+      "shipped": null
+    },
+    {
+      "q": "How does Kahn's algorithm use in-degree?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 27485.64319999423,
+      "tokens": 919,
+      "confidence": 0.0,
+      "flagged": 4,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "Kahn's algorithm uses in-degree to track how many edges point to each vertex. It starts by enqueuing all vertices with an in-degree of 0, meaning no edges lead into them [1]. As it processes each vertex, it removes it from the graph (conceptually) by decrementing the in-degree of its neighbors. If a neighbor's in-degree reaches 0, it means all its dependencies have been processed, so it is enqueued [1]. This ensures vertices are only processed once all their prerequisites are done.",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Compute the in-degree of every vertex. Put all vertices with in-degree 0 in a queue. Repeatedly remove a vertex, append it to the order, and decrement the in-degree of its neighbours, enqueueing any that reach 0. If the order contains fewer than V vertices, the graph has a cycle.\n\n```python\nfrom collections import deque\n\ndef topo_sort(n, edges):\n    adj, indeg = [[] for _ in range(n)], [0] * n\n    for u, v in edges:\n        adj[u].append(v)\n        indeg[v] += 1\n    q = deque(i for i in range(n) if indeg[i] == 0)\n    order = []\n    while q:\n        u = q.popleft()\n        order.append(u)\n        for v in adj[u]:\n            indeg[v] -= 1\n            if indeg[v] == 0:\n                q.append(v)\n    return order if len(order) == n else []     # [] means a cycle\n```"
+        },
+        {
+          "ref": 2,
+          "text": "Set the distance of the source to 0 and all others to infinity. Use a min-heap keyed by distance. Pop the vertex u with the smallest distance; for each edge (u, v, w), relax it: if dist[u] + w < dist[v], update dist[v] and push v.\n\n```python\nimport heapq\n\ndef dijkstra(graph, src):\n    dist = {src: 0}\n    pq = [(0, src)]\n    while pq:\n        d, u = heapq.heappop(pq)\n        if d > dist.get(u, float('inf')):\n            continue                       # stale entry\n        for v, w in graph[u]:\n            nd = d + w\n            if nd < dist.get(v, float('inf')):\n                dist[v] = nd\n                heapq.heappush(pq, (nd, v))\n    return dist\n```"
+        },
+        {
+          "ref": 3,
+          "text": "Dijkstra's algorithm finds the shortest path from a source vertex to all other vertices in a graph with non-negative edge weights. It is a greedy algorithm: it repeatedly finalizes the unvisited vertex with the smallest known distance."
+        },
+        {
+          "ref": 4,
+          "text": "Once a vertex is popped, its distance is final because any other route to it would have to pass through vertices with distance at least as large. A negative edge could later reduce that distance and break the argument. For negative weights use Bellman-Ford, which is O(V * E) and detects negative cycles."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 5
+      },
+      "shipped": null
+    },
+    {
+      "q": "What are path compression and union by rank?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 29023.75180000672,
+      "tokens": 791,
+      "confidence": 0.0,
+      "flagged": 3,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "Path compression flattens the tree during a `find` operation by making every node point directly to its root, reducing future lookup times. It\u2019s done in the `find` method by updating `self.p[x] = self.p[self.p[x]]` before moving up the tree [1].\n\nUnion by rank (or size) attaches the smaller tree under the larger one during a `union` to keep the tree balanced. In the code, it compares `self.size[ra]` and `self.size[rb]` to decide which root becomes the parent [1]. This ensures operations stay efficient.",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Each element points to a parent; a root points to itself. Two optimizations make it almost constant time: path compression flattens the tree during find, and union by rank or size attaches the smaller tree under the larger.\n\n```python\nclass DSU:\n    def __init__(self, n):\n        self.p = list(range(n))\n        self.size = [1] * n\n\n    def find(self, x):\n        while self.p[x] != x:\n            self.p[x] = self.p[self.p[x]]     # path compression (halving)\n            x = self.p[x]\n        return x\n\n    def union(self, a, b):\n        ra, rb = self.find(a), self.find(b)\n        if ra == rb:\n            return False\n        if self.size[ra] < self.size[rb]:\n            ra, rb = rb, ra\n        self.p[rb] = ra\n        self.size[ra] += self.size[rb]\n        return True\n```"
+        },
+        {
+          "ref": 2,
+          "text": "With both optimizations each operation takes O(alpha(n)) amortized, where alpha is the inverse Ackermann function, effectively a constant below 5 for any practical n. Without them, find can degrade to O(n)."
+        },
+        {
+          "ref": 3,
+          "text": "Union-Find maintains a collection of disjoint sets and supports two operations: find(x) returns the representative (root) of x's set, and union(x, y) merges the sets containing x and y. It answers \"are these two nodes connected?\" quickly."
+        },
+        {
+          "ref": 4,
+          "text": "Kruskal's minimum spanning tree algorithm, counting connected components, detecting a cycle in an undirected graph (a union that returns false means the edge closes a cycle), and grouping equivalent items."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 5
+      },
+      "shipped": null
+    },
+    {
+      "q": "What is the inverse Ackermann function doing in union-find complexity?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 21771.619000006467,
+      "tokens": 779,
+      "confidence": 0.0,
+      "flagged": 4,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw_text": "The inverse Ackermann function, **alpha(n)**, in Union-Find complexity measures how quickly the tree height grows with optimizations.\n\nWith **path compression** and **union by size/rank**, the tree height remains extremely small\u2014effectively constant for practical purposes. The inverse Ackermann function grows so slowly that **alpha(n) \u2264 4** for all computable values of *n* [1].\n\nThis means each **find** or **union** operation is nearly **O(1)** in practice [1].",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "With both optimizations each operation takes O(alpha(n)) amortized, where alpha is the inverse Ackermann function, effectively a constant below 5 for any practical n. Without them, find can degrade to O(n)."
+        },
+        {
+          "ref": 2,
+          "text": "Union-Find maintains a collection of disjoint sets and supports two operations: find(x) returns the representative (root) of x's set, and union(x, y) merges the sets containing x and y. It answers \"are these two nodes connected?\" quickly."
+        },
+        {
+          "ref": 3,
+          "text": "Each element points to a parent; a root points to itself. Two optimizations make it almost constant time: path compression flattens the tree during find, and union by rank or size attaches the smaller tree under the larger.\n\n```python\nclass DSU:\n    def __init__(self, n):\n        self.p = list(range(n))\n        self.size = [1] * n\n\n    def find(self, x):\n        while self.p[x] != x:\n            self.p[x] = self.p[self.p[x]]     # path compression (halving)\n            x = self.p[x]\n        return x\n\n    def union(self, a, b):\n        ra, rb = self.find(a), self.find(b)\n        if ra == rb:\n            return False\n        if self.size[ra] < self.size[rb]:\n            ra, rb = rb, ra\n        self.p[rb] = ra\n        self.size[ra] += self.size[rb]\n        return True\n```"
+        },
+        {
+          "ref": 4,
+          "text": "Kruskal's minimum spanning tree algorithm, counting connected components, detecting a cycle in an undirected graph (a union that returns false means the edge closes a cycle), and grouping equivalent items."
+        }
+      ],
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": null
+    },
+    {
+      "q": "Memoization versus tabulation: what is the difference?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 1374.2411999846809,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null,
+      "raw_text": "",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Any recursion can be rewritten with a loop and an explicit stack. Recursion is clearer for trees, graphs and divide-and-conquer. Iteration avoids call overhead and stack overflow. Fibonacci written naively as fib(n-1) + fib(n-2) is O(2^n) because it recomputes the same subproblems; memoization fixes this and leads into dynamic programming."
+        },
+        {
+          "ref": 2,
+          "text": "Fill a table iteratively from the smallest subproblems upward. It avoids recursion overhead and often allows space reduction, for example keeping only the previous row."
+        },
+        {
+          "ref": 3,
+          "text": "Write the natural recursion and cache results. Naive Fibonacci is O(2^n); with a cache it is O(n).\n\n```python\nfrom functools import lru_cache\n\n@lru_cache(None)\ndef fib(n):\n    return n if n < 2 else fib(n - 1) + fib(n - 2)\n```"
+        },
+        {
+          "ref": 4,
+          "text": "Forgetting to undo a choice, appending the same list object instead of a copy so later changes corrupt stored results, and missing pruning conditions. If subproblems overlap, memoize and use dynamic programming instead."
+        }
+      ]
+    },
+    {
+      "q": "How do I bake sourdough bread?",
+      "kind": "oos",
+      "status": "insufficient_evidence",
+      "ms": 2588.1196000264026,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null,
+      "raw_text": "",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "- Peek the min or max: O(1).\n- Insert: add at the end and sift up, O(log n).\n- Extract the min or max: swap the root with the last element, remove it, and sift down, O(log n).\n- Build a heap from n elements with heapify: O(n), not O(n log n).\n\n```python\nimport heapq\nh = []\nfor x in [5, 1, 8, 3]:\n    heapq.heappush(h, x)\nprint(heapq.heappop(h))   # 1\n```\n\nPython's heapq is a min-heap; push negated values to simulate a max-heap."
+        },
+        {
+          "ref": 2,
+          "text": "Count how many times the dominant operation runs. A single loop over n items is O(n). Two nested loops over n items is O(n^2). A loop that halves the problem each step is O(log n). Sequential blocks add, so O(n) followed by O(n^2) is O(n^2). Drop constants: 3n + 5 is O(n)."
+        },
+        {
+          "ref": 3,
+          "text": "1. Define the state: what parameters identify a subproblem.\n2. Write the recurrence relating a state to smaller states.\n3. Set the base cases.\n4. Choose the evaluation order and the answer cell.\nComplexity is the number of states multiplied by the work per state."
+        },
+        {
+          "ref": 4,
+          "text": "Push the start vertex into a queue and mark it visited. While the queue is not empty, dequeue a vertex and enqueue each unvisited neighbour, marking it visited at the moment it is enqueued.\n\n```python\nfrom collections import deque\n\ndef bfs(graph, start):\n    dist = {start: 0}\n    q = deque([start])\n    while q:\n        u = q.popleft()\n        for v in graph[u]:\n            if v not in dist:\n                dist[v] = dist[u] + 1\n                q.append(v)\n    return dist\n```"
+        }
+      ]
+    },
+    {
+      "q": "Who won the 2018 football world cup?",
+      "kind": "oos",
+      "status": "insufficient_evidence",
+      "ms": 1976.3338000047952,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null,
+      "raw_text": "",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "A positive integer x is a power of two if x & (x - 1) == 0, because subtracting 1 flips the lowest set bit and all bits below it. The expression x & (x - 1) clears the lowest set bit, so repeating it counts set bits in O(number of set bits) (Brian Kernighan's algorithm). x & -x isolates the lowest set bit."
+        },
+        {
+          "ref": 2,
+          "text": "Computing mid as (lo + hi) / 2 can overflow in fixed-width integers, so use lo + (hi - lo) / 2. Wrong loop conditions (lo < hi versus lo <= hi) and not shrinking the range (lo = mid instead of mid + 1) cause off-by-one errors and infinite loops. Binary search requires random access, so it is not efficient on a linked list."
+        },
+        {
+          "ref": 3,
+          "text": "```python\ndef binary_search(a, target):\n    lo, hi = 0, len(a) - 1\n    while lo <= hi:\n        mid = lo + (hi - lo) // 2\n        if a[mid] == target:\n            return mid\n        if a[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1\n```\n\nTime is O(log n) and space is O(1). A recursive version uses O(log n) stack space."
+        },
+        {
+          "ref": 4,
+          "text": "Rabin-Karp compares a rolling hash of each text window with the pattern's hash. The hash of the next window is computed from the previous one in O(1), by removing the leading character and adding the new one. Expected time is O(n + m); worst case is O(n * m) when many hash collisions force full comparisons. On a hash match, verify the characters to rule out collisions. It extends naturally to searching for multiple patterns."
+        }
+      ]
+    },
+    {
+      "q": "Explain quantum entanglement",
+      "kind": "oos",
+      "status": "insufficient_evidence",
+      "ms": 2680.7294999598525,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null,
+      "raw_text": "",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Big-O hides constants, so an O(n) algorithm with a huge constant can lose to O(n log n) for realistic n. O(n) does not mean \"exactly n steps\". Do not confuse worst case with Big-O: Big-O is a bound, and the worst case is a scenario."
+        },
+        {
+          "ref": 2,
+          "text": "Two pointers uses two indices that move through an array to avoid a nested loop. On a sorted array, put one pointer at each end: if the sum is too small move the left pointer right, if too large move the right pointer left. This finds a pair with a target sum in O(n) instead of O(n^2). A fast and slow pointer pair detects cycles and removes duplicates in place.\n\n```python\ndef pair_sum_sorted(a, target):\n    l, r = 0, len(a) - 1\n    while l < r:\n        s = a[l] + a[r]\n        if s == target:\n            return (l, r)\n        l, r = (l + 1, r) if s < target else (l, r - 1)\n```"
+        },
+        {
+          "ref": 3,
+          "text": "Push the start vertex into a queue and mark it visited. While the queue is not empty, dequeue a vertex and enqueue each unvisited neighbour, marking it visited at the moment it is enqueued.\n\n```python\nfrom collections import deque\n\ndef bfs(graph, start):\n    dist = {start: 0}\n    q = deque([start])\n    while q:\n        u = q.popleft()\n        for v in graph[u]:\n            if v not in dist:\n                dist[v] = dist[u] + 1\n                q.append(v)\n    return dist\n```"
+        },
+        {
+          "ref": 4,
+          "text": "A sliding window maintains a contiguous range [left, right] and updates its state incrementally as the window moves, rather than recomputing from scratch. A fixed-size window of size k slides one step at a time, adding the new element and removing the old one, giving O(n) for maximum sum of k elements.\n\nA variable-size window expands right to include elements and shrinks left while a constraint is violated. The longest substring without repeating characters is solved this way using a set or a dictionary of last positions in O(n)."
+        }
+      ]
+    },
+    {
+      "q": "What is the capital of Australia?",
+      "kind": "oos",
+      "status": "insufficient_evidence",
+      "ms": 2869.579699996393,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null,
+      "raw_text": "",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "A queue is a first-in, first-out (FIFO) collection. Elements are added at the back (enqueue) and removed from the front (dequeue), like people waiting in line. A deque (double-ended queue) allows insertion and removal at both ends."
+        },
+        {
+          "ref": 2,
+          "text": "KMP avoids re-examining text characters after a mismatch. It precomputes a failure (prefix) function: for each prefix of the pattern, the length of the longest proper prefix that is also a suffix. On a mismatch, the pattern shifts using this table instead of restarting. The total time is O(n + m) and extra space is O(m).\n\n```python\ndef prefix_function(p):\n    pi = [0] * len(p)\n    k = 0\n    for i in range(1, len(p)):\n        while k and p[i] != p[k]:\n            k = pi[k - 1]\n        if p[i] == p[k]:\n            k += 1\n        pi[i] = k\n    return pi\n```"
+        },
+        {
+          "ref": 3,
+          "text": "Rabin-Karp compares a rolling hash of each text window with the pattern's hash. The hash of the next window is computed from the previous one in O(1), by removing the leading character and adding the new one. Expected time is O(n + m); worst case is O(n * m) when many hash collisions force full comparisons. On a hash match, verify the characters to rule out collisions. It extends naturally to searching for multiple patterns."
+        },
+        {
+          "ref": 4,
+          "text": "From fastest to slowest growth: O(1) constant, O(log n) logarithmic, O(n) linear, O(n log n) linearithmic, O(n^2) quadratic, O(2^n) exponential, O(n!) factorial. Doubling n doubles the work for O(n), quadruples it for O(n^2), and adds only one step for O(log n)."
+        }
+      ]
+    },
+    {
+      "q": "Which state management library is best for React?",
+      "kind": "oos",
+      "status": "insufficient_evidence",
+      "ms": 1684.935300028883,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null,
+      "raw_text": "",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "1. Define the state: what parameters identify a subproblem.\n2. Write the recurrence relating a state to smaller states.\n3. Set the base cases.\n4. Choose the evaluation order and the answer cell.\nComplexity is the number of states multiplied by the work per state."
+        },
+        {
+          "ref": 2,
+          "text": "Wrong or incomplete state definitions, missing base cases, and mistaking a problem that needs backtracking for one with overlapping subproblems."
+        },
+        {
+          "ref": 3,
+          "text": "AVL trees and red-black trees rotate nodes after insertions and deletions to keep height O(log n), guaranteeing O(log n) worst-case operations. Standard library ordered maps are typically red-black trees."
+        },
+        {
+          "ref": 4,
+          "text": "A greedy algorithm builds a solution by repeatedly making the locally best choice, without reconsidering earlier decisions. It is fast and simple, but only correct for problems with the greedy-choice property and optimal substructure."
+        }
+      ]
+    },
+    {
+      "q": "How does TCP congestion control work?",
+      "kind": "oos",
+      "status": "insufficient_evidence",
+      "ms": 2170.9798999945633,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null,
+      "raw_text": "",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Each call pushes a frame holding its parameters and local variables onto the call stack. When a call returns, its frame is popped. The maximum depth of the stack determines the space cost: recursion depth d uses O(d) stack space."
+        },
+        {
+          "ref": 2,
+          "text": "Breadth-first search, task scheduling, print spooling, buffering streaming data and level-order tree traversal. A sliding-window maximum uses a monotonic deque to achieve O(n)."
+        },
+        {
+          "ref": 3,
+          "text": "1. Define the state: what parameters identify a subproblem.\n2. Write the recurrence relating a state to smaller states.\n3. Set the base cases.\n4. Choose the evaluation order and the answer cell.\nComplexity is the number of states multiplied by the work per state."
+        },
+        {
+          "ref": 4,
+          "text": "A circular (ring) buffer keeps head and tail indices and wraps them with modulo arithmetic, giving O(1) enqueue and dequeue in fixed memory."
+        }
+      ]
+    },
+    {
+      "q": "How does the A* search algorithm choose its heuristic?",
+      "kind": "oos",
+      "status": "insufficient_evidence",
+      "ms": 2506.1237000045367,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null,
+      "raw_text": "",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "The algorithm relies on ordering: if the middle element is smaller than the target, everything to its left is also smaller, so the left half can be eliminated safely. Without sorting, that conclusion is invalid and the algorithm can miss the target."
+        },
+        {
+          "ref": 2,
+          "text": "Binary search finds a target in a sorted array by repeatedly comparing it with the middle element and discarding the half that cannot contain the target. Each step halves the search space, so it runs in O(log n) time instead of the O(n) of linear search."
+        },
+        {
+          "ref": 3,
+          "text": "Push the start vertex into a queue and mark it visited. While the queue is not empty, dequeue a vertex and enqueue each unvisited neighbour, marking it visited at the moment it is enqueued.\n\n```python\nfrom collections import deque\n\ndef bfs(graph, start):\n    dist = {start: 0}\n    q = deque([start])\n    while q:\n        u = q.popleft()\n        for v in graph[u]:\n            if v not in dist:\n                dist[v] = dist[u] + 1\n                q.append(v)\n    return dist\n```"
+        },
+        {
+          "ref": 4,
+          "text": "Lower bound finds the first index with a[i] >= target; upper bound finds the first index with a[i] > target. Binary search on the answer applies the same idea to a monotonic yes/no condition, for example finding the minimum capacity that works."
+        }
+      ]
+    },
+    {
+      "q": "Explain how a segment tree supports range minimum queries",
+      "kind": "oos",
+      "status": "insufficient_evidence",
+      "ms": 2637.3140000505373,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null,
+      "raw_text": "",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Kruskal's minimum spanning tree algorithm, counting connected components, detecting a cycle in an undirected graph (a union that returns false means the edge closes a cycle), and grouping equivalent items."
+        },
+        {
+          "ref": 2,
+          "text": "A binary search tree (BST) is a binary tree where, for every node, all keys in the left subtree are smaller and all keys in the right subtree are larger. This ordering lets you search by comparing with the current node and going left or right, like binary search."
+        },
+        {
+          "ref": 3,
+          "text": "A complete tree fills every level except possibly the last, which fills left to right; heaps are complete trees. A perfect tree has all levels full and 2^h - 1 nodes for h levels. A balanced tree keeps height near log n. A degenerate (skewed) tree behaves like a linked list with height n."
+        },
+        {
+          "ref": 4,
+          "text": "Depth-first traversals visit nodes recursively: preorder is node, left, right; inorder is left, node, right; postorder is left, right, node. Level-order (breadth-first) visits nodes row by row using a queue. All traversals take O(n) time. Recursive depth-first traversal uses O(h) stack space where h is the height.\n\n```python\ndef inorder(node):\n    if not node:\n        return []\n    return inorder(node.left) + [node.val] + inorder(node.right)\n\ndef height(node):\n    return 0 if not node else 1 + max(height(node.left), height(node.right))\n```"
+        }
+      ]
+    },
+    {
+      "q": "Write a haiku about autumn",
+      "kind": "oos",
+      "status": "insufficient_evidence",
+      "ms": 1921.3659000233747,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null,
+      "raw_text": "",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Write the natural recursion and cache results. Naive Fibonacci is O(2^n); with a cache it is O(n).\n\n```python\nfrom functools import lru_cache\n\n@lru_cache(None)\ndef fib(n):\n    return n if n < 2 else fib(n - 1) + fib(n - 2)\n```"
+        },
+        {
+          "ref": 2,
+          "text": "An array stores elements in contiguous memory. Because the address of element i is base + i * element_size, reading or writing any index is O(1). This random access is the defining strength of arrays."
+        },
+        {
+          "ref": 3,
+          "text": "From fastest to slowest growth: O(1) constant, O(log n) logarithmic, O(n) linear, O(n log n) linearithmic, O(n^2) quadratic, O(2^n) exponential, O(n!) factorial. Doubling n doubles the work for O(n), quadruples it for O(n^2), and adds only one step for O(log n)."
+        },
+        {
+          "ref": 4,
+          "text": "Computing mid as (lo + hi) / 2 can overflow in fixed-width integers, so use lo + (hi - lo) / 2. Wrong loop conditions (lo < hi versus lo <= hi) and not shrinking the range (lo = mid instead of mid + 1) cause off-by-one errors and infinite loops. Binary search requires random access, so it is not efficient on a linked list."
+        }
+      ]
+    },
+    {
+      "q": "How do Fenwick trees compute prefix sums with updates?",
+      "kind": "oos",
+      "status": "insufficient_evidence",
+      "ms": 2824.652800045442,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null,
+      "raw_text": "",
+      "evidence": [
+        {
+          "ref": 1,
+          "text": "Two-dimensional prefix sums answer rectangle-sum queries in O(1). A difference array is the inverse idea: it applies range updates in O(1) each and is reconstructed with a prefix sum."
+        },
+        {
+          "ref": 2,
+          "text": "Keep a hash map from prefix-sum value to how many times it has occurred. At each position, the number of subarrays ending here with sum k equals the count of earlier prefix sums equal to current_prefix - k. This runs in O(n) and handles negative numbers, unlike a sliding window."
+        },
+        {
+          "ref": 3,
+          "text": "A prefix sum array stores running totals: prefix[i] is the sum of the first i elements. After an O(n) preprocessing pass, the sum of any range [l, r) is prefix[r] - prefix[l], answered in O(1)."
+        },
+        {
+          "ref": 4,
+          "text": "Insert, search and prefix check each take O(L), where L is the length of the string, independent of how many words are stored. A hash set also gives O(L) lookups (hashing the string) but cannot answer prefix queries efficiently; a trie can.\n\n```python\nclass Trie:\n    def __init__(self):\n        self.root = {}\n\n    def insert(self, word):\n        node = self.root\n        for ch in word:\n            node = node.setdefault(ch, {})\n        node['$'] = True\n\n    def starts_with(self, prefix):\n        node = self.root\n        for ch in prefix:\n            if ch not in node:\n                return False\n            node = node[ch]\n        return True\n```"
+        }
+      ]
+    }
+  ]
+}

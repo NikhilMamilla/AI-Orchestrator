@@ -1,0 +1,878 @@
+{
+  "summary": {
+    "n_scoped": 40,
+    "n_oos": 10,
+    "judged_raw": 38,
+    "judged_shipped": 8,
+    "answer_rate": 0.2,
+    "oos_refusal_rate": 1.0,
+    "faithfulness_raw": 0.9728,
+    "faithfulness_shipped": 0.9375,
+    "unfaithful_answer_rate_raw": 0.1053,
+    "unfaithful_answer_rate_shipped": 0.125,
+    "verifier_recall_on_unfaithful": 1.0,
+    "relevance_mean_1to5": 4.9474,
+    "citation_accuracy": 0.9375,
+    "latency_ms_p50": 11100.0,
+    "tokens_mean": 639.0,
+    "verifier": "nli+lexical"
+  },
+  "rows": [
+    {
+      "q": "What is the time complexity of binary search?",
+      "kind": "direct",
+      "status": "grounded",
+      "ms": 7287.8336000139825,
+      "tokens": 571,
+      "confidence": 0.484,
+      "flagged": 1,
+      "verifier": "nli+lexical",
+      "citation_acc": 1.0,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 2
+      },
+      "shipped": {
+        "faithfulness": 0.5,
+        "all_supported": false,
+        "relevance": 5.0,
+        "claims": 4
+      }
+    },
+    {
+      "q": "Why does binary search require a sorted array?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 13900.663000007626,
+      "tokens": 551,
+      "confidence": 0.0,
+      "flagged": 4,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": null
+    },
+    {
+      "q": "How do I avoid integer overflow when computing the midpoint?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 7016.997700033244,
+      "tokens": 608,
+      "confidence": 0.0,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 2
+      },
+      "shipped": null
+    },
+    {
+      "q": "How does Floyd's tortoise and hare detect a cycle?",
+      "kind": "direct",
+      "status": "grounded",
+      "ms": 12153.110800019931,
+      "tokens": 616,
+      "confidence": 0.603,
+      "flagged": 1,
+      "verifier": "nli+lexical",
+      "citation_acc": 1.0,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      },
+      "shipped": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      }
+    },
+    {
+      "q": "How do I reverse a linked list in place?",
+      "kind": "direct",
+      "status": "grounded",
+      "ms": 21347.847099998035,
+      "tokens": 642,
+      "confidence": 0.528,
+      "flagged": 3,
+      "verifier": "nli+lexical",
+      "citation_acc": 1.0,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 9
+      },
+      "shipped": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 9
+      }
+    },
+    {
+      "q": "Why is inserting at the front of an array slow?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 13192.073599959258,
+      "tokens": 701,
+      "confidence": 0.0,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 2
+      },
+      "shipped": null
+    },
+    {
+      "q": "How do hash tables handle collisions?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 12333.696900052018,
+      "tokens": 641,
+      "confidence": 0.0,
+      "flagged": 4,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 0.8,
+        "all_supported": false,
+        "relevance": 5.0,
+        "claims": 5
+      },
+      "shipped": null
+    },
+    {
+      "q": "Why is appending to a dynamic array O(1) amortized?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 15440.880500013009,
+      "tokens": 667,
+      "confidence": 0.0,
+      "flagged": 4,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 7
+      },
+      "shipped": null
+    },
+    {
+      "q": "Find two numbers that add up to a target in O(n)",
+      "kind": "paraphrase",
+      "status": "insufficient_evidence",
+      "ms": 3039.7553999791853,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null
+    },
+    {
+      "q": "What is the load factor of a hash table?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 8240.420199988876,
+      "tokens": 536,
+      "confidence": 0.0,
+      "flagged": 3,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      },
+      "shipped": null
+    },
+    {
+      "q": "How do I check balanced brackets with a stack?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 20822.406900057103,
+      "tokens": 669,
+      "confidence": 0.0,
+      "flagged": 5,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 6
+      },
+      "shipped": null
+    },
+    {
+      "q": "Why does a monotonic stack solve next greater element in linear time?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 16396.070100017823,
+      "tokens": 671,
+      "confidence": 0.0,
+      "flagged": 3,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 5
+      },
+      "shipped": null
+    },
+    {
+      "q": "What is a circular buffer?",
+      "kind": "direct",
+      "status": "grounded",
+      "ms": 8985.451899992768,
+      "tokens": 499,
+      "confidence": 0.556,
+      "flagged": 1,
+      "verifier": "nli+lexical",
+      "citation_acc": 1.0,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      },
+      "shipped": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      }
+    },
+    {
+      "q": "Why shouldn't I use list.pop(0) as a queue in Python?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 12258.867700002156,
+      "tokens": 650,
+      "confidence": 0.0,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      },
+      "shipped": null
+    },
+    {
+      "q": "What causes a stack overflow in recursion?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 6635.010999976657,
+      "tokens": 606,
+      "confidence": 0.0,
+      "flagged": 3,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      },
+      "shipped": null
+    },
+    {
+      "q": "Why is naive fibonacci exponential time?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 7742.47270001797,
+      "tokens": 703,
+      "confidence": 0.0,
+      "flagged": 3,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": null
+    },
+    {
+      "q": "What is the difference between worst case and amortized cost?",
+      "kind": "direct",
+      "status": "grounded",
+      "ms": 8955.851599981543,
+      "tokens": 597,
+      "confidence": 0.642,
+      "flagged": 1,
+      "verifier": "nli+lexical",
+      "citation_acc": 0.5,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      }
+    },
+    {
+      "q": "What does Big-O notation describe?",
+      "kind": "direct",
+      "status": "grounded",
+      "ms": 12093.112800037488,
+      "tokens": 664,
+      "confidence": 0.561,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": 1.0,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      }
+    },
+    {
+      "q": "When does quick sort degrade to O(n^2)?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 11653.304999985266,
+      "tokens": 632,
+      "confidence": 0.0,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 2
+      },
+      "shipped": null
+    },
+    {
+      "q": "Is merge sort stable and how much extra memory does it use?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 13208.322199992836,
+      "tokens": 623,
+      "confidence": 0.0,
+      "flagged": 3,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      },
+      "shipped": null
+    },
+    {
+      "q": "Which sorting algorithm is best for nearly sorted data?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 11214.55919998698,
+      "tokens": 533,
+      "confidence": 0.0,
+      "flagged": 3,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 0.8333333333333334,
+        "all_supported": false,
+        "relevance": 3.0,
+        "claims": 6
+      },
+      "shipped": null
+    },
+    {
+      "q": "What does an inorder traversal of a BST give?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 12754.435999959242,
+      "tokens": 620,
+      "confidence": 0.0,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      },
+      "shipped": null
+    },
+    {
+      "q": "How do you delete a node with two children from a BST?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 12426.543199981097,
+      "tokens": 561,
+      "confidence": 0.0,
+      "flagged": 3,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": null
+    },
+    {
+      "q": "Why can a binary search tree become O(n)?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 9861.17510002805,
+      "tokens": 646,
+      "confidence": 0.0,
+      "flagged": 3,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": null
+    },
+    {
+      "q": "What is a complete binary tree?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 6299.409799976274,
+      "tokens": 542,
+      "confidence": 0.0,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 0.6666666666666666,
+        "all_supported": false,
+        "relevance": 5.0,
+        "claims": 3
+      },
+      "shipped": null
+    },
+    {
+      "q": "What is the difference between preorder, inorder and postorder?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 14477.818199957255,
+      "tokens": 665,
+      "confidence": 0.0,
+      "flagged": 4,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": null
+    },
+    {
+      "q": "How are heap parent and child indices computed in an array?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 7253.383099974599,
+      "tokens": 610,
+      "confidence": 0.0,
+      "flagged": 4,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": null
+    },
+    {
+      "q": "What is the complexity of building a heap with heapify?",
+      "kind": "direct",
+      "status": "grounded",
+      "ms": 10634.91189997876,
+      "tokens": 693,
+      "confidence": 0.451,
+      "flagged": 1,
+      "verifier": "nli+lexical",
+      "citation_acc": 1.0,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      },
+      "shipped": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      }
+    },
+    {
+      "q": "How do I get the top k largest elements efficiently?",
+      "kind": "paraphrase",
+      "status": "insufficient_evidence",
+      "ms": 12833.194099948741,
+      "tokens": 600,
+      "confidence": 0.0,
+      "flagged": 5,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 5
+      },
+      "shipped": null
+    },
+    {
+      "q": "How does BFS find shortest paths in an unweighted graph?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 7866.5990000008605,
+      "tokens": 615,
+      "confidence": 0.0,
+      "flagged": 3,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": null
+    },
+    {
+      "q": "Adjacency list versus adjacency matrix: space usage?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 15443.436499976087,
+      "tokens": 643,
+      "confidence": 0.0,
+      "flagged": 4,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": null
+    },
+    {
+      "q": "Should I mark nodes visited when enqueuing or dequeuing in BFS?",
+      "kind": "direct",
+      "status": "grounded",
+      "ms": 13556.6638999735,
+      "tokens": 637,
+      "confidence": 0.396,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": 1.0,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      }
+    },
+    {
+      "q": "How do I detect a cycle in a directed graph with DFS?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 16706.59339998383,
+      "tokens": 674,
+      "confidence": 0.0,
+      "flagged": 5,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 0.6666666666666666,
+        "all_supported": false,
+        "relevance": 5.0,
+        "claims": 6
+      },
+      "shipped": null
+    },
+    {
+      "q": "Why does Dijkstra fail with negative edge weights?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 12026.007899956312,
+      "tokens": 607,
+      "confidence": 0.0,
+      "flagged": 4,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 3
+      },
+      "shipped": null
+    },
+    {
+      "q": "What is the time complexity of Dijkstra with a binary heap?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 10986.127600015607,
+      "tokens": 641,
+      "confidence": 0.0,
+      "flagged": 2,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 2
+      },
+      "shipped": null
+    },
+    {
+      "q": "How does Kahn's algorithm use in-degree?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 22097.00199996587,
+      "tokens": 893,
+      "confidence": 0.0,
+      "flagged": 3,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 5
+      },
+      "shipped": null
+    },
+    {
+      "q": "How can I tell a cycle exists using topological sorting?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 15902.82489999663,
+      "tokens": 689,
+      "confidence": 0.0,
+      "flagged": 3,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 5
+      },
+      "shipped": null
+    },
+    {
+      "q": "What is the inverse Ackermann function doing in union-find complexity?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 20431.345299992245,
+      "tokens": 789,
+      "confidence": 0.0,
+      "flagged": 4,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 4
+      },
+      "shipped": null
+    },
+    {
+      "q": "Memoization versus tabulation: what is the difference?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 1935.2162000141107,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null
+    },
+    {
+      "q": "What are path compression and union by rank?",
+      "kind": "direct",
+      "status": "insufficient_evidence",
+      "ms": 22135.66509995144,
+      "tokens": 779,
+      "confidence": 0.0,
+      "flagged": 4,
+      "verifier": "nli+lexical",
+      "citation_acc": null,
+      "raw": {
+        "faithfulness": 1.0,
+        "all_supported": true,
+        "relevance": 5.0,
+        "claims": 5
+      },
+      "shipped": null
+    },
+    {
+      "q": "Who won the 2018 football world cup?",
+      "kind": "oos",
+      "status": "insufficient_evidence",
+      "ms": 2564.9841999984346,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null
+    },
+    {
+      "q": "How do I bake sourdough bread?",
+      "kind": "oos",
+      "status": "insufficient_evidence",
+      "ms": 3132.1280999691226,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null
+    },
+    {
+      "q": "Explain quantum entanglement",
+      "kind": "oos",
+      "status": "insufficient_evidence",
+      "ms": 3586.172399984207,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null
+    },
+    {
+      "q": "What is the capital of Australia?",
+      "kind": "oos",
+      "status": "insufficient_evidence",
+      "ms": 4114.401299972087,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null
+    },
+    {
+      "q": "Which state management library is best for React?",
+      "kind": "oos",
+      "status": "insufficient_evidence",
+      "ms": 1627.2423000191338,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null
+    },
+    {
+      "q": "How does TCP congestion control work?",
+      "kind": "oos",
+      "status": "insufficient_evidence",
+      "ms": 2227.9911000514403,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null
+    },
+    {
+      "q": "How does the A* search algorithm choose its heuristic?",
+      "kind": "oos",
+      "status": "insufficient_evidence",
+      "ms": 3212.426799989771,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null
+    },
+    {
+      "q": "Explain how a segment tree supports range minimum queries",
+      "kind": "oos",
+      "status": "insufficient_evidence",
+      "ms": 3568.629499990493,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null
+    },
+    {
+      "q": "How do Fenwick trees compute prefix sums with updates?",
+      "kind": "oos",
+      "status": "insufficient_evidence",
+      "ms": 3258.9049999951385,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null
+    },
+    {
+      "q": "Write a haiku about autumn",
+      "kind": "oos",
+      "status": "insufficient_evidence",
+      "ms": 2020.811899972614,
+      "tokens": 0,
+      "confidence": 0.0,
+      "flagged": 0,
+      "verifier": null,
+      "citation_acc": null
+    }
+  ]
+}

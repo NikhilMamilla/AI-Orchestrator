@@ -1,0 +1,324 @@
+{
+ "model": "pixtral-12b-2409",
+ "n": 32,
+ "read_failures": 1,
+ "extraction_exact": [
+  0.581,
+  31
+ ],
+ "neuro_symbolic_accuracy": [
+  0.742,
+  31
+ ],
+ "direct_vlm_accuracy": [
+  0.5,
+  32
+ ],
+ "neuro_symbolic_detects_invalid": [
+  1.0,
+  16
+ ],
+ "direct_detects_invalid": [
+  0.375,
+  16
+ ],
+ "neuro_symbolic_false_alarm_on_valid": [
+  0.533,
+  15
+ ],
+ "direct_false_alarm_on_valid": [
+  0.375,
+  16
+ ],
+ "rows": [
+  {
+   "i": 0,
+   "kind": "bst",
+   "truth_valid": true,
+   "read_ok": true,
+   "extract_exact": false,
+   "pred_valid": false,
+   "direct_valid": true
+  },
+  {
+   "i": 1,
+   "kind": "min-heap",
+   "truth_valid": true,
+   "read_ok": true,
+   "extract_exact": true,
+   "pred_valid": true,
+   "direct_valid": true
+  },
+  {
+   "i": 2,
+   "kind": "bst",
+   "truth_valid": false,
+   "read_ok": true,
+   "extract_exact": false,
+   "pred_valid": false,
+   "direct_valid": true
+  },
+  {
+   "i": 3,
+   "kind": "min-heap",
+   "truth_valid": false,
+   "read_ok": true,
+   "extract_exact": false,
+   "pred_valid": false,
+   "direct_valid": true
+  },
+  {
+   "i": 4,
+   "kind": "bst",
+   "truth_valid": true,
+   "read_ok": true,
+   "extract_exact": false,
+   "pred_valid": false,
+   "direct_valid": false
+  },
+  {
+   "i": 5,
+   "kind": "min-heap",
+   "truth_valid": true,
+   "read_ok": true,
+   "extract_exact": true,
+   "pred_valid": false,
+   "direct_valid": false
+  },
+  {
+   "i": 6,
+   "kind": "bst",
+   "truth_valid": false,
+   "read_ok": true,
+   "extract_exact": true,
+   "pred_valid": false,
+   "direct_valid": false
+  },
+  {
+   "i": 7,
+   "kind": "min-heap",
+   "truth_valid": false,
+   "read_ok": true,
+   "extract_exact": false,
+   "pred_valid": false,
+   "direct_valid": true
+  },
+  {
+   "i": 8,
+   "kind": "bst",
+   "truth_valid": true,
+   "read_ok": true,
+   "extract_exact": true,
+   "pred_valid": true,
+   "direct_valid": true
+  },
+  {
+   "i": 9,
+   "kind": "min-heap",
+   "truth_valid": true,
+   "read_ok": true,
+   "extract_exact": true,
+   "pred_valid": false,
+   "direct_valid": true
+  },
+  {
+   "i": 10,
+   "kind": "bst",
+   "truth_valid": false,
+   "read_ok": true,
+   "extract_exact": true,
+   "pred_valid": false,
+   "direct_valid": false
+  },
+  {
+   "i": 11,
+   "kind": "min-heap",
+   "truth_valid": false,
+   "read_ok": true,
+   "extract_exact": true,
+   "pred_valid": false,
+   "direct_valid": false
+  },
+  {
+   "i": 12,
+   "kind": "bst",
+   "truth_valid": true,
+   "read_ok": true,
+   "extract_exact": false,
+   "pred_valid": false,
+   "direct_valid": false
+  },
+  {
+   "i": 13,
+   "kind": "min-heap",
+   "truth_valid": true,
+   "read_ok": true,
+   "extract_exact": true,
+   "pred_valid": true,
+   "direct_valid": true
+  },
+  {
+   "i": 14,
+   "kind": "bst",
+   "truth_valid": false,
+   "read_ok": true,
+   "extract_exact": false,
+   "pred_valid": false,
+   "direct_valid": false
+  },
+  {
+   "i": 15,
+   "kind": "min-heap",
+   "truth_valid": false,
+   "read_ok": true,
+   "extract_exact": true,
+   "pred_valid": false,
+   "direct_valid": true
+  },
+  {
+   "i": 16,
+   "kind": "bst",
+   "truth_valid": true,
+   "read_ok": true,
+   "extract_exact": false,
+   "pred_valid": true,
+   "direct_valid": true
+  },
+  {
+   "i": 17,
+   "kind": "min-heap",
+   "truth_valid": true,
+   "read_ok": false,
+   "extract_exact": null,
+   "pred_valid": null,
+   "direct_valid": true,
+   "error": "The drawing could not be read."
+  },
+  {
+   "i": 18,
+   "kind": "bst",
+   "truth_valid": false,
+   "read_ok": true,
+   "extract_exact": false,
+   "pred_valid": false,
+   "direct_valid": true
+  },
+  {
+   "i": 19,
+   "kind": "min-heap",
+   "truth_valid": false,
+   "read_ok": true,
+   "extract_exact": true,
+   "pred_valid": false,
+   "direct_valid": true
+  },
+  {
+   "i": 20,
+   "kind": "bst",
+   "truth_valid": true,
+   "read_ok": true,
+   "extract_exact": true,
+   "pred_valid": true,
+   "direct_valid": true
+  },
+  {
+   "i": 21,
+   "kind": "min-heap",
+   "truth_valid": true,
+   "read_ok": true,
+   "extract_exact": true,
+   "pred_valid": false,
+   "direct_valid": true
+  },
+  {
+   "i": 22,
+   "kind": "bst",
+   "truth_valid": false,
+   "read_ok": true,
+   "extract_exact": true,
+   "pred_valid": false,
+   "direct_valid": true
+  },
+  {
+   "i": 23,
+   "kind": "min-heap",
+   "truth_valid": false,
+   "read_ok": true,
+   "extract_exact": false,
+   "pred_valid": false,
+   "direct_valid": true
+  },
+  {
+   "i": 24,
+   "kind": "bst",
+   "truth_valid": true,
+   "read_ok": true,
+   "extract_exact": true,
+   "pred_valid": true,
+   "direct_valid": false
+  },
+  {
+   "i": 25,
+   "kind": "min-heap",
+   "truth_valid": true,
+   "read_ok": true,
+   "extract_exact": true,
+   "pred_valid": true,
+   "direct_valid": true
+  },
+  {
+   "i": 26,
+   "kind": "bst",
+   "truth_valid": false,
+   "read_ok": true,
+   "extract_exact": false,
+   "pred_valid": false,
+   "direct_valid": true
+  },
+  {
+   "i": 27,
+   "kind": "min-heap",
+   "truth_valid": false,
+   "read_ok": true,
+   "extract_exact": false,
+   "pred_valid": false,
+   "direct_valid": false
+  },
+  {
+   "i": 28,
+   "kind": "bst",
+   "truth_valid": true,
+   "read_ok": true,
+   "extract_exact": false,
+   "pred_valid": false,
+   "direct_valid": false
+  },
+  {
+   "i": 29,
+   "kind": "min-heap",
+   "truth_valid": true,
+   "read_ok": true,
+   "extract_exact": true,
+   "pred_valid": false,
+   "direct_valid": false
+  },
+  {
+   "i": 30,
+   "kind": "bst",
+   "truth_valid": false,
+   "read_ok": true,
+   "extract_exact": true,
+   "pred_valid": false,
+   "direct_valid": false
+  },
+  {
+   "i": 31,
+   "kind": "min-heap",
+   "truth_valid": false,
+   "read_ok": true,
+   "extract_exact": true,
+   "pred_valid": false,
+   "direct_valid": true
+  }
+ ]
+}

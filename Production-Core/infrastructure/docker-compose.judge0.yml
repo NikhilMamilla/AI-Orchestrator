@@ -1,0 +1,114 @@
+version: '3.8'
+
+# Judge0 CE — Self-Hosted Code Execution Engine
+# Usage (from Production-Core/infrastructure): docker compose -f docker-compose.judge0.yml up -d
+# API: http://localhost:2358
+
+services:
+  judge0-server:
+    image: judge0/judge0:1.13.1
+    container_name: kiddoo-judge0-server
+    ports:
+      - "2358:2358"
+    environment:
+      POSTGRES_HOST: judge0-db
+      POSTGRES_DB: judge0
+      POSTGRES_USER: judge0
+      POSTGRES_PASSWORD: judge0password
+      REDIS_HOST: judge0-redis
+      REDIS_PORT: 6379
+      # Execution Limits
+      CPU_TIME_LIMIT: 5
+      CPU_EXTRA_TIME: 1
+      WALL_TIME_LIMIT: 10
+      MEMORY_LIMIT: 128000
+      STACK_LIMIT: 64000
+      MAX_PROCESSES_AND_OR_THREADS: 60
+      ENABLE_WAIT_RESULT: "true"
+      ENABLE_BATCHED_SUBMISSIONS: "true"
+      # Disable auth for local dev
+      AUTHN_HEADER: ""
+      AUTHN_TOKEN: ""
+      AUTHZ_HEADER: ""
+      AUTHZ_TOKEN: ""
+    depends_on:
+      judge0-db:
+        condition: service_healthy
+      judge0-redis:
+        condition: service_healthy
+    restart: unless-stopped
+    privileged: true
+    networks:
+      - judge0-network
+
+  judge0-workers:
+    image: judge0/judge0:1.13.1
+    container_name: kiddoo-judge0-workers
+    command: ["./scripts/workers"]
+    environment:
+      POSTGRES_HOST: judge0-db
+      POSTGRES_DB: judge0
+      POSTGRES_USER: judge0
+      POSTGRES_PASSWORD: judge0password
+      REDIS_HOST: judge0-redis
+      REDIS_PORT: 6379
+      CPU_TIME_LIMIT: 5
+      CPU_EXTRA_TIME: 1
+      WALL_TIME_LIMIT: 10
+      MEMORY_LIMIT: 128000
+      STACK_LIMIT: 64000
+      MAX_PROCESSES_AND_OR_THREADS: 60
+      ENABLE_WAIT_RESULT: "true"
+      ENABLE_BATCHED_SUBMISSIONS: "true"
+      AUTHN_HEADER: ""
+      AUTHN_TOKEN: ""
+      AUTHZ_HEADER: ""
+      AUTHZ_TOKEN: ""
+    depends_on:
+      judge0-db:
+        condition: service_healthy
+      judge0-redis:
+        condition: service_healthy
+    restart: unless-stopped
+    privileged: true
+    networks:
+      - judge0-network
+
+  judge0-db:
+    image: postgres:16-alpine
+    container_name: kiddoo-judge0-db
+    environment:
+      POSTGRES_DB: judge0
+      POSTGRES_USER: judge0
+      POSTGRES_PASSWORD: judge0password
+    volumes:
+      - judge0_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U judge0"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - judge0-network
+
+  judge0-redis:
+    image: redis:7-alpine
+    container_name: kiddoo-judge0-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - judge0_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - judge0-network
+
+volumes:
+  judge0_postgres_data:
+  judge0_redis_data:
+
+networks:
+  judge0-network:
+    driver: bridge

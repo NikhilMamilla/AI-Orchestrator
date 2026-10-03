@@ -1,0 +1,385 @@
+{
+ "docs": 26,
+ "summary": {
+  "good": {
+   "n": 13,
+   "graded": 13,
+   "mean_score": 0.587,
+   "mean_accuracy": 0.768,
+   "mean_coverage": 0.406,
+   "pass_rate": 0.769
+  },
+  "thin": {
+   "n": 13,
+   "graded": 12,
+   "mean_score": 0.536,
+   "mean_accuracy": 0.917,
+   "mean_coverage": 0.154,
+   "pass_rate": 0.692
+  },
+  "wrong": {
+   "n": 13,
+   "graded": 13,
+   "mean_score": 0.405,
+   "mean_accuracy": 0.619,
+   "mean_coverage": 0.192,
+   "pass_rate": 0.154
+  }
+ },
+ "auc_good_vs_wrong": 0.902,
+ "auc_good_vs_thin": 0.686,
+ "auc_thin_vs_wrong_accuracy": 0.949,
+ "rows": [
+  {
+   "doc": "arrays",
+   "kind": "good",
+   "graded": true,
+   "score": 0.58,
+   "accuracy": 0.8,
+   "coverage": 0.36,
+   "passed": true
+  },
+  {
+   "doc": "arrays",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.531,
+   "accuracy": 1.0,
+   "coverage": 0.061,
+   "passed": true
+  },
+  {
+   "doc": "arrays",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.386,
+   "accuracy": 0.5,
+   "coverage": 0.273,
+   "passed": false
+  },
+  {
+   "doc": "binary-search",
+   "kind": "good",
+   "graded": true,
+   "score": 0.535,
+   "accuracy": 0.8,
+   "coverage": 0.269,
+   "passed": true
+  },
+  {
+   "doc": "binary-search",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.517,
+   "accuracy": 1.0,
+   "coverage": 0.035,
+   "passed": true
+  },
+  {
+   "doc": "binary-search",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.26,
+   "accuracy": 0.5,
+   "coverage": 0.021,
+   "passed": false
+  },
+  {
+   "doc": "hash-table",
+   "kind": "good",
+   "graded": true,
+   "score": 0.472,
+   "accuracy": 0.6,
+   "coverage": 0.345,
+   "passed": false
+  },
+  {
+   "doc": "hash-table",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.517,
+   "accuracy": 1.0,
+   "coverage": 0.034,
+   "passed": true
+  },
+  {
+   "doc": "hash-table",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.517,
+   "accuracy": 0.75,
+   "coverage": 0.284,
+   "passed": true
+  },
+  {
+   "doc": "linked-list",
+   "kind": "good",
+   "graded": true,
+   "score": 0.603,
+   "accuracy": 0.8,
+   "coverage": 0.406,
+   "passed": true
+  },
+  {
+   "doc": "linked-list",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.435,
+   "accuracy": 0.75,
+   "coverage": 0.119,
+   "passed": false
+  },
+  {
+   "doc": "linked-list",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.452,
+   "accuracy": 0.8,
+   "coverage": 0.105,
+   "passed": false
+  },
+  {
+   "doc": "queue",
+   "kind": "good",
+   "graded": true,
+   "score": 0.688,
+   "accuracy": 0.75,
+   "coverage": 0.625,
+   "passed": true
+  },
+  {
+   "doc": "queue",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.601,
+   "accuracy": 1.0,
+   "coverage": 0.203,
+   "passed": true
+  },
+  {
+   "doc": "queue",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.372,
+   "accuracy": 0.643,
+   "coverage": 0.102,
+   "passed": false
+  },
+  {
+   "doc": "recursion",
+   "kind": "good",
+   "graded": true,
+   "score": 0.778,
+   "accuracy": 1.0,
+   "coverage": 0.556,
+   "passed": true
+  },
+  {
+   "doc": "recursion",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.758,
+   "accuracy": 1.0,
+   "coverage": 0.516,
+   "passed": true
+  },
+  {
+   "doc": "recursion",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.42,
+   "accuracy": 0.5,
+   "coverage": 0.34,
+   "passed": false
+  },
+  {
+   "doc": "stack",
+   "kind": "good",
+   "graded": true,
+   "score": 0.605,
+   "accuracy": 0.688,
+   "coverage": 0.523,
+   "passed": true
+  },
+  {
+   "doc": "stack",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.508,
+   "accuracy": 0.75,
+   "coverage": 0.266,
+   "passed": true
+  },
+  {
+   "doc": "stack",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.432,
+   "accuracy": 0.6,
+   "coverage": 0.265,
+   "passed": false
+  },
+  {
+   "doc": "big-o-complexity",
+   "kind": "good",
+   "graded": true,
+   "score": 0.565,
+   "accuracy": 0.75,
+   "coverage": 0.38,
+   "passed": true
+  },
+  {
+   "doc": "big-o-complexity",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.456,
+   "accuracy": 0.75,
+   "coverage": 0.162,
+   "passed": false
+  },
+  {
+   "doc": "big-o-complexity",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.358,
+   "accuracy": 0.5,
+   "coverage": 0.216,
+   "passed": false
+  },
+  {
+   "doc": "binary-search-tree",
+   "kind": "good",
+   "graded": true,
+   "score": 0.715,
+   "accuracy": 0.9,
+   "coverage": 0.53,
+   "passed": true
+  },
+  {
+   "doc": "binary-search-tree",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.532,
+   "accuracy": 1.0,
+   "coverage": 0.063,
+   "passed": true
+  },
+  {
+   "doc": "binary-search-tree",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.368,
+   "accuracy": 0.7,
+   "coverage": 0.037,
+   "passed": false
+  },
+  {
+   "doc": "bit-manipulation",
+   "kind": "good",
+   "graded": true,
+   "score": 0.362,
+   "accuracy": 0.6,
+   "coverage": 0.124,
+   "passed": false
+  },
+  {
+   "doc": "bit-manipulation",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.511,
+   "accuracy": 1.0,
+   "coverage": 0.022,
+   "passed": true
+  },
+  {
+   "doc": "bit-manipulation",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.41,
+   "accuracy": 0.75,
+   "coverage": 0.07,
+   "passed": false
+  },
+  {
+   "doc": "breadth-first-search",
+   "kind": "good",
+   "graded": true,
+   "score": 0.573,
+   "accuracy": 0.8,
+   "coverage": 0.346,
+   "passed": true
+  },
+  {
+   "doc": "breadth-first-search",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.639,
+   "accuracy": 1.0,
+   "coverage": 0.278,
+   "passed": true
+  },
+  {
+   "doc": "breadth-first-search",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.374,
+   "accuracy": 0.6,
+   "coverage": 0.148,
+   "passed": false
+  },
+  {
+   "doc": "depth-first-search",
+   "kind": "good",
+   "graded": true,
+   "score": 0.469,
+   "accuracy": 0.7,
+   "coverage": 0.238,
+   "passed": false
+  },
+  {
+   "doc": "depth-first-search",
+   "kind": "thin",
+   "graded": true,
+   "score": 0.422,
+   "accuracy": 0.75,
+   "coverage": 0.095,
+   "passed": false
+  },
+  {
+   "doc": "depth-first-search",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.342,
+   "accuracy": 0.6,
+   "coverage": 0.084,
+   "passed": false
+  },
+  {
+   "doc": "graph-basics",
+   "kind": "good",
+   "graded": true,
+   "score": 0.688,
+   "accuracy": 0.8,
+   "coverage": 0.576,
+   "passed": true
+  },
+  {
+   "doc": "graph-basics",
+   "kind": "thin",
+   "graded": false,
+   "score": null,
+   "accuracy": null,
+   "coverage": null,
+   "passed": false
+  },
+  {
+   "doc": "graph-basics",
+   "kind": "wrong",
+   "graded": true,
+   "score": 0.573,
+   "accuracy": 0.6,
+   "coverage": 0.545,
+   "passed": true
+  }
+ ]
+}

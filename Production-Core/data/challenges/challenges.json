@@ -1,0 +1,362 @@
+[
+ {
+  "id": "bs-off-by-one",
+  "concept": "binary-search",
+  "kind": "debug",
+  "title": "Fix the binary search",
+  "prompt": "This program reads a sorted list of integers on line 1 and a target on line 2, and prints the index of the target or -1. It sometimes misses elements that are in the list. Find and fix the bug.",
+  "starter": "a = list(map(int, input().split()))\nt = int(input())\nlo, hi = 0, len(a) - 1\nwhile lo < hi:\n    mid = (lo + hi) // 2\n    if a[mid] == t:\n        print(mid)\n        break\n    if a[mid] < t:\n        lo = mid + 1\n    else:\n        hi = mid - 1\nelse:\n    print(-1)\n",
+  "hint": "Check the loop condition: when lo equals hi there is still one candidate left to examine.",
+  "tests": [
+   {
+    "input": "1 3 5 7 9 11\n7\n",
+    "output": "3\n"
+   },
+   {
+    "input": "1 3 5 7 9 11\n1\n",
+    "output": "0\n"
+   },
+   {
+    "input": "1 3 5 7 9 11\n11\n",
+    "output": "5\n"
+   },
+   {
+    "input": "5\n5\n",
+    "output": "0\n"
+   },
+   {
+    "input": "1 3 5 7\n4\n",
+    "output": "-1\n"
+   },
+   {
+    "input": "2 4 6 8 10\n10\n",
+    "output": "4\n"
+   }
+  ],
+  "reference": "a = list(map(int, input().split()))\nt = int(input())\nlo, hi = 0, len(a) - 1\nwhile lo <= hi:\n    mid = (lo + hi) // 2\n    if a[mid] == t:\n        print(mid)\n        break\n    if a[mid] < t:\n        lo = mid + 1\n    else:\n        hi = mid - 1\nelse:\n    print(-1)\n"
+ },
+ {
+  "id": "rotate-array",
+  "concept": "arrays",
+  "kind": "write",
+  "title": "Rotate an array",
+  "prompt": "Read an array of integers on line 1 and k on line 2. Print the array rotated to the right by k positions (k can be larger than the length), space separated.",
+  "starter": "a = list(map(int, input().split()))\nk = int(input())\n# write your solution here\nprint(*a)\n",
+  "hint": "Rotating by k is the same as rotating by k modulo the length. Slicing the end and the start works.",
+  "tests": [
+   {
+    "input": "1 2 3 4 5\n2\n",
+    "output": "4 5 1 2 3\n"
+   },
+   {
+    "input": "1 2 3\n0\n",
+    "output": "1 2 3\n"
+   },
+   {
+    "input": "1 2 3\n3\n",
+    "output": "1 2 3\n"
+   },
+   {
+    "input": "1 2 3 4\n9\n",
+    "output": "4 1 2 3\n"
+   },
+   {
+    "input": "7\n100\n",
+    "output": "7\n"
+   }
+  ],
+  "reference": "a = list(map(int, input().split()))\nk = int(input()) % len(a)\nprint(*(a[-k:] + a[:-k] if k else a))\n"
+ },
+ {
+  "id": "balanced-brackets",
+  "concept": "stack",
+  "kind": "write",
+  "title": "Balanced brackets",
+  "prompt": "Read a string made of ()[]{} characters. Print YES if every bracket is closed in the correct order, otherwise NO. An empty line is balanced.",
+  "starter": "s = input()\n# write your solution here\nprint(\"YES\")\n",
+  "hint": "Push opening brackets; on a closing bracket the top of the stack must be its partner.",
+  "tests": [
+   {
+    "input": "()[]{}\n",
+    "output": "YES\n"
+   },
+   {
+    "input": "([{}])\n",
+    "output": "YES\n"
+   },
+   {
+    "input": "(]\n",
+    "output": "NO\n"
+   },
+   {
+    "input": "((\n",
+    "output": "NO\n"
+   },
+   {
+    "input": "\n",
+    "output": "YES\n"
+   },
+   {
+    "input": "{[}]\n",
+    "output": "NO\n"
+   },
+   {
+    "input": ")(\n",
+    "output": "NO\n"
+   }
+  ],
+  "reference": "s = input()\npairs = {\")\": \"(\", \"]\": \"[\", \"}\": \"{\"}\nst = []\nok = True\nfor ch in s:\n    if ch in \"([{\":\n        st.append(ch)\n    elif ch in pairs:\n        if not st or st.pop() != pairs[ch]:\n            ok = False\n            break\nprint(\"YES\" if ok and not st else \"NO\")\n"
+ },
+ {
+  "id": "two-sum-indices",
+  "concept": "hash-table",
+  "kind": "write",
+  "title": "Two sum",
+  "prompt": "Read an array on line 1 and a target on line 2. Print the two indices i and j (i < j) of the first pair that sums to the target, scanning j from left to right, or -1 if none exists. Aim for a single pass.",
+  "starter": "a = list(map(int, input().split()))\nt = int(input())\n# write your solution here\nprint(-1)\n",
+  "hint": "Store each value's index in a dictionary; for each new value look up target minus value.",
+  "tests": [
+   {
+    "input": "2 7 11 15\n9\n",
+    "output": "0 1\n"
+   },
+   {
+    "input": "3 2 4\n6\n",
+    "output": "1 2\n"
+   },
+   {
+    "input": "1 2 3\n7\n",
+    "output": "-1\n"
+   },
+   {
+    "input": "3 3\n6\n",
+    "output": "0 1\n"
+   },
+   {
+    "input": "5 1 4 2 3\n6\n",
+    "output": "0 1\n"
+   }
+  ],
+  "reference": "a = list(map(int, input().split()))\nt = int(input())\nseen = {}\nfor j, v in enumerate(a):\n    if t - v in seen:\n        print(seen[t - v], j)\n        break\n    seen[v] = j\nelse:\n    print(-1)\n"
+ },
+ {
+  "id": "reverse-linked-list",
+  "concept": "linked-list",
+  "kind": "debug",
+  "title": "Fix the list reversal",
+  "prompt": "The program builds a singly linked list from line 1, reverses it in place and prints it. The output is wrong for lists with more than one element. Fix the reversal.",
+  "starter": "class Node:\n    def __init__(self, v):\n        self.v, self.next = v, None\n\nvals = list(map(int, input().split()))\nhead = None\nfor v in reversed(vals):\n    n = Node(v)\n    n.next = head\n    head = n\n\nprev, cur = None, head\nwhile cur:\n    cur.next = prev\n    prev = cur\n    cur = cur.next\nhead = prev\n\nout = []\nwhile head:\n    out.append(head.v)\n    head = head.next\nprint(*out)\n",
+  "hint": "After you overwrite cur.next you have lost the rest of the list: save it first.",
+  "tests": [
+   {
+    "input": "1 2 3 4\n",
+    "output": "4 3 2 1\n"
+   },
+   {
+    "input": "1\n",
+    "output": "1\n"
+   },
+   {
+    "input": "5 4\n",
+    "output": "4 5\n"
+   },
+   {
+    "input": "9 8 7 6 5 4\n",
+    "output": "4 5 6 7 8 9\n"
+   }
+  ],
+  "reference": "class Node:\n    def __init__(self, v):\n        self.v, self.next = v, None\n\nvals = list(map(int, input().split()))\nhead = None\nfor v in reversed(vals):\n    n = Node(v)\n    n.next = head\n    head = n\n\nprev, cur = None, head\nwhile cur:\n    nxt = cur.next\n    cur.next = prev\n    prev = cur\n    cur = nxt\nhead = prev\n\nout = []\nwhile head:\n    out.append(head.v)\n    head = head.next\nprint(*out)\n"
+ },
+ {
+  "id": "longest-unique-substring",
+  "concept": "two-pointers-sliding-window",
+  "kind": "write",
+  "title": "Longest substring without repeats",
+  "prompt": "Read a string. Print the length of its longest substring with no repeated character.",
+  "starter": "s = input()\n# write your solution here\nprint(0)\n",
+  "hint": "Keep a window [start, i] with no repeats; when ch repeats inside the window, move start past its last position.",
+  "tests": [
+   {
+    "input": "abcabcbb\n",
+    "output": "3\n"
+   },
+   {
+    "input": "bbbbb\n",
+    "output": "1\n"
+   },
+   {
+    "input": "pwwkew\n",
+    "output": "3\n"
+   },
+   {
+    "input": "\n",
+    "output": "0\n"
+   },
+   {
+    "input": "abcdef\n",
+    "output": "6\n"
+   },
+   {
+    "input": "dvdf\n",
+    "output": "3\n"
+   }
+  ],
+  "reference": "s = input()\nlast, start, best = {}, 0, 0\nfor i, ch in enumerate(s):\n    if ch in last and last[ch] >= start:\n        start = last[ch] + 1\n    last[ch] = i\n    best = max(best, i - start + 1)\nprint(best)\n"
+ },
+ {
+  "id": "digit-sum-recursion",
+  "concept": "recursion",
+  "kind": "debug",
+  "title": "Fix the recursion",
+  "prompt": "This should print the sum of the digits of a non-negative integer using recursion, but it crashes with a RecursionError. Fix it.",
+  "starter": "def digit_sum(n):\n    return n % 10 + digit_sum(n // 10)\n\nprint(digit_sum(int(input())))\n",
+  "hint": "Every recursion needs a base case that stops it. What is the digit sum of 0?",
+  "tests": [
+   {
+    "input": "123\n",
+    "output": "6\n"
+   },
+   {
+    "input": "0\n",
+    "output": "0\n"
+   },
+   {
+    "input": "9\n",
+    "output": "9\n"
+   },
+   {
+    "input": "99999\n",
+    "output": "45\n"
+   },
+   {
+    "input": "1000000\n",
+    "output": "1\n"
+   }
+  ],
+  "reference": "def digit_sum(n):\n    if n == 0:\n        return 0\n    return n % 10 + digit_sum(n // 10)\n\nprint(digit_sum(int(input())))\n"
+ },
+ {
+  "id": "range-sum",
+  "concept": "prefix-sum",
+  "kind": "write",
+  "title": "Range sum queries",
+  "prompt": "Line 1 has the array. Line 2 has q. The next q lines each have l r (0-indexed, inclusive). Print the sum of a[l..r] for each query on its own line. Use a prefix-sum array so each query is O(1).",
+  "starter": "a = list(map(int, input().split()))\nq = int(input())\nfor _ in range(q):\n    l, r = map(int, input().split())\n    # answer the query here\n    print(0)\n",
+  "hint": "pre[i] = sum of the first i values, so a[l..r] = pre[r+1] - pre[l].",
+  "tests": [
+   {
+    "input": "1 2 3 4 5\n3\n0 4\n1 3\n2 2\n",
+    "output": "15\n9\n3\n"
+   },
+   {
+    "input": "5\n1\n0 0\n",
+    "output": "5\n"
+   },
+   {
+    "input": "-1 4 -2 7\n2\n0 3\n1 2\n",
+    "output": "8\n2\n"
+   },
+   {
+    "input": "10 20 30\n3\n0 0\n0 2\n1 2\n",
+    "output": "10\n60\n50\n"
+   }
+  ],
+  "reference": "a = list(map(int, input().split()))\npre = [0]\nfor v in a:\n    pre.append(pre[-1] + v)\nq = int(input())\nfor _ in range(q):\n    l, r = map(int, input().split())\n    print(pre[r + 1] - pre[l])\n"
+ },
+ {
+  "id": "bubble-sort-bug",
+  "concept": "sorting-algorithms",
+  "kind": "debug",
+  "title": "Fix the bubble sort",
+  "prompt": "The program should print the numbers in ascending order using bubble sort, but some inputs come out unsorted. Fix the bug.",
+  "starter": "a = list(map(int, input().split()))\nn = len(a)\nfor i in range(n - 1):\n    for j in range(n - 2 - i):\n        if a[j] > a[j + 1]:\n            a[j], a[j + 1] = a[j + 1], a[j]\nprint(*a)\n",
+  "hint": "On pass i the inner loop must still compare every adjacent pair that is not yet in its final place.",
+  "tests": [
+   {
+    "input": "5 2 9 1 7\n",
+    "output": "1 2 5 7 9\n"
+   },
+   {
+    "input": "1 2 3\n",
+    "output": "1 2 3\n"
+   },
+   {
+    "input": "3 2 1\n",
+    "output": "1 2 3\n"
+   },
+   {
+    "input": "4 4 1 4\n",
+    "output": "1 4 4 4\n"
+   },
+   {
+    "input": "2 1\n",
+    "output": "1 2\n"
+   }
+  ],
+  "reference": "a = list(map(int, input().split()))\nn = len(a)\nfor i in range(n - 1):\n    for j in range(n - 1 - i):\n        if a[j] > a[j + 1]:\n            a[j], a[j + 1] = a[j + 1], a[j]\nprint(*a)\n"
+ },
+ {
+  "id": "min-coins",
+  "concept": "dynamic-programming",
+  "kind": "write",
+  "title": "Fewest coins",
+  "prompt": "Line 1 has the coin values, line 2 the amount. Print the fewest coins that sum to the amount (unlimited copies of each coin), or -1 if impossible. A greedy choice is not always correct.",
+  "starter": "coins = list(map(int, input().split()))\namount = int(input())\n# write your solution here\nprint(-1)\n",
+  "hint": "dp[x] = 1 + min(dp[x - c]) over coins c <= x. For coins 1, 3, 4 and amount 6, greedy gives 3 coins but 2 is possible.",
+  "tests": [
+   {
+    "input": "1 2 5\n11\n",
+    "output": "3\n"
+   },
+   {
+    "input": "2\n3\n",
+    "output": "-1\n"
+   },
+   {
+    "input": "1 3 4\n6\n",
+    "output": "2\n"
+   },
+   {
+    "input": "5 10 25\n0\n",
+    "output": "0\n"
+   },
+   {
+    "input": "186 419 83 408\n6249\n",
+    "output": "20\n"
+   }
+  ],
+  "reference": "coins = list(map(int, input().split()))\namount = int(input())\nINF = amount + 1\ndp = [0] + [INF] * amount\nfor x in range(1, amount + 1):\n    for c in coins:\n        if c <= x and dp[x - c] + 1 < dp[x]:\n            dp[x] = dp[x - c] + 1\nprint(dp[amount] if dp[amount] != INF else -1)\n"
+ },
+ {
+  "id": "bfs-distance",
+  "concept": "breadth-first-search",
+  "kind": "write",
+  "title": "Shortest path by BFS",
+  "prompt": "Line 1: n and m. Next m lines: an undirected edge u v (nodes are 0..n-1). Last line: source and target. Print the fewest edges on a path from source to target, or -1 if unreachable.",
+  "starter": "n, m = map(int, input().split())\nadj = [[] for _ in range(n)]\nfor _ in range(m):\n    u, v = map(int, input().split())\n    adj[u].append(v)\n    adj[v].append(u)\ns, t = map(int, input().split())\n# write your solution here\nprint(-1)\n",
+  "hint": "Breadth-first search visits nodes in order of distance, so the first time you reach the target is the shortest path.",
+  "tests": [
+   {
+    "input": "5 4\n0 1\n1 2\n2 3\n3 4\n0 4\n",
+    "output": "4\n"
+   },
+   {
+    "input": "4 2\n0 1\n2 3\n0 3\n",
+    "output": "-1\n"
+   },
+   {
+    "input": "3 3\n0 1\n1 2\n0 2\n0 2\n",
+    "output": "1\n"
+   },
+   {
+    "input": "1 0\n0 0\n",
+    "output": "0\n"
+   },
+   {
+    "input": "6 7\n0 1\n0 2\n1 3\n2 3\n3 4\n4 5\n2 5\n0 5\n",
+    "output": "2\n"
+   }
+  ],
+  "reference": "from collections import deque\nn, m = map(int, input().split())\nadj = [[] for _ in range(n)]\nfor _ in range(m):\n    u, v = map(int, input().split())\n    adj[u].append(v)\n    adj[v].append(u)\ns, t = map(int, input().split())\ndist = {s: 0}\nq = deque([s])\nwhile q:\n    u = q.popleft()\n    for w in adj[u]:\n        if w not in dist:\n            dist[w] = dist[u] + 1\n            q.append(w)\nprint(dist.get(t, -1))\n"
+ }
+]

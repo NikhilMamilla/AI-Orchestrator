@@ -1,0 +1,37 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [develop, main]
+    paths: ['Production-Core/frontend/**', 'curriculum/**', 'Production-Core/data/challenges/**', 'Production-Core/backend/app/learning/sketch.py', '.github/workflows/ci-frontend.yml']
+  pull_request:
+    branches: [develop, main]
+    paths: ['Production-Core/frontend/**', 'curriculum/**', 'Production-Core/data/challenges/**', 'Production-Core/backend/app/learning/sketch.py', '.github/workflows/ci-frontend.yml']
+
+defaults:
+  run:
+    working-directory: Production-Core/frontend
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: Production-Core/frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Unit tests
+        run: npm test
+      # also fails if any dev-only placeholder asset reaches dist/ (scripts/check-dist.mjs)
+      - name: Build
+        run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: Production-Core/frontend/dist
