@@ -101,8 +101,8 @@ prerequisite-aware unlocking, with no measurable extra benefit from remediation 
   five-part scroll story (`frontend/src/experience`). Its words come from this file and the README. Its city is built
   from `curriculum/dsa_roadmap.md`: the 22 domains, real prerequisite roads between them, and tool chips only where the
   tool exists. Tests check all three against their sources. With reduced motion the story is five still cards.
-  In development the story uses third-party placeholder assets; a production build draws every stage itself and
-  is checked to contain none of them (`frontend/ASSET-TODO.md`).
+  The story can use third-party placeholder assets: in development, and on the hosted site (`VITE_PLACEHOLDERS=ship`).
+  A default build draws every stage itself and is checked to contain none of them (`frontend/ASSET-TODO.md`).
 
 ## Not built (honest scope)
 

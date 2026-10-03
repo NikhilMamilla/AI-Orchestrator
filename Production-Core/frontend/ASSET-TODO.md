@@ -7,9 +7,13 @@ in `Production-Core/frontend/placeholder-assets/`. **They are not ours.**
 
 - **Dev only.** They live outside `public/` and the folder is gitignored. Only the Vite dev server serves them: on by
   default in `npm run dev`, off with `VITE_PLACEHOLDERS=off`.
-- **Never in a build.** `npm run build` cannot contain them. Every stage has a version drawn in code, which a build
-  uses instead. `scripts/check-dist.mjs` then fails the build if any of these files, a paid font name or a
-  `/placeholder-assets/` URL appears in `dist/`.
+- **Not in a default build.** `npm run build` (and CI) cannot contain them. Every stage has a version drawn in code,
+  which a build uses instead, and `scripts/check-dist.mjs` fails the build if any of these files, a paid font name or
+  a `/placeholder-assets/` URL appears in `dist/`.
+- **The hosted site ships them by the owner's decision (2026-10-03).** Vercel builds with `VITE_PLACEHOLDERS=ship`,
+  which copies only the story's file types into `dist/placeholder-assets/`. The never-used files below are excluded,
+  and the check still fails on them and on paid font names. The files stay out of git: the Vercel CLI uploads them
+  from the local folder.
 
 **Decided 2026-10-02:** neutral assets only, dev only, for now. The decision is recorded in
 `src/lib/experienceAssets.ts`, which also lists each file's purpose.

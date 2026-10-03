@@ -2,7 +2,7 @@
 // Placeholders live in placeholder-assets/ (gitignored, served by the dev server only); see ASSET-TODO.md.
 import { createHash } from 'node:crypto';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { join, relative, resolve } from 'node:path';
+import { join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
@@ -26,14 +26,19 @@ const fontNames = /PPSupply|PP Supply|STKBureau|STK Bureau|Bethany Elingston/;
 
 const files = walk(dist);
 const problems = [];
+// VITE_PLACEHOLDERS=ship (the hosted site): story assets may ship under placeholder-assets/, but never fonts, logos,
+// brand files, company videos, the world map or the texts atlas, and no paid font names anywhere
+const ship = process.env.VITE_PLACEHOLDERS === 'ship';
+const never = /(^|\/)(fonts|logos|brand)\/|Card\.mp4$|PPSupply|STKBureau|Bethany|world\.ktx2$|texts\.ktx2$/;
 for (const file of files) {
-    const rel = relative(dist, file);
-    if (forbidden.has(hash(file))) problems.push(`${rel}: a placeholder file was copied into the build`);
+    const rel = relative(dist, file).split(sep).join('/');
+    if (ship ? rel.startsWith('placeholder-assets/') && never.test(rel.slice('placeholder-assets/'.length)) : forbidden.has(hash(file)))
+        problems.push(`${rel}: a placeholder file that must never ship was copied into the build`);
     if (/\.(js|css|html)$/.test(file)) {
         const text = readFileSync(file, 'utf-8');
         if (fontNames.test(text)) problems.push(`${rel}: references a paid placeholder font`);
         // production code folds PLACEHOLDERS_ENABLED to false, so the URL prefix must not survive minification at all
-        if (text.includes('/placeholder-assets/')) problems.push(`${rel}: can request a placeholder URL`);
+        if (!ship && text.includes('/placeholder-assets/')) problems.push(`${rel}: can request a placeholder URL`);
     }
 }
 
@@ -41,4 +46,4 @@ if (problems.length) {
     console.error('check-dist: placeholder content found in dist/\n  ' + problems.join('\n  '));
     process.exit(1);
 }
-console.log(`check-dist: ok (${files.length} files, none of ${forbidden.size} placeholder files, no paid font names, no placeholder URLs)`);
+console.log(ship ? `check-dist: ok, ship mode (${files.length} files; story assets allowed, never-ship files and paid fonts absent)` : `check-dist: ok (${files.length} files, none of ${forbidden.size} placeholder files, no paid font names, no placeholder URLs)`);

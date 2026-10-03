@@ -52,3 +52,6 @@ docs/eval/*.tmp
 
 # third-party placeholder assets: dev-only, never committed or built (see Production-Core/frontend/ASSET-TODO.md)
 Production-Core/frontend/placeholder-assets/
+
+# Vercel CLI project link (local)
+.vercel

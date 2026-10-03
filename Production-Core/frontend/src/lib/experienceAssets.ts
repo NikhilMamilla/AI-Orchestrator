@@ -20,7 +20,9 @@ export interface AssetEntry {
     replaceWith: string;                 // a free, licence-clean source for a final asset
 }
 
-export const PLACEHOLDERS_ENABLED: boolean = import.meta.env.DEV && import.meta.env.VITE_PLACEHOLDERS !== 'off';
+// dev: on unless VITE_PLACEHOLDERS=off; a build: only with VITE_PLACEHOLDERS=ship (the hosted site ships them)
+export const PLACEHOLDERS_ENABLED: boolean =
+    (import.meta.env.DEV && import.meta.env.VITE_PLACEHOLDERS !== 'off') || import.meta.env.VITE_PLACEHOLDERS === 'ship';
 
 const PH = (path: string, kind: AssetKind, use: string, replaceWith: string): AssetEntry => ({ path, kind, placeholder: true, use, replaceWith });
 const HAND = 'Sketchfab CC0 / CC-BY rigged hand, or a MakeHuman (CC0) hand exported to glTF';

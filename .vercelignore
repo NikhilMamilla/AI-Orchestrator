@@ -1,0 +1,13 @@
+# Uploaded to Vercel for the frontend build (root directory: Production-Core/frontend). Never: secrets,
+# the Python environment, dependencies or build output. The story assets (placeholder-assets) ARE uploaded: the site
+# ships them (VITE_PLACEHOLDERS=ship), while they stay out of git.
+.git
+**/.env
+**/.env.*
+!**/.env.example
+**/node_modules
+**/dist
+**/__pycache__
+Production-Core/venv
+Production-Core/docs
+Production-Core/infrastructure
