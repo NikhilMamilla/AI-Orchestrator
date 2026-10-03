@@ -57,8 +57,11 @@ class HybridRetriever:
         # encoding inside many workers exhausts threads. Only the (I/O-bound) store calls run in parallel.
         vec = {}
         if use_dense:
-            for q in dict.fromkeys(queries + ([plan.original] if plan.concepts else [])):
-                vec[q] = self.embedder.encode_query(q)
+            texts = list(dict.fromkeys(queries + ([plan.original] if plan.concepts else [])))
+            batch = getattr(self.embedder, "encode_queries", None)
+            vec = dict(zip(texts, batch(texts) if batch else [self.embedder.encode_query(q) for q in texts]))
+            if getattr(self.embedder, "degraded", False):      # fallback vectors can't be compared with stored ones
+                use_dense, vec = False, {}
         for qi, q in enumerate(queries):
             w = 1.0 if qi == 0 else 0.6
             label = "orig" if qi == 0 else f"rw{qi}"

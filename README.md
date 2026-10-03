@@ -183,6 +183,7 @@ The backend reads `Production-Core/backend/.env`; the template is
 | `ENV` | yes in production | Set to `production` to switch off all development shortcuts and the API docs |
 | `JUDGE0_API_URL` | optional | Code-execution server (defaults to the free public Judge0 CE) |
 | `RAG_NEURAL` | optional | `true` uses the AI models for search and checking; `false` uses a lightweight offline mode |
+| `EMBEDDINGS`, `HF_TOKEN` | optional | `EMBEDDINGS=hosted` with a Hugging Face token runs without PyTorch (for small servers) |
 
 The frontend reads `Production-Core/frontend/.env.local`; the template is
 [`Production-Core/frontend/.env.example`](Production-Core/frontend/.env.example).
@@ -255,12 +256,17 @@ GitHub Actions runs the backend tests and the frontend lint, tests and build on 
 
 ## Deploying
 
-* **Backend:** any host that runs Docker. `backend/Dockerfile` builds with CPU-only PyTorch; free options include
-  Hugging Face Spaces and Render. Set `ENV=production` and `ALLOWED_ORIGINS=<your frontend URL>` plus the keys above.
+* **Backend, small free hosts (for example Render's free plan, 512 MB):** run the image built by
+  `backend/Dockerfile.server`. GitHub Actions publishes it as `ghcr.io/nikhilmamilla/kiddoo-backend:server`. It has no
+  PyTorch: set `EMBEDDINGS=hosted` and `HF_TOKEN`, and embeddings come from Hugging Face Inference (the same vectors as
+  the local model, so nothing is re-ingested). The reranker and the sentence checker then use their built-in non-AI
+  fallbacks. If the hosted service is down, search falls back to keywords instead of failing. The process peaks at
+  about 160 MB.
+* **Backend, larger hosts (~1.5 GB RAM):** `backend/Dockerfile` bakes the three models into the image for full quality.
+* For either one, set `ENV=production` and `ALLOWED_ORIGINS=<your frontend URL>` plus the keys above.
 * **Frontend:** any static host (Vercel, Netlify, Cloudflare Pages). Run `npm run build`, publish `dist/`, and set the
   `VITE_*` variables. Add the site's domain under Firebase → Authentication → **Authorised domains**.
-* The AI models download on the backend's first start, so expect one slow start. Keep a cache volume to avoid repeating
-  it.
+* Free hosts sleep when idle. The first request after a quiet spell takes up to a minute while the backend wakes up.
 
 Full details are in [docs/SETUP.md](Production-Core/docs/SETUP.md).
 

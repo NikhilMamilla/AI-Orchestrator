@@ -1,0 +1,23 @@
+# Small-server image (no torch, no model weights): for hosts with ~512 MB of RAM, such as Render's free plan.
+# Embeddings come from Hugging Face Inference (EMBEDDINGS=hosted, HF_TOKEN); see backend/Dockerfile for the full image.
+# Build context is Production-Core/.
+FROM python:3.11-slim
+
+WORKDIR /app
+ENV PYTHONPATH=/app PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 EMBEDDINGS=hosted
+
+COPY backend/requirements-server.txt backend/requirements-server.txt
+RUN pip install -r backend/requirements-server.txt
+
+COPY backend backend
+COPY data data
+
+RUN useradd -m app && chown -R app /app
+USER app
+
+# Behind the host's reverse proxy the TCP peer is the proxy: trust its X-Forwarded-For so per-client rate limits see
+# real client addresses. Only expose this image behind such a proxy.
+ENV FORWARDED_ALLOW_IPS="*"
+EXPOSE 8000
+# Render (and most hosts) pass the port in $PORT
+CMD ["sh", "-c", "uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

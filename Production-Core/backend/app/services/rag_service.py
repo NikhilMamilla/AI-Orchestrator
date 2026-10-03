@@ -36,16 +36,18 @@ def _make_store():
 
 def _build() -> tuple[RAGPipeline, Ingestor]:
     store = _store or _make_store()                               # the one get_store() already opened, if any
-    embedder = load_embedder(prefer_neural=settings.RAG_NEURAL)
-    reranker = CrossEncoderReranker(enabled=settings.RAG_NEURAL)
+    hosted = settings.EMBEDDINGS.lower() == "hosted" and bool(settings.HF_TOKEN)
+    local_models = settings.RAG_NEURAL and not hosted                     # hosted mode: no torch on this server
+    embedder = load_embedder(prefer_neural=settings.RAG_NEURAL, hosted_token=settings.HF_TOKEN if hosted else None)
+    reranker = CrossEncoderReranker(enabled=local_models)
     llm = get_router()                                       # shared with the agents
     ingestor = Ingestor(store, embedder)
     report = ingestor.ingest_directory(KNOWLEDGE_DIR)          # incremental: unchanged docs are skipped
     logger.info("RAG ready: %s | embedder=%s reranker=%s llm=%s | ingest: +%d ~%d =%d !%d",
                 store.stats(), embedder.name, reranker.name, ",".join(p.name for p in llm.providers) or "none",
                 len(report.added), len(report.updated), len(report.unchanged), len(report.failed))
-    nli = load_nli(enabled=settings.RAG_NEURAL)               # entailment-based claim verification
-    guard = SemanticGuard(embedder) if settings.RAG_NEURAL else None      # needs real embeddings to be meaningful
+    nli = load_nli(enabled=local_models)                      # entailment-based claim verification
+    guard = SemanticGuard(embedder) if (settings.RAG_NEURAL or hosted) else None   # needs real embeddings
     return RAGPipeline(store, embedder, reranker, llm, RAGConfig(), nli, guard), ingestor
 
 

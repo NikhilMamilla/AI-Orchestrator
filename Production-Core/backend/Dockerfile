@@ -1,4 +1,5 @@
-# Build context is Production-Core/ (so the image contains backend/ and data/).
+# Full image with the three models baked in (needs ~1.5 GB RAM); used by infrastructure/docker-compose.yml.
+# Small hosts use backend/Dockerfile.server instead. Build context is Production-Core/ (so the image contains backend/ and data/).
 FROM python:3.11-slim
 
 WORKDIR /app

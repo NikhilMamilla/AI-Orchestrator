@@ -37,6 +37,10 @@ class Settings(BaseSettings):
     RAG_DB_PATH: str = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
                                     "data", "rag.sqlite")
     RAG_NEURAL: bool = True                       # bge embeddings + cross-encoder (free, local)
+    # "local": the models run in this process (needs torch). "hosted": embeddings come from Hugging Face Inference with
+    # HF_TOKEN (same vectors), and the reranker and NLI use their lexical fallbacks; for small servers without torch.
+    EMBEDDINGS: str = "local"
+    HF_TOKEN: str = ""
     RAG_RATE_LIMIT_PER_MIN: int = 20
 
     @property

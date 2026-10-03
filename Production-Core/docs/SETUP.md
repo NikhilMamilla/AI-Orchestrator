@@ -64,8 +64,11 @@ Docker instead: `cd infrastructure && docker compose up --build` (reads `backend
 
 ## Deployment (free options)
 
-* Backend: Hugging Face Spaces (Docker, 16 GB RAM free) or Render free web service; `backend/Dockerfile`
-  builds with CPU torch. Set `ENV=production`, `ALLOWED_ORIGINS=<frontend url>`.
+* Backend on a small free host (Render free web service, 512 MB): deploy the image
+  `ghcr.io/nikhilmamilla/kiddoo-backend:server` (`backend/Dockerfile.server`, published by
+  `.github/workflows/backend-image.yml`). Set `EMBEDDINGS=hosted`, `HF_TOKEN`, `ENV=production` and
+  `ALLOWED_ORIGINS=<frontend url>`, plus the keys from `.env.example`.
+* Backend on a host with ~1.5 GB RAM: `backend/Dockerfile` (models baked into the image, full quality).
 * Frontend: Vercel / Netlify / Cloudflare Pages (`npm run build`, publish `dist/`), with `VITE_API_URL`
   and the `VITE_FIREBASE_*` values; add the site to Firebase → Authentication → Authorised domains.
 * Behind the host's proxy the backend image trusts `X-Forwarded-For` (`FORWARDED_ALLOW_IPS` in `backend/Dockerfile`), so
