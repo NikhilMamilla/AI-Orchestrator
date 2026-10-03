@@ -12,6 +12,10 @@ RUN pip install -r backend/requirements.txt
 COPY backend backend
 COPY data data
 
+# The three models are part of the image, so a (re)started container never downloads them: it answers sooner after waking.
+ENV HF_HOME=/app/.hf-cache
+RUN python -c "from sentence_transformers import SentenceTransformer, CrossEncoder; SentenceTransformer('BAAI/bge-small-en-v1.5'); CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2'); CrossEncoder('cross-encoder/nli-deberta-v3-xsmall')"
+
 # Run as an unprivileged user.
 RUN useradd -m app && chown -R app /app
 USER app
