@@ -1,81 +1,299 @@
-# Kiddoo — a DSA tutor that shows its evidence
+# Kiddoo: a DSA tutor that shows its evidence
 
-**Most AI tutors sound confident whether or not they are right.** Kiddoo only answers from a curated
-knowledge base, cites every claim, checks each sentence against its sources, and says *"I don't have
-enough evidence"* instead of guessing. On top of that, five cooperating agents decide what a learner
-should study next, and show their reasoning.
+**Kiddoo is an AI tutor for Data Structures and Algorithms (DSA) that never guesses.** It answers only from a curated
+set of course notes. Every claim in an answer carries a numbered citation you can open, and each sentence is checked
+against its sources before you see it. When the notes don't cover a question, Kiddoo says *"I don't have enough
+evidence"* instead of making something up.
 
-Built on a **zero-cost stack**: Supabase (Postgres + pgvector), Firebase Auth (sign-in only), Mistral's free
-API (ministral / open-mistral-nemo, with automatic failover to Gemini and Groq when configured), Judge0 CE for
-code execution, and local open models (bge-small embeddings, MiniLM cross-encoder, DeBERTa NLI).
+Around that tutor sits a learning system. It measures what you know from your own answers, decides what you should
+study next, explains why, and lets you practise on real code that is actually run and graded.
 
-## What is different
+> © 2026 NikhilMamilla. All rights reserved. See [LICENSE](LICENSE): viewing is allowed; copying, reuse or
+> redistribution needs written permission.
 
-| | Typical "RAG chatbot" | Kiddoo |
-|---|---|---|
-| Retrieval | embed → top-k | query understanding → multi-query **dense + BM25** → **RRF** fusion → learner-level weighting + **prerequisite-graph hop** → **cross-encoder rerank** → parent-child context + compression |
-| Answers | fluent text | **numbered citations**, per-sentence **support check**, citation repair, measured **confidence**, extractive fallback if the LLM is down |
-| Unknown topics | hallucinate | **evidence gate** refuses before spending a model call |
-| Quality claims | "it works" | **evaluation harness**: Recall@K, Precision@K, MRR, nDCG, ablations, gate calibration — [results](Production-Core/docs/eval/results.md) |
-| Security | none | JWT-verified on every route + WebSocket, RLS, prompt-injection defences at ingest/query/prompt/output — [details](Production-Core/docs/SECURITY.md) |
-| Learning loop | static content | grounded **check questions** → **Bayesian Knowledge Tracing** → **spaced repetition** → prerequisite-aware roadmap, every decision explained |
-| Behavioural analyst | none | struggle / rushing / plateau / **misconception** detection from real response times and wrong-option provenance, using the PRD's own thresholds |
-| Adaptive teaching | one tone | **per-learner bandit** over teaching styles (Thompson sampling) and **mastery-aware** explanation level and prerequisite hints |
-| Placement and goals | none | **adaptive diagnostic** over the prerequisite graph (~8 questions), goal + deadline feasibility with weekly plan |
-| Assessment | multiple choice | hints that cost mastery credit, confidence calibration, **debugging and coding challenges graded by real execution** (Judge0) |
-| Monitoring | none | student-controlled, expiring, revocable **teacher/parent link** with alerts and talking points, no answers or free text |
-| See it run | static diagrams | **visualizer** whose steps are recorded from real runs; audio explanations; PDF learning journal |
-| Progress UI | animated spinner | stage list streamed from the **real** server trace (only stages that ran) |
-| Observability | logs | per-request trace, p50/p95 per stage, admin dashboard |
-| Explaining back | none | **Teach it back**: your own explanation is checked sentence by sentence against the sources, no LLM involved — [measured](Production-Core/docs/eval/teachback.md) |
-| Vision | none | **Draw it**: a vision model *reads* your tree, **fixed rules judge it**; catches 16/16 invalid drawings vs about a third when the model judges directly — [measured, with its false-alarm problem](Production-Core/docs/eval/sketch.md) |
-| Evidence | claims | **Evidence Lab**: opt-in pre/post test with bootstrap CI, paired t and effect size; refuses to claim an effect below 10 completers. No real cohort yet |
-| Control | none | tone, session length and style preferences that change real behaviour; opt-in leaderboard; **delete my data** |
+---
 
-## Try it
+## Contents
+
+1. [What you can do with it](#what-you-can-do-with-it)
+2. [How it works](#how-it-works)
+3. [Tech stack](#tech-stack)
+4. [Run it on your computer](#run-it-on-your-computer)
+5. [Configuration (environment variables)](#configuration-environment-variables)
+6. [Tests and checks](#tests-and-checks)
+7. [Project structure](#project-structure)
+8. [Deploying](#deploying)
+9. [Troubleshooting](#troubleshooting)
+10. [Documentation](#documentation)
+11. [Copyright and licence](#copyright-and-licence)
+
+---
+
+## What you can do with it
+
+| Feature | What it does |
+|---|---|
+| **Ask** | Ask any DSA question. You see each stage of the answer as it runs, numbered citations you can click to read the exact source passage, and a confidence score. Off-topic questions and prompt-injection attempts are refused. |
+| **Learn** | A check question follows each answer. Your answers update a mastery estimate per concept (Bayesian Knowledge Tracing), schedule spaced reviews, and reorder your roadmap so prerequisites come first. |
+| **Placement and goals** | A short adaptive test (about 8 questions) finds your level. Set a goal and a deadline and Kiddoo tells you whether it is realistic and builds a weekly plan. |
+| **Challenges** | Debugging and coding exercises run in a real sandbox (Judge0) against hidden tests. Hints are available but cost a little mastery credit. |
+| **Teach it back** | Explain a concept in your own words. Each sentence is checked against the course notes without using an AI model. |
+| **Concepts map** | The real prerequisite graph of the 26 concepts, coloured by your mastery. |
+| **Visualizer and Playground** | Watch algorithms step through real runs, or write and run code in the browser. |
+| **Insights and Journal** | Decisions the five agents made for you, with their reasoning; badges from real progress; a learning journal you can export as a PDF. |
+| **Share with a teacher or parent** | A private link that you can revoke and that expires. It shows your progress, never your answers or anything you typed. |
+| **Settings and privacy** | Tutor tone, teaching style, session length, appearance, linked coding profiles (GitHub, LeetCode, Codeforces…), and full control over your data: export it, or delete part or all of it. |
+| **Admin console** | For admins only: usage and answer-quality trends, content gaps, a question inspector, announcements and system health. Aggregates only, so no individual learner is identifiable. |
+
+## How it works
+
+```
+ Browser (React app)
+   │  sign in with Firebase (email/password or Google)  →  ID token
+   ▼
+ FastAPI backend  ── verifies the token on every request ──┐
+   │                                                       │
+   ├─ Ask:   question ─► safety guard ─► hybrid search (meaning + keywords)
+   │                     ─► rerank ─► evidence gate (refuse if too weak)
+   │                     ─► LLM writes an answer with citations
+   │                     ─► every sentence checked against its source (NLI)
+   │
+   ├─ Learn: answers ─► mastery model (BKT) ─► review queue ─► roadmap
+   ├─ Agents: Orchestrator · Knowledge · Teaching · Assessment · Analyst
+   └─ Challenges ─► Judge0 sandbox (real code execution)
+   ▼
+ Supabase Postgres (+ pgvector)  ── all app data, course notes and their vectors
+```
+
+* **Knowledge base.** `Production-Core/data/knowledge/` holds 26 original DSA documents. They are split into passages,
+  embedded and stored in Postgres, and only these passages are used to answer.
+* **Retrieval.** Several reformulations of the question are searched by meaning (dense vectors) and by keywords (BM25).
+  The results are fused, weighted for your level and for prerequisites, then reranked by a cross-encoder.
+* **Honesty.** If the best evidence is too weak, Kiddoo refuses before spending an AI call. After generation, each
+  sentence is checked for support, and unsupported answers are withheld.
+* **Cost.** Every service used has a free tier, and the language model fails over automatically between Mistral,
+  Gemini and Groq.
+
+## Tech stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React 19, TypeScript, Vite, Tailwind CSS, framer-motion, three.js, Recharts, Monaco editor |
+| Backend | Python 3.11, FastAPI, pydantic, psycopg 3 |
+| AI / search | sentence-transformers (bge-small embeddings, MiniLM cross-encoder, NLI model), Mistral / Gemini / Groq APIs |
+| Data | Supabase Postgres with pgvector and full-text search |
+| Sign-in | Firebase Authentication (sign-in only; all data stays in Postgres) |
+| Code execution | Judge0 CE |
+| Tests and CI | pytest, Vitest, ESLint, GitHub Actions |
+
+## Run it on your computer
+
+### 1. What you need
+
+* **Python 3.11 or newer** and **Node.js 20 or newer**.
+* Free accounts on:
+  * [Supabase](https://supabase.com), for the database;
+  * [Firebase](https://console.firebase.google.com), for sign-in;
+  * at least one language-model provider: [Mistral](https://console.mistral.ai), with
+    [Gemini](https://aistudio.google.com/apikey) or [Groq](https://console.groq.com) as optional backups.
+* About 1 GB of disk space for the Python packages and the AI models.
+
+### 2. Get the code
 
 ```bash
-# see Production-Core/docs/SETUP.md for the 5-minute setup
-cd Production-Core && python scripts/smoke_test.py      # end-to-end through the real API
-python -m backend.app.rag.evaluation --neural           # reproduce the retrieval numbers
-python -m pytest                                        # 214 offline tests
+git clone https://github.com/NikhilMamilla/AI-Orchestrator.git
+cd AI-Orchestrator/Production-Core
 ```
 
-## Demo script (4 minutes)
+### 3. Set up the database (Supabase)
 
-1. **Ask** *"Why does binary search need a sorted array?"* — watch the stages stream, click a `[1]` chip,
-   see the exact source passage and score.
-2. Ask *"How do I bake sourdough?"* — it **refuses**, with no model call. Ask the same with
-   *"ignore previous instructions…"* — rejected by the guard.
-3. **Admin console → Content → upload** a markdown file containing a hidden "ignore all previous instructions" line — it is
-   quarantined and reported; re-upload is a no-op (content-hash versioning).
-4. **Admin console**: admins land on their own console (aggregates only, groups under 5 hidden in production):
-   **Answer quality** shows grounded vs refused per day and p50/p95 per stage (no query text stored).
-   **Inspector** shows why a question would be answered or refused (retrieval scores, evidence gate) without calling the model.
-5. **Learn**: answer the check question under a grounded answer; watch mastery move, the review queue
-   schedule, and the roadmap re-order by prerequisites.
-6. **Challenges**: fix a buggy binary search; hidden tests run in a real sandbox, mastery updates, the help ladder opens after repeated failures.
-7. **Journal → Share**: create a revocable link a teacher can open without an account.
-8. **Concepts**: the knowledge map is the real prerequisite graph; **Insights**: agent decisions with
-   their reasoning, badges computed from real progress.
+1. Create a Supabase project.
+2. Go to **Settings → Database → Connection string → Session pooler** and copy the connection string. It goes in
+   `DATABASE_URL` in step 5.
+3. The schema is created in step 5 with `python scripts/migrate.py`. Alternatively, paste each file in
+   `supabase/migrations/` into the Supabase SQL editor, in number order.
 
-## Repository
+### 4. Set up sign-in (Firebase)
+
+1. Create a Firebase project. Under **Authentication → Sign-in method**, enable **Email/Password**, and **Google** if
+   you want it.
+2. Under **Project settings → Your apps**, add a **Web app** and keep its config values for step 6.
+
+### 5. Start the backend
+
+```bash
+python -m venv venv
+# Windows:      venv\Scripts\activate
+# macOS/Linux:  source venv/bin/activate
+
+pip install --extra-index-url https://download.pytorch.org/whl/cpu torch     # small CPU-only build
+pip install -r backend/requirements-dev.txt
+
+cp .env.example backend/.env       # then open backend/.env and fill in the values (see Configuration)
+python scripts/migrate.py          # creates the tables (safe to run again)
+python scripts/ingest_knowledge.py # loads the 26 course notes (first run downloads ~130 MB of models)
+
+uvicorn backend.app.main:app --reload
+```
+
+The API now runs at **http://127.0.0.1:8000**, with interactive docs at `/docs`.
+
+### 6. Start the frontend
+
+In a second terminal:
+
+```bash
+cd Production-Core/frontend
+cp .env.example .env.local         # fill in the Firebase web config from step 4
+npm install
+npm run dev
+```
+
+Open **http://localhost:5173**, create an account and start asking.
+
+### 7. (Optional) Make yourself an admin
+
+Put your email in `ADMIN_EMAILS` in `backend/.env` and restart the backend. Verify the email from
+**Settings → Profile**, or sign in with Google, then sign out and back in. **Settings → Admin console** then opens the
+admin console.
+
+### Using Docker instead
+
+```bash
+cd Production-Core/infrastructure
+docker compose up --build          # reads backend/.env and frontend/.env.local
+```
+
+For a self-hosted Judge0, run `docker compose -f docker-compose.judge0.yml up -d`.
+
+## Configuration (environment variables)
+
+The backend reads `Production-Core/backend/.env`; the template is
+[`Production-Core/.env.example`](Production-Core/.env.example).
+
+| Variable | Required | What it is |
+|---|---|---|
+| `DATABASE_URL` | yes | Supabase *session pooler* connection string |
+| `FIREBASE_PROJECT_ID` | yes | Your Firebase project id; the backend accepts only that project's tokens |
+| `MISTRAL_API_KEY` | yes (or another provider) | Language model key |
+| `GEMINI_API_KEY`, `GROQ_API_KEYS` | optional | Backup providers, used automatically if one fails |
+| `LLM_PROVIDERS` | optional | Order to try providers (default `mistral,gemini,groq`) |
+| `ADMIN_EMAILS` | optional | Comma-separated admin emails (they count only once verified) |
+| `ALLOWED_ORIGINS` | yes in production | The frontend URL(s) allowed to call the API |
+| `ENV` | yes in production | Set to `production` to switch off all development shortcuts and the API docs |
+| `JUDGE0_API_URL` | optional | Code-execution server (defaults to the free public Judge0 CE) |
+| `RAG_NEURAL` | optional | `true` uses the AI models for search and checking; `false` uses a lightweight offline mode |
+
+The frontend reads `Production-Core/frontend/.env.local`; the template is
+[`Production-Core/frontend/.env.example`](Production-Core/frontend/.env.example).
+
+| Variable | What it is |
+|---|---|
+| `VITE_API_URL` | Backend URL (default `http://localhost:8000/api/v1`) |
+| `VITE_WS_URL` | Backend WebSocket URL (default `ws://localhost:8000/api/v1/ws`) |
+| `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_APP_ID` | Firebase web config |
+
+**Never commit `.env` or `.env.local`.** Both are already excluded by `.gitignore`.
+
+## Tests and checks
+
+```bash
+# backend (from Production-Core/, offline: no network or models needed)
+python -m pytest                                   # 214 tests
+
+# frontend (from Production-Core/frontend/)
+npm run lint
+npm test                                           # 31 tests
+npm run build                                      # type-check, build, and verify the bundle
+
+# end to end against a running backend (from Production-Core/)
+python scripts/smoke_test.py
+
+# reproduce the retrieval-quality numbers
+python -m backend.app.rag.evaluation --neural
+```
+
+GitHub Actions runs the backend tests and the frontend lint, tests and build on every push.
+
+## Project structure
 
 ```
-.github/                  CI: backend tests, frontend lint + tests + build
-curriculum/               the roadmap the corpus follows (the landing's 22 domains read it)
-Production-Core/
-  backend/app/rag/        the pipeline (ingest · chunking · retrieval · rerank · generate · guard · eval)
-  backend/app/agents/     Orchestrator · Knowledge · Teaching · Assessment · Analyst
-  backend/app/learning/   mastery, review, roadmap, challenges, journal, study, coding profiles
-  backend/app/admin/      admin console aggregates (no learner identities), question inspector, audit log
-  backend/app/api/v1/     REST + SSE + WebSocket
-  frontend/               React 19 · Vite · Tailwind (src/pages, src/components, src/admin = admin console, src/experience = landing story)
-  supabase/migrations/    schema, pgvector, FTS, RLS
-  data/knowledge/         26 original DSA concept documents (the corpus)
-  data/eval/              labelled evaluation questions
-  data/challenges/        debugging and coding challenges with hidden tests
-  docs/                   ARCHITECTURE · LEARNING · RAG · SECURITY · SETUP · TROUBLESHOOTING · DEMO · eval results
-  infrastructure/         docker compose (app stack, self-hosted Judge0)
-  scripts/                migrate · ingest_knowledge · smoke_test · build/verify_challenges
+.
+├── LICENSE                  copyright and terms of use
+├── README.md                this file
+├── curriculum/              the DSA roadmap the course notes follow
+├── .github/                 CI workflows and the pull-request template
+└── Production-Core/
+    ├── backend/
+    │   ├── app/
+    │   │   ├── api/v1/      HTTP, streaming and WebSocket endpoints
+    │   │   ├── rag/         search, reranking, answer generation, checking, safety guard, evaluation
+    │   │   ├── agents/      the five agents (Orchestrator, Knowledge, Teaching, Assessment, Analyst)
+    │   │   ├── learning/    mastery, reviews, roadmap, challenges, journal, preferences, coding profiles
+    │   │   ├── admin/       admin statistics (aggregates only), question inspector, audit log
+    │   │   ├── services/    database, models and shared services
+    │   │   └── tests/       the backend test suite
+    │   ├── requirements.txt
+    │   └── Dockerfile
+    ├── frontend/
+    │   ├── src/
+    │   │   ├── pages/       one file per screen (Ask, Learn, Challenges, Settings…)
+    │   │   ├── components/  shared UI pieces
+    │   │   ├── admin/       the admin console
+    │   │   ├── experience/  the animated landing story
+    │   │   └── lib/         API clients, auth, helpers
+    │   └── package.json
+    ├── supabase/migrations/ the database schema, in order
+    ├── data/
+    │   ├── knowledge/       the 26 course notes (the only source of answers)
+    │   ├── challenges/      coding and debugging challenges with hidden tests
+    │   └── eval/            labelled questions for measuring quality
+    ├── docs/                architecture, setup, security, RAG, learning, evaluation results
+    ├── scripts/             migrate, ingest knowledge, smoke test, build/verify challenges
+    └── infrastructure/      Docker Compose files
 ```
+
+## Deploying
+
+* **Backend:** any host that runs Docker. `backend/Dockerfile` builds with CPU-only PyTorch; free options include
+  Hugging Face Spaces and Render. Set `ENV=production` and `ALLOWED_ORIGINS=<your frontend URL>` plus the keys above.
+* **Frontend:** any static host (Vercel, Netlify, Cloudflare Pages). Run `npm run build`, publish `dist/`, and set the
+  `VITE_*` variables. Add the site's domain under Firebase → Authentication → **Authorised domains**.
+* The AI models download on the backend's first start, so expect one slow start. Keep a cache volume to avoid repeating
+  it.
+
+Full details are in [docs/SETUP.md](Production-Core/docs/SETUP.md).
+
+## Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| Every request returns 401 | `FIREBASE_PROJECT_ID` is missing or wrong in `backend/.env`. Sign out and in again |
+| `failed to resolve host db.<ref>.supabase.co` | Use the **Session pooler** connection string, not the direct one |
+| Answers say "Quoted from sources" | Every language-model provider failed, so Kiddoo fell back to quoting its sources; check your API keys |
+| The first question is slow | The AI models load in the background after start-up; wait a moment, or run `ingest_knowledge.py` first |
+| `Missing VITE_FIREBASE_API_KEY…` | Create `frontend/.env.local` from `frontend/.env.example` |
+
+More fixes are in [docs/TROUBLESHOOTING.md](Production-Core/docs/TROUBLESHOOTING.md).
+
+## Documentation
+
+| Document | About |
+|---|---|
+| [ARCHITECTURE](Production-Core/docs/ARCHITECTURE.md) | How the pieces fit together |
+| [SETUP](Production-Core/docs/SETUP.md) | Installation and deployment, in full |
+| [RAG](Production-Core/docs/RAG.md) | The search and answer pipeline, and how it was measured |
+| [LEARNING](Production-Core/docs/LEARNING.md) | Mastery, reviews, roadmap, agents and the landing story |
+| [SECURITY](Production-Core/docs/SECURITY.md) | Threat model and protections |
+| [DEMO](Production-Core/docs/DEMO.md) | A guided tour of the main features |
+| [Evaluation results](Production-Core/docs/eval/results.md) | Retrieval-quality measurements |
+
+## Copyright and licence
+
+**© 2026 NikhilMamilla. All rights reserved.**
+
+This project is proprietary. You may view it on GitHub, but you may not copy, modify, redistribute or reuse any part of
+it, including the code, the course notes, the challenges or the designs, without written permission. See
+[LICENSE](LICENSE) for the full terms. To ask for permission, contact [NikhilMamilla on GitHub](https://github.com/NikhilMamilla).
+
+Third-party libraries and models used by the project remain under their own licences.

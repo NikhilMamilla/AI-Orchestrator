@@ -1,0 +1,26 @@
+Copyright (c) 2026 NikhilMamilla. All rights reserved.
+
+This repository and everything in it (source code, documentation, the knowledge-base documents, challenges,
+evaluation data, designs, images and other assets, together "the Software") are the exclusive property of the
+copyright holder.
+
+No licence is granted. Without the prior written permission of the copyright holder you may not:
+
+  1. copy, reproduce or mirror the Software, in whole or in part;
+  2. modify it, translate it or create derivative works based on it;
+  3. distribute, publish, sublicense, sell, rent or otherwise make it available to others;
+  4. use it, or any part of it, in another product, service, project or competition entry;
+  5. use it to train or evaluate machine-learning models.
+
+Viewing the Software on the hosting platform where it is published does not grant any of the rights above.
+Forking it on that platform is permitted only to the extent the platform's own terms require, and grants no other right.
+
+To request permission, contact the copyright holder through their GitHub profile: https://github.com/NikhilMamilla
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OF IT.
+
+Third-party components (the open-source libraries listed in Production-Core/frontend/package.json and
+Production-Core/backend/requirements.txt, and the models downloaded at run time) remain under their own licences.
