@@ -602,7 +602,7 @@ html[data-intro] body::after, html[data-story] body::after { display: none !impo
 .world { position: relative; overflow: hidden; isolation: isolate; }
 .world-layer { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
 
-/* the sky of "Every learner": teal-blue with mint glows at the top and bottom, light rays, falling petals */
+/* the sky of "Every learner": teal-blue with mint glows at the top and bottom, light rays, rising light motes */
 .world-sky {
   background:
     radial-gradient(ellipse 85% 70% at 50% 0%, #aaebd7 0%, rgb(170 235 215 / 0) 100%),
@@ -613,18 +613,19 @@ html[data-intro] body::after, html[data-story] body::after { display: none !impo
   background: conic-gradient(from 150deg at 50% -20%, transparent 0deg, rgb(255 255 255 / 0.28) 6deg, transparent 13deg, transparent 22deg,
     rgb(255 255 255 / 0.2) 27deg, transparent 33deg, transparent 41deg, rgb(255 255 255 / 0.24) 46deg, transparent 53deg, transparent 60deg);
   -webkit-mask-image: linear-gradient(#000, transparent 80%); mask-image: linear-gradient(#000, transparent 80%);
-  transform-origin: 50% -20%; animation: raysSway 16s ease-in-out infinite alternate;
+  transform-origin: 50% -20%; animation: raysSway 30s ease-in-out infinite alternate; will-change: transform;
 }
-@keyframes raysSway { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
-.petal {
-  position: absolute; top: -6%; width: 16px; height: 10px; border-radius: 70% 30% 70% 30%;
-  background: radial-gradient(circle at 30% 30%, #fff4f6, #f6b9c8 70%); opacity: 0.85;
-  animation: petalFall 18s linear infinite;
+@keyframes raysSway { from { transform: rotate(-2deg); } to { transform: rotate(2deg); } }
+.mote {
+  position: absolute; bottom: -4%; border-radius: 50%; opacity: 0;
+  background: radial-gradient(circle, rgb(255 255 255 / 0.95) 0%, rgb(255 255 255 / 0.45) 45%, rgb(255 255 255 / 0) 72%);
+  animation: moteRise 40s linear infinite; will-change: transform, opacity;
 }
-@keyframes petalFall {
-  0% { transform: translate3d(0, 0, 0) rotate(0deg); }
-  50% { transform: translate3d(6vw, 55svh, 0) rotate(200deg); }
-  100% { transform: translate3d(-2vw, 112svh, 0) rotate(420deg); }
+.mote-warm { background: radial-gradient(circle, rgb(255 236 170 / 0.95) 0%, rgb(240 201 94 / 0.4) 45%, rgb(240 201 94 / 0) 72%); }
+@keyframes moteRise {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  12%, 88% { opacity: var(--o, 0.6); }
+  100% { transform: translate3d(var(--dx, 2vw), -108svh, 0); opacity: 0; }
 }
 
 /* the red curtain: soft vertical light drifting over deep red */
@@ -668,8 +669,8 @@ html[data-intro] body::after, html[data-story] body::after { display: none !impo
 @keyframes cloudDrift { from { transform: translateX(0); } to { transform: translateX(150vw); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .sky-rays, .petal, .curtain-streaks, .ash, .tunnel-rings span, .cloud { animation: none; }
-  .petal, .tunnel-rings span { display: none; }
+  .sky-rays, .mote, .curtain-streaks, .ash, .tunnel-rings span, .cloud { animation: none; }
+  .mote, .tunnel-rings span { display: none; }
 }
 
 
@@ -683,7 +684,6 @@ html[data-intro] body::after, html[data-story] body::after { display: none !impo
     #08202a;
 }
 :root[data-theme='dark'] .sky-rays { opacity: 0.35; }
-:root[data-theme='dark'] .petal { opacity: 0.45; }
 /* clouds, dark: moonlit clouds over a night sky */
 :root[data-theme='dark'] .world-clouds { background: linear-gradient(180deg, #0a1a22 0%, #10252e 55%, #0c1c23 100%); }
 .world-clouds.world-flat { background: #e3f1f4; }
@@ -961,16 +961,6 @@ html[data-intro] body::after, html[data-story] body::after { display: none !impo
 .pill-theme { border: 2px solid var(--max-line); background: rgb(255 252 244 / 0.86) !important; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
 :root[data-theme='dark'] .pill-theme { background: rgb(12 29 36 / 0.86) !important; }
 
-/* the hero's fuller petal fall: a second sway path and two more colours */
-@keyframes petalFallAlt {
-  0% { transform: translate3d(0, 0, 0) rotate(0deg) rotateX(0deg); }
-  30% { transform: translate3d(-5vw, 32svh, 0) rotate(-120deg) rotateX(60deg); }
-  65% { transform: translate3d(3vw, 70svh, 0) rotate(-260deg) rotateX(0deg); }
-  100% { transform: translate3d(-4vw, 112svh, 0) rotate(-400deg) rotateX(50deg); }
-}
-.petal-white { background: radial-gradient(circle at 30% 30%, #ffffff, #ffe9ef 70%); }
-.petal-deep { background: radial-gradient(circle at 30% 30%, #ffd9e2, #ee8fa8 70%); }
-
 /* ── The app (dashboard and the pages that share its sidebar) ── */
 :root { --max: #ff8a73; }
 .app-rail {
@@ -1105,8 +1095,8 @@ html[data-intro] body::after, html[data-story] body::after { display: none !impo
 html[data-motion='reduce'] *, html[data-motion='reduce'] *::before, html[data-motion='reduce'] *::after {
   animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important;
 }
-html[data-motion='reduce'] .petal { display: none; }
-html[data-petals='off'] .petal { display: none; }
+html[data-motion='reduce'] .mote { display: none; }
+html[data-petals='off'] .mote { display: none; }       /* the stored switch keeps its old key so saved settings still apply */
 /* high contrast: solid surfaces, full-strength ink and borders, no glass blur */
 html[data-contrast='high'] { --max-line: #000; }
 html[data-contrast='high'] .sticker, html[data-contrast='high'] .app-rail, html[data-contrast='high'] .top-bar,
@@ -1171,26 +1161,26 @@ button.auth-eye, button.auth-eye:hover, button.auth-eye:active { transform: none
   main.landing *, main.landing *::before, main.landing *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
   main.landing [class*='blur-['], main.landing [data-fx] { display: none !important; }
   main.landing .sky-rays { animation: none !important; }
-  main.landing .petal:nth-child(2n) { display: none; }
+  main.landing .mote:nth-child(2n) { display: none; }
   main.landing .stage { contain: paint; }
   main.landing .glass-pebble, main.landing .glass { background-color: rgb(255 252 244 / 0.94); }
   :root[data-theme='dark'] main.landing .glass-pebble, :root[data-theme='dark'] main.landing .glass { background-color: rgb(12 29 36 / 0.94); }
 }
 
 /* phones, app pages: cheap to paint, so a fast fling never shows an unpainted (sky-blue) card for a moment.
-   No glass blur (it re-blurs what is behind on every frame), still light rays, fewer petals; cards stay near-opaque */
+   No glass blur (it re-blurs what is behind on every frame), still light rays, fewer motes; cards stay near-opaque */
 @media (max-width: 767px) {
   .app-shell *, .app-shell *::before, .app-shell *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
   .app-shell .sky-rays { animation: none !important; }
-  .app-shell .petal:nth-child(2n) { display: none; }
+  .app-shell .mote:nth-child(2n) { display: none; }
   .app-shell .glass, .app-shell .glass-pebble, .app-shell .campus-card { background-color: rgb(255 252 244 / 0.95); }
   :root[data-theme='dark'] .app-shell .glass, :root[data-theme='dark'] .app-shell .glass-pebble, :root[data-theme='dark'] .app-shell .campus-card { background-color: rgb(12 29 36 / 0.95); }
 }
 
-/* phones, app pages: the sky is a plain painted background that scrolls with the page (no fixed layer, no petals, no
+/* phones, app pages: the sky is a plain painted background that scrolls with the page (no fixed layer, no motes, no
    moving rays), so a fast fling has nothing extra to repaint and never shows a blue, not-yet-painted box */
 @media (max-width: 767px) {
   .app-shell > .world-sky { position: absolute !important; }
-  .app-shell .petal, .app-shell .sky-rays { display: none !important; }
+  .app-shell .mote, .app-shell .sky-rays { display: none !important; }
   html:has(.app-shell) .aurora-layer, html:has(.app-shell) body::after { display: none !important; }
 }

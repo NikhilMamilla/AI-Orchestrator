@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, ArrowLeft, Eye, EyeOff, GraduationCap } from 'lucide-react';
 import { Script } from '../fx/ScriptWord';
 import ThemeToggle from '../fx/ThemeToggle';
+import Motes from '../fx/Motes';
 
 /**
  * The frame of the sign-in and sign-up pages, in the landing story's language: on wide screens the story's sky with
@@ -17,12 +18,7 @@ export function AuthShell({ title, mark, subtitle, error, children, footer }: {
     return (
         <div className="auth world world-sky relative flex h-[100svh] min-h-[600px] overflow-hidden max-lg:fixed max-lg:inset-0 max-lg:h-auto max-lg:min-h-0">
             <div aria-hidden className="world-layer sky-rays" />
-            <div aria-hidden className="world-layer">{Array.from({ length: 34 }, (_, i) => {
-                // the same fall as the top of the landing page: a lane each, neighbours far apart in time, three sizes and colours
-                const N = 34, size = [0.7, 1, 1.45][i % 3], tone = ['', ' petal-white', ' petal-deep'][(i * 7) % 3];
-                const dur = (24 - size * 6) + (i % 5) * 1.5, phase = ((i * 13) % N) / N;
-                return <span key={i} className={`petal${tone}`} style={{ left: `${((i + 0.5) / N) * 100}%`, width: `${16 * size}px`, height: `${10 * size}px`, opacity: 0.55 + size * 0.25, animationDelay: `${-phase * dur}s`, animationDuration: `${dur}s`, animationName: i % 2 ? 'petalFall' : 'petalFallAlt' }} />;
-            })}</div>
+            <div aria-hidden className="world-layer"><Motes /></div>
 
             <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-5 py-4 sm:px-8">
                 <Link to="/" className="group flex items-center gap-2.5">

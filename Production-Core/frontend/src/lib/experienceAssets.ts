@@ -34,16 +34,12 @@ export const EXPERIENCE_ASSETS = {
     camera1: PH('models/camera_1.glb', 'model', 'Stage 1: the animated camera path', 'our own camera path (Blender)'),
     handMatcap: PH('textures/matcap-hand.webp', 'texture', 'Stage 1: the sculpted hand\'s material', 'a matcap from github.com/nidorx/matcaps (CC0)'),
     humanHandsAtlas: PH('atlases/human_hands.ktx2', 'ktx2', 'Stages 1-2: skin textures and the hand mask', 'textures baked from the CC0 hand above'),
-    spcAtlas: PH('atlases/shards-petals-coins.ktx2', 'ktx2', 'Stage 1: petals (only the petal frames are used)', 'Poly Haven (CC0) petal photos'),
-    gardenAtlas: PH('atlases/garden-godrays.ktx2', 'ktx2', 'Stage 1: garden, pillars, sky and light rays', 'Poly Haven (CC0) HDRI crops and Pexels photos'),
     // stage 2: the glass
     glassShatter: PH('models/stage2_glass-shatter.glb', 'model', 'Stage 2: the pane that breaks (animated fracture)', 'Blender cell-fracture of our own pane'),
     glassShards: PH('models/glass_shards.glb', 'model', 'Stage 2: the shards that carry our evidence lines', 'Blender cell-fracture of our own pane'),
     handHuman2: PH('models/human_hand_2.glb', 'model', 'Stage 2: the hand that rises behind the glass', HAND),
     camera2: PH('models/camera_2.glb', 'model', 'Stage 2: the animated camera path', 'our own camera path (Blender)'),
     stage2Bg: PH('textures/stage2_background2.webp', 'texture', 'Stage 2: background', 'Pexels (free licence) abstract light'),
-    stage2Video: PH('videos/stage2_background_video-desktop.mp4', 'video', 'Stage 2: moving background', 'Pexels (free licence) light loop'),
-    stage2VideoMobile: PH('videos/stage2_background_video-mobile.mp4', 'video', 'Stage 2: moving background (phones)', 'Pexels (free licence) light loop'),
     // stage 3: what wasted study burns
     moneyShredsAtlas: PH('atlases/leather-money-shreds.ktx2', 'ktx2', 'Stage 3: paper shreds and the burning bill (no quote cards)', 'Poly Haven (CC0) paper textures'),
     moneyHand: PH('textures/stage3_money-hand.webp', 'texture', 'Stage 3: the hand holding the bill', 'Pexels (free licence) photo'),
@@ -81,7 +77,7 @@ export function assetUrl(key: AssetKey): string | null {
 
 /** What each stage loads; the next stage's set is prefetched while the current one plays. */
 export const STAGE_ASSETS: Record<'believed' | 'shatter' | 'burn' | 'tunnel' | 'city', AssetKey[]> = {
-    believed: ['loaderHand', 'handEth', 'handHuman', 'camera1', 'handMatcap', 'humanHandsAtlas', 'spcAtlas', 'gardenAtlas'],
+    believed: ['loaderHand', 'handEth', 'handHuman', 'camera1', 'handMatcap', 'humanHandsAtlas'],
     shatter: ['glassShatter', 'glassShards', 'handHuman2', 'camera2', 'stage2Bg', 'humanHandsAtlas', 'frostNormal'],
     burn: ['stage3Bg'],                                                 // the pages and the board are drawn in code
     tunnel: [],

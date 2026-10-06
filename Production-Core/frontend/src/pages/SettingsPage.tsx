@@ -494,8 +494,8 @@ function AppearanceSection({ say }: { say: (k: 'ok' | 'err', t: string) => void 
             </div>
             <Label>Comfort</Label>
             <div className="grid max-w-3xl gap-3 md:grid-cols-2">
-                <Switch on={ui.petals} onToggle={() => change({ petals: !ui.petals }, ui.petals ? 'Petals off.' : 'Petals back.')} title="Falling petals" note="The petals drifting across the background." />
-                <Switch on={ui.motion === 'reduce'} onToggle={() => change({ motion: ui.motion === 'reduce' ? 'full' : 'reduce' }, ui.motion === 'reduce' ? 'Motion back on.' : 'Motion reduced.')} title="Reduce motion" note="Stops petals, light rays and other decorative animation." />
+                <Switch on={ui.petals} onToggle={() => change({ petals: !ui.petals }, ui.petals ? 'Light motes off.' : 'Light motes back.')} title="Floating light" note="The soft light specks rising through the background." />
+                <Switch on={ui.motion === 'reduce'} onToggle={() => change({ motion: ui.motion === 'reduce' ? 'full' : 'reduce' }, ui.motion === 'reduce' ? 'Motion back on.' : 'Motion reduced.')} title="Reduce motion" note="Stops floating light, light rays and other decorative animation." />
                 <Switch on={ui.contrast} onToggle={() => change({ contrast: !ui.contrast }, ui.contrast ? 'Standard contrast.' : 'High contrast on.')} title="High contrast" note="Solid cards, full-strength text and borders, no glass blur." />
             </div>
         </div>

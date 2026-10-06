@@ -1,10 +1,9 @@
 import {
     Box3,
-    DoubleSide, Euler, Group, LinearFilter, Mesh, MeshBasicMaterial, PerspectiveCamera, PlaneGeometry, PMREMGenerator,
-    Quaternion, RepeatWrapping, Scene, ShaderMaterial, SRGBColorSpace, Vector2, Vector3, VideoTexture, BufferAttribute, type Object3D, type Texture,
+    DoubleSide, Euler, Group, Mesh, MeshBasicMaterial, PerspectiveCamera, PlaneGeometry, PMREMGenerator,
+    Quaternion, RepeatWrapping, Scene, ShaderMaterial, Vector2, Vector3, BufferAttribute, type Object3D, type Texture,
 } from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { assetUrl } from '../../../lib/experienceAssets';
 import { EVIDENCE_SHARDS } from '../../copy';
 import { canvasTexture, clamp01, fontsReady, SERIF, span } from '../../procedural/common';
 import type { StageCtx, StageFactory } from '../../types';
@@ -12,7 +11,7 @@ import { cameraPath, dress, scrubbable, skin, tile } from './common';
 
 /**
  * Stage 2 on the placeholder assets. The last frame of stage 1 breaks along the cells of stage2_glass-shatter.glb
- * (the belief shatters); behind it the curtain video plays and the hand of human_hand_2.glb rises on camera_2's path.
+ * (the belief shatters); behind it the curtain drifts and the hand of human_hand_2.glb rises on camera_2's path.
  * Then the pieces of glass_shards.glb rise past the camera, four of them carrying what Kiddoo does instead (README).
  */
 
@@ -28,25 +27,31 @@ const BG_SHARDS = [[-0.72, -0.28, -1.8], [0.64, -0.2, -2], [-0.95, -0.28, -2.2],
 const BG_ROT = [[0.3, 0.4, 0.2], [-0.25, 0.5, -0.35], [0.45, -0.3, 0.6], [-0.2, 0.35, 0.35], [0.55, -0.2, -0.45], [-0.4, 0.1, 0.65], [0.35, -0.5, -0.55], [-0.3, 0.45, 0.25], [0.2, -0.35, -0.4]];
 const BG_SCALE = [1.65, 1.4, 1.9, 1.5, 1.25, 1.75, 1.35, 1.2, 1.1];
 
-// the footage is a red curtain: it is recoloured by brightness into deep teal, so the stage matches the opening sky
-const RECOLOR = /* glsl */ `
-vec3 recolor(vec3 c) {
-    float v = clamp(max(c.r, max(c.g, c.b)) * 1.15, 0.0, 1.0);
+// the backdrop: a clean teal curtain, soft vertical light that drifts slowly (no footage: nothing noisy, nothing to download)
+const CURTAIN = /* glsl */ `
+vec3 palette(float v) {
     vec3 lo = vec3(0.004, 0.022, 0.032), mid = vec3(0.012, 0.13, 0.165), hi = vec3(0.16, 0.5, 0.53);
     return v < 0.5 ? mix(lo, mid, v * 2.0) : mix(mid, hi, (v - 0.5) * 2.0);
+}
+vec3 curtain(vec2 uv, float t) {
+    float beams = 0.0;
+    for (int i = 0; i < 3; i++) {
+        float f = float(i);
+        float cx = 0.2 + 0.3 * f + 0.05 * sin(t * 0.12 + f * 2.1);
+        float w = 0.085 + 0.02 * f;
+        float d = (uv.x - cx) / w;
+        beams += exp(-d * d) * (0.55 + 0.45 * sin(t * 0.18 + f * 1.7));
+    }
+    float v = 0.26 + 0.16 * (1.0 - uv.y) + 0.34 * beams * (0.55 + 0.45 * uv.y);
+    return palette(clamp(v, 0.0, 1.0));
 }`;
 const BG_VS = /* glsl */ `varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.9999, 1.0); }`;
-const BG_FS = RECOLOR + /* glsl */ `
-uniform sampler2D uVideo, uStill;
-uniform float uHasVideo, uHasStill, uToStill, uAspect, uVideoAspect, uStillAspect, uRed;
+const BG_FS = CURTAIN + /* glsl */ `
+uniform sampler2D uStill;
+uniform float uHasStill, uToStill, uAspect, uStillAspect, uRed, uTime;
 varying vec2 vUv;
-vec2 cover(vec2 uv, float texAspect) {
-    vec2 s = uAspect > texAspect ? vec2(1.0, texAspect / uAspect) : vec2(uAspect / texAspect, 1.0);
-    return (uv - 0.5) * s + 0.5;
-}
 void main() {
-    vec3 col = vec3(0.012, 0.09, 0.12);
-    if (uHasVideo > 0.5) col = recolor(texture2D(uVideo, cover(vUv, uVideoAspect)).rgb);
+    vec3 col = curtain(vUv, uTime);
     if (uHasStill > 0.5) col = mix(col, texture2D(uStill, vec2(vUv.x * uAspect, vUv.y) * 3.0).rgb, uToStill);
     float corner = pow(1.0 - vUv.y, 1.8) * (0.35 + 0.65 * abs(vUv.x - 0.5) * 2.0);   // dark pull into the bottom corners
     col *= 1.0 - corner * 0.7;
@@ -70,16 +75,11 @@ void main() {
     gl_Position = projectionMatrix * mv;
     vClip = gl_Position;
 }`;
-const GLASS_FS = RECOLOR + /* glsl */ `
-uniform sampler2D uVideo;
-uniform float uHasVideo, uAspect, uVideoAspect, uRed, uTime;
+const GLASS_FS = CURTAIN + /* glsl */ `
+uniform float uAspect, uRed, uTime;
 varying vec3 vN; varying vec3 vV; varying vec4 vClip;
-vec2 cover(vec2 uv, float texAspect) {
-    vec2 s = uAspect > texAspect ? vec2(1.0, texAspect / uAspect) : vec2(uAspect / texAspect, 1.0);
-    return (uv - 0.5) * s + 0.5;
-}
 vec3 behind(vec2 uv) {
-    vec3 c = uHasVideo > 0.5 ? recolor(texture2D(uVideo, cover(clamp(uv, 0.001, 0.999), uVideoAspect)).rgb) : vec3(0.012, 0.13, 0.165);
+    vec3 c = curtain(clamp(uv, 0.001, 0.999), uTime);
     return c * (1.0 + uRed * 0.5);
 }
 void main() {
@@ -181,26 +181,14 @@ const factory: StageFactory = async (ctx: StageCtx) => {
     const env = pmrem.fromScene(new RoomEnvironment(), 0.04);
     scene.environment = env.texture;
 
-    // background: the curtain video (phones get the small one), then the still at the end
-    const video = document.createElement('video');
-    // the curtain is a soft, blurred 18-frame loop: the 854x480 file looks the same as the 1080p one and uploads 4.5x less
-    const vurl = assetUrl('stage2VideoMobile');
-    let vtex: VideoTexture | null = null;
-    if (vurl) {
-        Object.assign(video, { src: vurl, muted: true, loop: true, playsInline: true, crossOrigin: 'anonymous' });
-        void video.play().catch(() => undefined);
-        vtex = new VideoTexture(video);
-        vtex.colorSpace = SRGBColorSpace;
-        vtex.minFilter = vtex.magFilter = LinearFilter;
-    }
+    // background: the clean curtain, then the still at the end
     const bgMat = new ShaderMaterial({
         vertexShader: BG_VS, fragmentShader: BG_FS, depthTest: false, depthWrite: false,
         uniforms: {
-            uVideo: { value: vtex }, uStill: { value: still }, uHasVideo: { value: 0 }, uHasStill: { value: still ? 1 : 0 }, uToStill: { value: 0 },
-            uAspect: { value: 1 }, uVideoAspect: { value: 16 / 9 }, uStillAspect: { value: 16 / 9 }, uRed: { value: 0 },
+            uStill: { value: still }, uHasStill: { value: still ? 1 : 0 }, uToStill: { value: 0 },
+            uAspect: { value: 1 }, uStillAspect: { value: 16 / 9 }, uRed: { value: 0 }, uTime: { value: 0 },
         },
     });
-    video.addEventListener('loadeddata', () => { bgMat.uniforms.uHasVideo.value = 1; bgMat.uniforms.uVideoAspect.value = video.videoWidth / Math.max(1, video.videoHeight); });
     if (still) { still.wrapS = still.wrapT = RepeatWrapping; still.needsUpdate = true; }
     const bg = new Mesh(new PlaneGeometry(2, 2), bgMat);
     bg.frustumCulled = false;
@@ -264,10 +252,9 @@ const factory: StageFactory = async (ctx: StageCtx) => {
     const glass = new ShaderMaterial({
         vertexShader: GLASS_VS, fragmentShader: GLASS_FS, transparent: true, depthWrite: false, side: DoubleSide,
         uniforms: {
-            uVideo: { value: vtex }, uHasVideo: { value: 0 }, uAspect: { value: 1 }, uVideoAspect: { value: 16 / 9 }, uRed: { value: 0 }, uTime: { value: 0 },
+            uAspect: { value: 1 }, uRed: { value: 0 }, uTime: { value: 0 },
         },
     });
-    video.addEventListener('loadeddata', () => { glass.uniforms.uHasVideo.value = 1; glass.uniforms.uVideoAspect.value = video.videoWidth / Math.max(1, video.videoHeight); });
     const nodes = new Map<string, Object3D>();
     shards.scene.traverse((o) => { if (o.name) nodes.set(o.name, o); });
     const shardGroup = new Group();
@@ -364,6 +351,7 @@ const factory: StageFactory = async (ctx: StageCtx) => {
             bgMat.uniforms.uRed.value = Math.max(0, 1 - gate * 15) * 0.85 * (p > 0 ? 1 : 0);
             glass.uniforms.uRed.value = bgMat.uniforms.uRed.value;
             glass.uniforms.uTime.value = c.time;
+            bgMat.uniforms.uTime.value = c.time;
 
             // the end: the hand fades, the background settles on the still
             const fade = span(t, 0.85, 1);
@@ -388,8 +376,7 @@ const factory: StageFactory = async (ctx: StageCtx) => {
             }
         },
         dispose() {
-            video.pause(); video.removeAttribute('src'); video.load();
-            vtex?.dispose(); bgMat.dispose(); bg.geometry.dispose(); env.dispose(); pmrem.dispose();
+            bgMat.dispose(); bg.geometry.dispose(); env.dispose(); pmrem.dispose();
             hand.mat.dispose(); paneMat.dispose(); glass.dispose(); texts.forEach((x) => x.dispose());
             rigs.forEach((r) => r.mixer.stopAllAction()); paneRig.mixer.stopAllAction();
             camera.remove(paneRoot, shardGroup);

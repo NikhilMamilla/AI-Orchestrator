@@ -19,6 +19,7 @@ import IntroExperience from '../components/intro/IntroExperience';
 import { introWillPlay, prefersReducedMotion } from '../lib/introFlag';
 import HoldToStart from '../components/intro/HoldToStart';
 import StoryCards from '../experience/StoryCards';
+import Motes from '../components/fx/Motes';
 
 const Experience = lazy(() => import('../experience/Experience'));
 
@@ -350,13 +351,7 @@ export default function LandingPage() {
             {/* ━━━ HERO ━━━ */}
             <section id="top" data-anchor="right" className="stage world world-sky relative flex min-h-[100svh] items-center overflow-hidden pb-8 pt-20 lg:pt-20">
                 <div aria-hidden className="world-layer sky-rays" />
-                <div aria-hidden className="world-layer">{Array.from({ length: 34 }, (_, i) => {
-                    // a fuller fall, spaced out: each petal has its own lane across the width, and neighbouring lanes start far
-                    // apart in time, so they never bunch; three sizes (near ones larger and faster), pink, white and rose petals
-                    const N = 34, size = [0.7, 1, 1.45][i % 3], tone = ['', ' petal-white', ' petal-deep'][(i * 7) % 3];
-                    const dur = (24 - size * 6) + (i % 5) * 1.5, phase = ((i * 13) % N) / N;
-                    return <span key={i} className={`petal${tone}`} style={{ left: `${((i + 0.5) / N) * 100}%`, width: `${16 * size}px`, height: `${10 * size}px`, opacity: 0.55 + size * 0.25, animationDelay: `${-phase * dur}s`, animationDuration: `${dur}s`, animationName: i % 2 ? 'petalFall' : 'petalFallAlt' }} />;
-                })}</div>
+                <div aria-hidden className="world-layer"><Motes /></div>
 
                 <div className="relative z-10 mx-auto w-full max-w-7xl px-5 sm:px-6">
                     <div className="mx-auto max-w-4xl">

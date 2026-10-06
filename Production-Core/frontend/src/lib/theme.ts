@@ -80,6 +80,7 @@ export function setMotionReduced(on: boolean): void {
 }
 
 /* ── More appearance, kept per device in localStorage for a no-flash first paint, and synced to the server (prefs.ui) ── */
+// the floating-light switch keeps its old 'petals' names so saved settings still apply
 const TEXT_KEY = 'kiddoo-text', PETALS_KEY = 'kiddoo-petals', CONTRAST_KEY = 'kiddoo-contrast';
 const get = (k: string) => { try { return localStorage.getItem(k); } catch { return null; } };
 const put = (k: string, v: string | null) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch { /* ignore */ } };

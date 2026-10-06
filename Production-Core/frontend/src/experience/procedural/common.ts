@@ -34,7 +34,7 @@ export function keyframes<T extends Record<string, number>>(frames: [number, T][
     return { ...frames[frames.length - 1][1] };
 }
 
-/** A pearl-and-gold matcap drawn on a canvas: every hand, petal and coin is lit by it, so no lights are needed. */
+/** A pearl-and-gold matcap drawn on a canvas: every hand and coin is lit by it, so no lights are needed. */
 export function pearlMatcap(size = 256, tint = '#2b2d66') {
     const c = document.createElement('canvas');
     c.width = c.height = size;

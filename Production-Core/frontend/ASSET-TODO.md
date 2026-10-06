@@ -21,7 +21,7 @@ in `Production-Core/frontend/placeholder-assets/`. **They are not ours.**
 **Never used, whatever the mode**
 
 - `world.ktx2`: other companies' buildings.
-- `texts.ktx2` and the job statistics in `shards-petals-coins.ktx2`: third-party text and numbers.
+- `texts.ktx2`: third-party text and numbers.
 - The logo coins.
 - The quote cards: photos of real people with quotes attributed to them.
 - The diplomas: real universities' seals.
@@ -40,16 +40,12 @@ Every file below has a version drawn in code, which the production build uses in
 | `models/camera_1.glb` | Stage 1: the camera path | our own camera path (Blender) |
 | `textures/matcap-hand.webp` | Stage 1 and the gate: the hand's material | a matcap from github.com/nidorx/matcaps (CC0) |
 | `atlases/human_hands.ktx2` | Stages 1–2: skin textures and the hand mask | textures baked from the CC0 hand |
-| `atlases/shards-petals-coins.ktx2` | Stage 1: petals (only the petal frames are sampled) | Poly Haven (CC0) petal photos |
-| `atlases/garden-godrays.ktx2` | Stage 1: garden, pillars, sky, light rays | Poly Haven (CC0) HDRI crops, Pexels photos |
 | `models/stage2_glass-shatter.glb` | Stage 2: the stage 1 frame breaks along its cells | Blender cell-fracture of our own pane |
 | `models/glass_shards.glb` | Stage 2: the shards carrying Kiddoo's evidence lines | same |
 | `models/human_hand_2.glb` | Stage 2: the rising hand | Sketchfab CC0 / CC-BY rigged hand, or a MakeHuman (CC0) hand exported to glTF |
 | `models/camera_2.glb` | Stage 2: the camera path | our own camera path (Blender) |
 | `textures/frost_normal.webp` | Stage 2: the shards' surface | a CC0 frosted-glass normal map (ambientCG) |
 | `textures/stage2_background2.webp` | Stage 2: the closing grain | Pexels (free licence) abstract texture |
-| `videos/stage2_background_video-mobile.mp4` | Stage 2: the curtain (used on every screen) | Pexels (free licence) light loop |
-| `videos/stage2_background_video-desktop.mp4` | listed in the manifest; the mobile file is used instead (same look, 4.5× less upload) | — |
 | `textures/stage3_background1.webp` | Stage 3: background | Pexels (free licence) dark texture |
 | `atlases/clouds.ktx2`, `atlases/clouds-mobile.ktx2` | Stage 5: clouds over the city | Poly Haven (CC0) cloud textures |
 | `audio/amb_stage1.mp3` | Stage 1 ambience (sound is muted until turned on; production synthesises it) | Pixabay Music / Freesound CC0 ambient pad |

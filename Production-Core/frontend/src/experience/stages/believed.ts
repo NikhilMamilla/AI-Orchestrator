@@ -8,7 +8,7 @@ import type { StageFactory } from '../types';
 
 /**
  * Stage 1, "Every Learner is different … yet courses teach Everyone the same way."
- * The title card, then a hand rises from below and turns to reach across the screen; petals, gold coins and glass
+ * The title card, then a hand rises from below and turns to reach across the screen; light motes, gold coins and glass
  * shards start to drift; a second hand reaches back from the right. At the end a hold ring appears: holding it brings
  * the two hands together, the light swells, and the story cuts to white.
  */
@@ -47,10 +47,10 @@ const factory: StageFactory = async () => {
     const handA = procA, handB = procB;
     void handA; void handB;                                                // stage 1 is words only: the hands are not shown
 
-    // drifting petals (pearl), coins (gold) and glass shards (indigo)
+    // drifting motes (white), coins (gold) and glass shards (indigo)
     const R = rng(7);
     const kinds = [
-        { geo: new CircleGeometry(0.17, 14), mat: new MeshMatcapMaterial({ matcap, color: new Color('#fff1ea'), side: DoubleSide }), n: 34, sx: 1, sy: 0.62, sz: 1 },
+        { geo: new CircleGeometry(0.17, 14), mat: new MeshMatcapMaterial({ matcap, color: new Color('#ffffff'), side: DoubleSide }), n: 34, sx: 1, sy: 0.62, sz: 1 },
         { geo: new CylinderGeometry(0.15, 0.15, 0.035, 26), mat: new MeshMatcapMaterial({ matcap, color: new Color('#f0c95e') }), n: 16, sx: 1, sy: 1, sz: 1 },
         { geo: new TetrahedronGeometry(0.16), mat: new MeshMatcapMaterial({ matcap, color: new Color('#a9b0ff'), transparent: true, opacity: 0.75 }), n: 18, sx: 1.4, sy: 0.5, sz: 1 },
     ];
