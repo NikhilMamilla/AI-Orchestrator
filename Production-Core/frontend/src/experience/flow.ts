@@ -24,8 +24,8 @@ export interface StageSpec {
 
 export const STAGES: StageSpec[] = [
     { id: 'believed', name: 'Every learner', length: 2600, hold: { at: 0.95, ms: 1500, label: 'Tap & hold', advance: true }, xpOnHold: 100, flash: '#ffffff', tone: 'light' },
-    { id: 'shatter', name: 'Confident, not right', length: 5000, flash: '#b8323a', tone: 'dark' },
-    { id: 'burn', name: 'Wasted study', length: 2500, hold: { at: 0.95, ms: 1500, label: 'Tap & hold', advance: true }, xpOnHold: 300, flash: '#8e2a2e', tone: 'dark' },
+    { id: 'shatter', name: 'Confident, not right', length: 5000, flash: '#0d3a47', tone: 'dark' },
+    { id: 'burn', name: 'Wasted study', length: 2500, hold: { at: 0.95, ms: 1500, label: 'Tap & hold', advance: true }, xpOnHold: 300, flash: '#0f2238', tone: 'dark' },
     { id: 'tunnel', name: 'Five agents', length: 4600, creep: 0.026, flash: '#05060d', tone: 'dark' },
     { id: 'city', name: 'The DSA city', length: 2600, final: true, xpOnEnter: 500, flash: '#ffffff', tone: 'light' },
 ];

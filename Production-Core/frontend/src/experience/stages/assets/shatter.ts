@@ -28,8 +28,15 @@ const BG_SHARDS = [[-0.72, -0.28, -1.8], [0.64, -0.2, -2], [-0.95, -0.28, -2.2],
 const BG_ROT = [[0.3, 0.4, 0.2], [-0.25, 0.5, -0.35], [0.45, -0.3, 0.6], [-0.2, 0.35, 0.35], [0.55, -0.2, -0.45], [-0.4, 0.1, 0.65], [0.35, -0.5, -0.55], [-0.3, 0.45, 0.25], [0.2, -0.35, -0.4]];
 const BG_SCALE = [1.65, 1.4, 1.9, 1.5, 1.25, 1.75, 1.35, 1.2, 1.1];
 
+// the footage is a red curtain: it is recoloured by brightness into deep teal, so the stage matches the opening sky
+const RECOLOR = /* glsl */ `
+vec3 recolor(vec3 c) {
+    float v = clamp(max(c.r, max(c.g, c.b)) * 1.15, 0.0, 1.0);
+    vec3 lo = vec3(0.004, 0.022, 0.032), mid = vec3(0.012, 0.13, 0.165), hi = vec3(0.16, 0.5, 0.53);
+    return v < 0.5 ? mix(lo, mid, v * 2.0) : mix(mid, hi, (v - 0.5) * 2.0);
+}`;
 const BG_VS = /* glsl */ `varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.9999, 1.0); }`;
-const BG_FS = /* glsl */ `
+const BG_FS = RECOLOR + /* glsl */ `
 uniform sampler2D uVideo, uStill;
 uniform float uHasVideo, uHasStill, uToStill, uAspect, uVideoAspect, uStillAspect, uRed;
 varying vec2 vUv;
@@ -38,12 +45,12 @@ vec2 cover(vec2 uv, float texAspect) {
     return (uv - 0.5) * s + 0.5;
 }
 void main() {
-    vec3 col = vec3(0.12, 0.0, 0.01);
-    if (uHasVideo > 0.5) col = texture2D(uVideo, cover(vUv, uVideoAspect)).rgb;
+    vec3 col = vec3(0.012, 0.09, 0.12);
+    if (uHasVideo > 0.5) col = recolor(texture2D(uVideo, cover(vUv, uVideoAspect)).rgb);
     if (uHasStill > 0.5) col = mix(col, texture2D(uStill, vec2(vUv.x * uAspect, vUv.y) * 3.0).rgb, uToStill);
     float corner = pow(1.0 - vUv.y, 1.8) * (0.35 + 0.65 * abs(vUv.x - 0.5) * 2.0);   // dark pull into the bottom corners
     col *= 1.0 - corner * 0.7;
-    col = mix(col, col * vec3(1.6, 0.35, 0.3), uRed);
+    col *= 1.0 + uRed * 0.5;                                                         // a bright pulse at the moment of impact
     gl_FragColor = vec4(col, 1.0);
     #include <colorspace_fragment>
 }`;
@@ -63,7 +70,7 @@ void main() {
     gl_Position = projectionMatrix * mv;
     vClip = gl_Position;
 }`;
-const GLASS_FS = /* glsl */ `
+const GLASS_FS = RECOLOR + /* glsl */ `
 uniform sampler2D uVideo;
 uniform float uHasVideo, uAspect, uVideoAspect, uRed, uTime;
 varying vec3 vN; varying vec3 vV; varying vec4 vClip;
@@ -72,8 +79,8 @@ vec2 cover(vec2 uv, float texAspect) {
     return (uv - 0.5) * s + 0.5;
 }
 vec3 behind(vec2 uv) {
-    vec3 c = uHasVideo > 0.5 ? texture2D(uVideo, cover(clamp(uv, 0.001, 0.999), uVideoAspect)).rgb : vec3(0.42, 0.04, 0.05);
-    return mix(c, c * vec3(1.6, 0.35, 0.3), uRed);
+    vec3 c = uHasVideo > 0.5 ? recolor(texture2D(uVideo, cover(clamp(uv, 0.001, 0.999), uVideoAspect)).rgb) : vec3(0.012, 0.13, 0.165);
+    return c * (1.0 + uRed * 0.5);
 }
 void main() {
     vec3 N = normalize(vN), V = normalize(vV);
@@ -348,7 +355,7 @@ const factory: StageFactory = async (ctx: StageCtx) => {
             hand.at(handT(p));
             path.follow(camera, dt, c.pointer);
 
-            // the glass breaks during the gate; a red pulse at the moment of impact
+            // the glass breaks during the gate; a light pulse at the moment of impact
             const breakT = clamp01(span(gate, 0.15, 1) * 1.2);
             if (!shattered && breakT > 0) { shattered = true; }
             if (shattered && p < 0.01) shattered = false;
@@ -361,7 +368,7 @@ const factory: StageFactory = async (ctx: StageCtx) => {
             // the end: the hand fades, the background settles on the still
             const fade = span(t, 0.85, 1);
             hand.mat.uniforms.uOpacity.value = atlas ? 1 - fade : 0;
-            bgMat.uniforms.uToStill.value = 0;                                   // it stays red to the end; the pages follow
+            bgMat.uniforms.uToStill.value = 0;                                   // it stays teal to the end; the pages follow
 
             const now = c.time;
             // the shards with words fly through on their own, between the gold lines, so the two never overlap

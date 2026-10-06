@@ -2,11 +2,11 @@ import { Group, Mesh, MeshMatcapMaterial, PerspectiveCamera, PlaneGeometry, Scen
 import { clamp01, ease, pearlMatcap, span } from '../../procedural/common';
 import { cameraPath, dress, scrubbable, skin, tile } from './common';
 import type { StageCtx, StageFactory } from '../../types';
-import { petals } from './petals';
+import { motes } from './motes';
 
 /**
  * Stage 1 ("Every learner is different") on the placeholder assets: the sculpted hand and the human hand (fancy_hand_2.glb, human_hand_1.glb),
- * the camera path of camera_1.glb, the hand textures and mask from human_hands.ktx2, petals, and the opening sky behind them. Scroll scrubs every animation; holding the ring plays the last part, where the hands
+ * the camera path of camera_1.glb, the hand textures and mask from human_hands.ktx2, drifting light motes, and the opening sky behind them. Scroll scrubs every animation; holding the ring plays the last part, where the hands
  * meet. The words on top are Kiddoo's (Overlays.tsx).
  */
 
@@ -41,9 +41,9 @@ function background() {
 
 const factory: StageFactory = async (ctx: StageCtx) => {
     const A = ctx.assets;
-    const [eth, human, cam, handsAtlas, spc] = await Promise.all([
+    const [eth, human, cam, handsAtlas] = await Promise.all([
         A.model('handEth'), A.model('handHuman'), A.model('camera1'),
-        A.texture('humanHandsAtlas'), A.texture('spcAtlas'),
+        A.texture('humanHandsAtlas'),
     ]);
     if (!eth || !human || !cam) return (await import('../believed')).default(ctx);   // assets missing: the procedural stage
 
@@ -71,8 +71,8 @@ const factory: StageFactory = async (ctx: StageCtx) => {
     hands.add(eth.scene, human.scene);
     scene.add(cam.scene);                                                  // stage 1 is words only: the hands are not shown
 
-    const flowers = spc ? petals(spc) : null;
-    if (flowers) scene.add(flowers.group);
+    const flowers = motes();
+    scene.add(flowers.group);
 
     const fwd = new Vector3();
     let entered = false;
@@ -97,7 +97,7 @@ const factory: StageFactory = async (ctx: StageCtx) => {
 
             path.follow(camera, dt, c.pointer);
 
-            if (flowers) {
+            {
                 flowers.setEntry(span(p, 0.25, 0.85));
                 fwd.set(0, 0, -0.7).applyQuaternion(camera.quaternion);
                 flowers.group.position.copy(camera.position).add(fwd);
@@ -105,7 +105,7 @@ const factory: StageFactory = async (ctx: StageCtx) => {
             }
         },
         dispose() {
-            bg.dispose(); ethMat.dispose(); ownMatcap.dispose(); hand.mat.dispose(); mask?.dispose(); flowers?.dispose();
+            bg.dispose(); ethMat.dispose(); ownMatcap.dispose(); hand.mat.dispose(); mask?.dispose(); flowers.dispose();
             rigs.forEach((r) => r.mixer.stopAllAction());
             hands.remove(eth.scene, human.scene); scene.remove(hands, cam.scene);                       // the models stay cached for a return visit
         },

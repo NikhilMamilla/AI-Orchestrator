@@ -64,9 +64,9 @@ function pageTexture(page: (typeof PAGES)[number]) {
 function boardTexture() {
     return canvasTexture(2400, 1500, (g) => {
         const gr = g.createRadialGradient(1200, 650, 150, 1200, 750, 1400);
-        gr.addColorStop(0, '#2f4d3e'); gr.addColorStop(1, '#14231b');
+        gr.addColorStop(0, '#2b4663'); gr.addColorStop(1, '#0e1b2e');
         g.fillStyle = gr; g.fillRect(0, 0, 2400, 1500);
-        const chalk = (a: number) => `rgba(226,238,230,${a})`;
+        const chalk = (a: number) => `rgba(228,236,244,${a})`;
         g.lineCap = 'round'; g.lineJoin = 'round';
         // top right: a prerequisite graph (the shape of the curriculum)
         const nodes: [number, number][] = [[1980, 170], [1800, 380], [2160, 380], [1980, 590], [2240, 610]];
@@ -89,12 +89,12 @@ uniform sampler2D uTex; uniform float uHasTex, uToGreen, uAspect, uTexAspect, uD
 varying vec2 vUv;
 void main() {
     vec2 s = uAspect > uTexAspect ? vec2(1.0, uTexAspect / uAspect) : vec2(uAspect / uTexAspect, 1.0);
-    vec3 a = uHasTex > 0.5 ? texture2D(uTex, (vUv - 0.5) * s + 0.5).rgb : vec3(0.06, 0.09, 0.07);
+    vec3 a = uHasTex > 0.5 ? texture2D(uTex, (vUv - 0.5) * s + 0.5).rgb : vec3(0.05, 0.07, 0.11);
     vec2 c = vec2((vUv.x - 0.5) * uAspect, vUv.y - 1.0);
     float r = min(length(c), 1.0);
-    vec3 g1 = vec3(134.0, 163.0, 144.0) / 255.0, g2 = vec3(68.0, 102.0, 82.0) / 255.0, g3 = vec3(34.0, 52.0, 42.0) / 255.0;
-    vec3 green = pow(r < 0.5 ? mix(g1, g2, r / 0.5) : mix(g2, g3, (r - 0.5) / 0.5), vec3(2.2));
-    gl_FragColor = vec4(mix(a, green, uToGreen) * uDim, 1.0);
+    vec3 g1 = vec3(78.0, 108.0, 142.0) / 255.0, g2 = vec3(38.0, 62.0, 92.0) / 255.0, g3 = vec3(14.0, 26.0, 46.0) / 255.0;
+    vec3 navy = pow(r < 0.5 ? mix(g1, g2, r / 0.5) : mix(g2, g3, (r - 0.5) / 0.5), vec3(2.2));
+    gl_FragColor = vec4(mix(a, navy, uToGreen) * uDim, 1.0);
     #include <colorspace_fragment>
 }`;
 
@@ -136,7 +136,7 @@ const factory: StageFactory = async (ctx: StageCtx) => {
     ash.mat.uniforms.uColor.value.set(0.85, 0.9, 0.85);
     scene.add(ash.points);
     const boardTex: Texture = boardTexture();
-    // soft edges, so the board melts into the green rather than ending in a hard rectangle
+    // soft edges, so the board melts into the navy rather than ending in a hard rectangle
     const edges = canvasTexture(256, 256, (g) => {
         const gr = g.createRadialGradient(128, 128, 100, 128, 128, 128);
         gr.addColorStop(0, '#fff'); gr.addColorStop(1, '#000');
@@ -175,7 +175,7 @@ const factory: StageFactory = async (ctx: StageCtx) => {
             camera.quaternion.multiply(tilt);
 
             bgMat.uniforms.uToGreen.value = span(p, 0.175, 0.35);
-            bgMat.uniforms.uDim.value = 1;                                       // the same green as behind "Guessing", to the end
+            bgMat.uniforms.uDim.value = 1;                                       // the board's navy, to the end
             if (!crackle && p > 0.05) { crackle = true; c.sound.fx('burn'); }
             if (crackle && p < 0.02) crackle = false;
 

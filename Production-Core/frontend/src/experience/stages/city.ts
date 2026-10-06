@@ -24,7 +24,7 @@ const AZIMUTH = Math.PI / 4, ELEV_MAP = 0.62, ELEV_SKY = 1.25, DIST_MAP = 74, DI
 const SKY_FS = /* glsl */ `
 varying vec2 vUv;
 void main() {
-    vec3 top = vec3(0.86, 0.93, 0.91), bot = vec3(0.97, 0.98, 0.97);
+    vec3 top = vec3(0.40, 0.70, 0.87), bot = vec3(0.78, 0.92, 0.95);   // the opening's blue, so white clouds stand out
     gl_FragColor = vec4(pow(mix(bot, top, vUv.y), vec3(2.2)), 1.0);
     #include <colorspace_fragment>
 }`;
@@ -201,11 +201,11 @@ const factory: StageFactory = async (ctx: StageCtx) => {
         const t = clouds.clone();
         t.offset.set(x / 2048, 1 - (y + h) / 2048); t.repeat.set(w / 2048, h / 2048); t.needsUpdate = true;
         cloudTex.push(t);
-        const s = new Sprite(new SpriteMaterial({ map: t, transparent: true, depthWrite: false, toneMapped: false }));
+        const s = new Sprite(new SpriteMaterial({ map: t, transparent: true, depthWrite: false, toneMapped: false, fog: false }));
         const ang = R() * Math.PI * 2, rad = i < 18 ? 2 + R() * 18 : 46 + R() * 20;
         const scale = (i < 18 ? 26 : 34) + R() * 16;
         s.scale.set(scale, scale * (h / w), 1);
-        s.userData = { ang, rad, y: i < 18 ? 22 + R() * 70 : 6 + R() * 6, base: i < 18 ? 1 : 0.55, ceiling: i < 18 };
+        s.userData = { ang, rad, y: i < 18 ? 22 + R() * 70 : 6 + R() * 6, base: i < 18 ? 1 : 0.85, ceiling: i < 18 };
         scene.add(s);
         return s;
     }) : [];
