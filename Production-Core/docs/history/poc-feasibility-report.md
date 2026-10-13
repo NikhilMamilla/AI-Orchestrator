@@ -1,5 +1,8 @@
 # Technical Feasibility Report — AI Learning Orchestrator
 
+> **Historical document.** Written during the early proof of concept and kept for context. The current design, stack and
+> status are in [ARCHITECTURE.md](../ARCHITECTURE.md); where this page disagrees, ARCHITECTURE.md is right.
+
 ## 📋 Executive Summary
 The Technical Feasibility and Proof of Concept (PoC) phase for the AI Learning Orchestrator has been successfully completed. We have validated all core components using a 100% free technology stack. The system demonstrates high performance (low latency), accurate retrieval, and a sustainable cost model.
 

@@ -43,6 +43,7 @@ study next, explains why, and lets you practise on real code that is actually ru
 | **Insights and Journal** | Decisions the five agents made for you, with their reasoning; badges from real progress; a learning journal you can export as a PDF. |
 | **Share with a teacher or parent** | A private link that you can revoke and that expires. It shows your progress, never your answers or anything you typed. |
 | **Settings and privacy** | Tutor tone, teaching style, session length, appearance, linked coding profiles (GitHub, LeetCode, Codeforces…), and full control over your data: export it, or delete part or all of it. |
+| **Landing story** | A first visit opens with a count to 26, a "draw a zero" gate and a five-part scroll story that ends in a city of the 22 roadmap domains. With reduced motion it is five still cards. See [FRONTEND](Production-Core/docs/FRONTEND.md). |
 | **Admin console** | For admins only: usage and answer-quality trends, content gaps, a question inspector, announcements and system health. Aggregates only, so no individual learner is identifiable. |
 
 ## How it works
@@ -78,12 +79,13 @@ study next, explains why, and lets you practise on real code that is actually ru
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 19, TypeScript, Vite, Tailwind CSS, framer-motion, three.js, Recharts, Monaco editor |
+| Frontend | React 19, TypeScript, Vite 7, Tailwind CSS, react-router, zustand, framer-motion, GSAP, three.js (landing story only), Recharts, Monaco editor |
 | Backend | Python 3.11, FastAPI, pydantic, psycopg 3 |
 | AI / search | sentence-transformers (bge-small embeddings, MiniLM cross-encoder, NLI model), Mistral / Gemini / Groq APIs |
 | Data | Supabase Postgres with pgvector and full-text search |
 | Sign-in | Firebase Authentication (sign-in only; all data stays in Postgres) |
 | Code execution | Judge0 CE |
+| Optional | Redis (agent message queue; nothing needs it), Hugging Face Inference (hosted embeddings on small servers) |
 | Tests and CI | pytest, Vitest, ESLint, GitHub Actions |
 
 ## Run it on your computer
@@ -181,7 +183,12 @@ The backend reads `Production-Core/backend/.env`; the template is
 | `ADMIN_EMAILS` | optional | Comma-separated admin emails (they count only once verified) |
 | `ALLOWED_ORIGINS` | yes in production | The frontend URL(s) allowed to call the API |
 | `ENV` | yes in production | Set to `production` to switch off all development shortcuts and the API docs |
-| `JUDGE0_API_URL` | optional | Code-execution server (defaults to the free public Judge0 CE) |
+| `JUDGE0_API_URL`, `JUDGE0_API_KEY` | optional | Code-execution server (defaults to the free public Judge0 CE; the key is only for RapidAPI) |
+| `ADMIN_MIN_GROUP` | optional | Smallest learner group the admin console will show (default 5, production only) |
+| `RAG_RATE_LIMIT_PER_MIN` | optional | Ask requests per user per minute (default 20) |
+| `REDIS_URL` | optional | Agent message queue; the app works without it |
+| `AUTH_DISABLED` | development only | Treats every request as one dev user; the server refuses to start with it when `ENV=production` |
+| `SUPABASE_URL`, `SUPABASE_JWT_SECRET` | legacy | Only for projects that sign in with Supabase Auth instead of Firebase |
 | `RAG_NEURAL` | optional | `true` uses the AI models for search and checking; `false` uses a lightweight offline mode |
 | `EMBEDDINGS`, `HF_TOKEN` | optional | `EMBEDDINGS=hosted` with a Hugging Face token runs without PyTorch (for small servers) |
 
@@ -193,6 +200,7 @@ The frontend reads `Production-Core/frontend/.env.local`; the template is
 | `VITE_API_URL` | Backend URL (default `http://localhost:8000/api/v1`) |
 | `VITE_WS_URL` | Backend WebSocket URL (default `ws://localhost:8000/api/v1/ws`) |
 | `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_APP_ID` | Firebase web config |
+| `VITE_PLACEHOLDERS` | Landing story assets: on by default in `npm run dev`, `off` disables them, `ship` includes them in a build (the maintainer's hosted site only; see [ASSET-TODO](Production-Core/frontend/ASSET-TODO.md)) |
 
 **Never commit `.env` or `.env.local`.** Both are already excluded by `.gitignore`.
 
@@ -200,11 +208,11 @@ The frontend reads `Production-Core/frontend/.env.local`; the template is
 
 ```bash
 # backend (from Production-Core/, offline: no network or models needed)
-python -m pytest                                   # 214 tests
+python -m pytest                                   # 221 tests
 
 # frontend (from Production-Core/frontend/)
 npm run lint
-npm test                                           # 31 tests
+npm test                                           # 31 tests in 5 files
 npm run build                                      # type-check, build, and verify the bundle
 
 # end to end against a running backend (from Production-Core/)
@@ -222,36 +230,37 @@ GitHub Actions runs the backend tests and the frontend lint, tests and build on 
 .
 ├── LICENSE                  copyright and terms of use
 ├── README.md                this file
-├── curriculum/              the DSA roadmap the course notes follow
-├── .github/                 CI workflows and the pull-request template
+├── curriculum/              the DSA roadmap (22 domains) the course notes and the landing city follow
+├── .github/                 CI workflows (backend, frontend, backend image) and the pull-request template
+├── .vercel/, .vercelignore  frontend deploy target and what is never uploaded
 └── Production-Core/
     ├── backend/
     │   ├── app/
     │   │   ├── api/v1/      HTTP, streaming and WebSocket endpoints
     │   │   ├── rag/         search, reranking, answer generation, checking, safety guard, evaluation
     │   │   ├── agents/      the five agents (Orchestrator, Knowledge, Teaching, Assessment, Analyst)
-    │   │   ├── learning/    mastery, reviews, roadmap, challenges, journal, preferences, coding profiles
+    │   │   ├── learning/    mastery, reviews, roadmap, challenges, teach-back, sketch, journal, preferences, coding profiles
     │   │   ├── admin/       admin statistics (aggregates only), question inspector, audit log
-    │   │   ├── services/    database, models and shared services
-    │   │   └── tests/       the backend test suite
-    │   ├── requirements.txt
-    │   └── Dockerfile
+    │   │   ├── services/    database, LLM access, code execution, shared services
+    │   │   └── tests/       the backend test suite (221 tests, offline)
+    │   ├── requirements*.txt, Dockerfile (full), Dockerfile.server (small hosts)
     ├── frontend/
     │   ├── src/
     │   │   ├── pages/       one file per screen (Ask, Learn, Challenges, Settings…)
-    │   │   ├── components/  shared UI pieces
+    │   │   ├── components/  shared UI pieces (ask, learn, concepts, intro, fx…)
     │   │   ├── admin/       the admin console
     │   │   ├── experience/  the animated landing story
-    │   │   └── lib/         API clients, auth, helpers
+    │   │   └── lib/, hooks/, store/   API client, Firebase auth, preferences, helpers
+    │   ├── ASSET-TODO.md    which third-party story files may be used where
     │   └── package.json
-    ├── supabase/migrations/ the database schema, in order
+    ├── supabase/migrations/ the database schema (0001 to 0010), in order
     ├── data/
     │   ├── knowledge/       the 26 course notes (the only source of answers)
-    │   ├── challenges/      coding and debugging challenges with hidden tests
-    │   └── eval/            labelled questions for measuring quality
-    ├── docs/                architecture, setup, security, RAG, learning, evaluation results
+    │   ├── challenges/      11 coding and debugging challenges with hidden tests
+    │   └── eval/            labelled questions and attack prompts for measuring quality
+    ├── docs/                architecture, frontend, setup, security, RAG, learning, agents, evaluation results
     ├── scripts/             migrate, ingest knowledge, smoke test, build/verify challenges
-    └── infrastructure/      Docker Compose files
+    └── infrastructure/      Docker Compose files (stack with Redis; self-hosted Judge0)
 ```
 
 ## Deploying
@@ -265,7 +274,11 @@ GitHub Actions runs the backend tests and the frontend lint, tests and build on 
 * **Backend, larger hosts (~1.5 GB RAM):** `backend/Dockerfile` bakes the three models into the image for full quality.
 * For either one, set `ENV=production` and `ALLOWED_ORIGINS=<your frontend URL>` plus the keys above.
 * **Frontend:** any static host (Vercel, Netlify, Cloudflare Pages). Run `npm run build`, publish `dist/`, and set the
-  `VITE_*` variables. Add the site's domain under Firebase → Authentication → **Authorised domains**.
+  `VITE_*` variables. Add the site's domain under Firebase → Authentication → **Authorised domains**, and its URL to the
+  backend's `ALLOWED_ORIGINS`.
+* **The maintainer's hosted site** is deployed with the Vercel CLI (`npx vercel deploy --prod`) from a machine that holds
+  the landing story's third-party asset files, which are not in git. **Pushing to GitHub does not update it.** A default
+  build, as anyone else gets, draws the whole story in code.
 * Free hosts sleep when idle. The first request after a quiet spell takes up to a minute while the backend wakes up.
 
 Full details are in [docs/SETUP.md](Production-Core/docs/SETUP.md).
@@ -286,13 +299,17 @@ More fixes are in [docs/TROUBLESHOOTING.md](Production-Core/docs/TROUBLESHOOTING
 
 | Document | About |
 |---|---|
-| [ARCHITECTURE](Production-Core/docs/ARCHITECTURE.md) | How the pieces fit together |
+| [ARCHITECTURE](Production-Core/docs/ARCHITECTURE.md) | How the pieces fit together, the data model and the deployment topology |
+| [FRONTEND](Production-Core/docs/FRONTEND.md) | The app's structure, the shared look and the landing story |
 | [SETUP](Production-Core/docs/SETUP.md) | Installation and deployment, in full |
 | [RAG](Production-Core/docs/RAG.md) | The search and answer pipeline, and how it was measured |
-| [LEARNING](Production-Core/docs/LEARNING.md) | Mastery, reviews, roadmap, agents and the landing story |
-| [SECURITY](Production-Core/docs/SECURITY.md) | Threat model and protections |
+| [LEARNING](Production-Core/docs/LEARNING.md) | Mastery, reviews, roadmap, the five agents' behaviour and the landing story |
+| [Agents](Production-Core/docs/agents/) | One page per agent: what is real, what is a placeholder |
+| [SECURITY](Production-Core/docs/SECURITY.md) | Threat model, protections and known limits |
 | [DEMO](Production-Core/docs/DEMO.md) | A guided tour of the main features |
-| [Evaluation results](Production-Core/docs/eval/results.md) | Retrieval-quality measurements |
+| [TROUBLESHOOTING](Production-Core/docs/TROUBLESHOOTING.md) | Symptoms we hit and their fixes |
+| [Evaluation results](Production-Core/docs/eval/results.md) | Retrieval-quality measurements (more reports in the same folder) |
+| [ASSET-TODO](Production-Core/frontend/ASSET-TODO.md) | Third-party story assets: where allowed, what replaces them |
 
 ## Copyright and licence
 

@@ -1,4 +1,4 @@
-# 🤖 Knowledge Curator Agent
+# Knowledge Curator Agent
 
 ## Overview
 The Knowledge Curator Agent is the primary content orchestration engine for the Kiddoo educational platform. It is responsible for retrieving, ranking, and adapting educational content from the curated Master Class dataset.
@@ -20,6 +20,9 @@ graph TD
     RAG --> ConceptService[Concept Service]
     ConceptService --> VectorDB
 ```
+
+Both endpoints require a signed-in user. The hybrid pipeline behind them is described in [RAG.md](../RAG.md); the *Ask* page
+uses it directly through `POST /api/v1/rag/ask`.
 
 ## API Specification
 ### Content Retrieval

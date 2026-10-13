@@ -15,8 +15,13 @@ in `Production-Core/frontend/placeholder-assets/`. **They are not ours.**
   and the check still fails on them and on paid font names. The files stay out of git: the Vercel CLI uploads them
   from the local folder.
 
-**Decided 2026-10-02:** neutral assets only, dev only, for now. The decision is recorded in
-`src/lib/experienceAssets.ts`, which also lists each file's purpose.
+**Decided 2026-10-02:** neutral assets only. On 2026-10-03 the owner chose to ship them on the hosted site too. The
+decision is recorded in `src/lib/experienceAssets.ts`, which also lists each file's purpose.
+
+**Drawn in code, no file needed (since 2026-10):** stage 1's background (the opening teal sky gradient, kept for the whole
+stage), the floating light motes, and stage 2's teal curtain. The garden image, the petal atlas
+(`shards-petals-coins.ktx2`), the garden atlas (`garden-godrays.ktx2`) and the curtain videos
+(`stage2_background_video-*.mp4`) are no longer loaded by anything and are not listed below.
 
 **Never used, whatever the mode**
 
@@ -65,6 +70,7 @@ Every file below has a version drawn in code, which the production build uses in
 
 | File(s) | Why |
 |---|---|
+| `atlases/garden-godrays.ktx2`, `atlases/shards-petals-coins.ktx2`, `videos/stage2_background_video-*.mp4` | Replaced by the code-drawn sky, light motes and teal curtain; nothing loads them |
 | `atlases/leather-money-shreds.ktx2`, `textures/stage3_money-hand.webp` | Stage 3 burns our own pages of study notes (drawn in code), not money |
 | `atlases/board-certificates.ktx2` | Stage 3 draws its own sharp chalkboard (the mastery update, review schedule, prerequisite graph) |
 | `models/tunnel_new_new.glb` | Its twisted, lobed profile filled the view; the tunnel is our own tube and shader |

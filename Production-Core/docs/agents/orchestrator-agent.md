@@ -1,39 +1,47 @@
-# Orchestrator Agent 🕹️
+# Orchestrator Agent
 
-The **Orchestrator Agent** is the "Pedagogical Brain" of the Kiddoo platform. It acts as the master coordinator, synchronizing Knowledge, Teaching, Assessment, and Analyst agents to create a seamless, adaptive learning experience.
+The coordinator of the five agents. Overview of all five: [ARCHITECTURE.md](../ARCHITECTURE.md#agents); the learner-facing
+adaptive rules (mastery, session plan, goals, placement) are in [LEARNING.md](../LEARNING.md).
 
-## Responsibilities
-- **Session Lifespan Management**: Handles the creation, state maintenance, and conclusion of learning sessions.
-- **Agent Synchronization**: Uses a Message Queue (MQ) to delegate tasks and aggregate results from specialized agents.
-- **Pedagogical Strategy**: Employs a Decision Engine and Session Planner to adapt the curriculum in real-time.
-- **Adaptive Remediation**: Orchestrates the loop between assessment failure and prerequisite review.
+## Two layers, stated plainly
 
-## Architecture
+| Layer | Code | What it does today |
+|---|---|---|
+| **Learner-facing decisions** | `learning/policy.py`, `planner.py`, `goals.py`, `diagnostic.py` | The real adaptive loop behind *Learn*, *Insights* and *Today's plan*: advance / deepen / review / remediate, the 60/25/15 plan, goal feasibility, placement. Computed from recorded answers; every decision is written to `agent_events` with its reasoning. |
+| **Agent framework** | `agents/orchestrator/` | The original agent-protocol implementation used by the live session (`/ws/session/{id}`) and `/sessions/*`. |
 
-### 1. Decision Engine (`decision_engine.py`)
-The logic center that determines the student's next state based on performance, fatigue, and mastery.
-- **States**: `ADVANCE`, `REVIEW`, `REMEDIATE`, `CONTINUE`, `SUGGEST_BREAK`, `SWITCH_MODALITY`.
+## `agents/orchestrator/`
 
-### 2. Session Planner (`session_planner.py`)
-Generates structured learning paths and daily session goals.
-- Uses LLM (Grok) to customize paths based on student goals and available time.
+* **`decision_engine.py`**: `DecisionEngine.decide_next_action` returns one of `ADVANCE`, `DEEPEN`, `REVIEW`, `REMEDIATE`,
+  `SWITCH` (teaching strategy) or `BREAK` (a critical-issue check runs first, for example fatigue), each with a reason,
+  the next concept and a recommended strategy.
+* **`session_planner.py`**: `SessionPlanner` builds quick, standard and extended session plans from the learner's profile
+  and goal, and `plan_learning_path` finds a concept path from where the learner is to a goal.
+* **`agent.py`**: `OrchestratorAgent` starts a session (`start_learning_session`), greets the learner, processes each
+  response (`process_student_response`), generates the tutor reply, and emits agent events to the learner's event log.
 
-### 3. Orchestration Logic (`agent.py`)
-The core class that implements the message-passing protocol.
-- **`start_learning_session`**: Kickstarts the brain by planning the path and requesting the first lesson.
-- **`process_student_response`**: The main entry point for interaction, routing data to Analysts or Evaluators as needed.
+## What is real in the live session, and what is a placeholder
 
-## Communication Pattern
-The Orchestrator communicates via Redis Pub/Sub topics:
-- `knowledge.requests`: Fetches content.
-- `teaching.requests`: Requests lesson generation.
-- `assessment.requests`: Triggers question generation.
-- `analyst.requests`: Requests deep behavioral analysis.
+| Step in `OrchestratorAgent` | Status |
+|---|---|
+| Session plan, greeting, decision engine, tutor reply, event emission | Real |
+| Lesson text (`_request_lesson`) | Real: one call to the shared LLM router (Mistral → Gemini → Groq) |
+| Content package (`_request_content`) | **Placeholder**: builds a title and one sentence from the concept id; it does not call the Knowledge agent |
+| Answer evaluation (`_evaluate_answer`) | **Placeholder**: returns a fixed "correct, 0.8" result |
+| Session analysis (`_request_analysis`) | **Partly placeholder**: publishes an `analyst.requests` message to Redis (if connected) and returns a fixed result |
+| Re-explanation (`_adapt_teaching`) | **Placeholder**: returns a fixed sentence |
 
-## LLM Integration
-Powered by **Grok (xAI)** via the centralized `LLMService`.
-- Model: `grok-beta`
-- Primary use cases: Strategy selection, session planning, and reasoning about student performance.
+The real Knowledge, Teaching, Assessment and Analyst agents are fully wired behind the **`/agents/*` REST endpoints**
+(and their own pages). The measured, adaptive behaviour learners see in *Learn*, *Insights* and *Challenges* comes from the
+`learning/` modules, not from this live-session path. Connecting these placeholders to the real agents is the open
+work item for the live-session loop.
 
-## Status: 100% Operational ✅
-Verified through end-to-end integration tests (`test_complete_loop.py`).
+## Messaging
+
+`services/message_queue.py` wraps Redis pub/sub and is **optional**: with no Redis the orchestrator still runs and
+nothing else depends on it (the admin *System* page lists Redis as optional). The only channel the orchestrator publishes
+to today is `analyst.requests`.
+
+## Verification
+
+`python -m pytest backend/app/tests/test_learning` covers the learner-facing policy, planner, goals, diagnostic and analyst rules.

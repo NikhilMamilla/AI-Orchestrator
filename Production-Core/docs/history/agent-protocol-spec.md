@@ -1,5 +1,8 @@
 # AGENT COMMUNICATION PROTOCOL SPECIFICATION
 
+> **Historical document.** Written during the early proof of concept and kept for context. The current design, stack and
+> status are in [ARCHITECTURE.md](../ARCHITECTURE.md); where this page disagrees, ARCHITECTURE.md is right.
+
 ## Message Format (Standard)
 ```json
 {

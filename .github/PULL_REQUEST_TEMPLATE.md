@@ -13,4 +13,6 @@ Briefly describe the changes in this PR.
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] My changes generate no new warnings
 - [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] New and existing unit tests pass locally with my changes
+- [ ] New and existing unit tests pass locally with my changes (`python -m pytest` in `Production-Core/`, `npm test` and `npm run build` in `Production-Core/frontend/`)
+- [ ] I updated the docs that this change makes untrue (`Production-Core/docs/`, the README, `ASSET-TODO.md`)
+- [ ] No secrets, `.env` files or third-party story assets are included

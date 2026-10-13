@@ -1,42 +1,40 @@
-# 🤖 Teaching Agent (Adaptive Pedagogy)
+# Teaching Agent (Adaptive Pedagogy)
 
-## Overview
-The Teaching Agent is the "Professor" of the Kiddoo system. It takes raw educational content from the Knowledge Agent and transforms it into a personalized lesson using advanced pedagogical strategies.
+Turns a content package from the Knowledge agent into a lesson in one of five teaching strategies. Overview of all agents:
+[ARCHITECTURE.md](../ARCHITECTURE.md#agents).
 
-## Teaching Strategies
-The agent dynamically selects from five primary strategies:
-- **Analogy-Based**: Best for beginners or introducing new abstract concepts.
-- **Visual Teaching**: Uses ASCII diagrams and structural mapping for visual learners.
-- **Worked Examples**: Step-by-step problem solving for kinesthetic/hands-on learners.
-- **Socratic Method**: Interactive questioning to guide the student toward discovery.
-- **Incremental Complexity**: Scaffolding content from foundation to master level.
+## Strategies (`agents/teaching/strategies.py`)
 
-## Orchestration Logic
-1. **Selection**: Analyzes student level, learning style, and interest to pick the best starting strategy.
-2. **Generation**: Uses the `LLMService` (powered by **Groq**) to apply the strategy to the content.
-3. **Assessment**: Automatically embeds 2-3 comprehension check questions throughout the lesson.
-4. **Adaptation**: Can rewrite explanations in real-time if a student provides confusing feedback.
+| Strategy | Style |
+|---|---|
+| `analogy` | Everyday analogies; default for beginners |
+| `visual` | ASCII diagrams and structure maps; default for visual learners |
+| `worked_example` | Step-by-step problem solving; default for intermediate learners and hands-on learners |
+| `socratic` | Guiding questions toward discovery (interactive) |
+| `incremental` | Scaffolding from foundation to mastery; default for advanced learners and readers |
 
-## Architecture
-```mermaid
-graph LR
-    KA[Knowledge Agent] -- Content Package --> TA[Teaching Agent]
-    TA -- Context Aware --> LLM[Groq LLM Service]
-    LLM -- Strategy Applied --> Lesson[Dynamic Lesson]
-```
+## Flow (`agents/teaching/agent.py`)
 
-## Usage
-Lessons are served via the `AgentFactory` and integrated into the learning session websocket/API.
+1. **Select** (`_select_strategy`): if the previous strategy failed, try the next alternative; otherwise match the
+   learner's style (visual → `visual`, kinesthetic → `worked_example`, reading → `incremental`), otherwise choose by level.
+2. **Generate**: the strategy builds a prompt and calls `LLMService`, which uses the shared router
+   (Mistral → Gemini → Groq by default, `LLM_PROVIDERS`). If no provider answers, the agent returns a plain
+   "I can't reach the language model right now" message instead of inventing text.
+3. **Check**: comprehension-check questions are added to the lesson, and next steps are suggested.
+4. **Adapt** (`adapt_explanation`): rewrites an explanation when the learner reports confusion.
 
-### Sample Lesson Structure
+## Relation to the measured teaching-style bandit
+
+The learner-facing choice of style in *Learn* is made by `learning/strategy.py` (a per-learner Thompson-sampling bandit
+over `socratic`, `worked_example`, `analogy` and `default`, rewarded by the next check question). That is where
+"which style works for me" is measured; see [LEARNING.md](../LEARNING.md#meta-learning-strategypy). This agent applies a
+chosen strategy to content.
+
+## API
+
+`POST /api/v1/agents/teaching/teach` (authenticated; acts on the caller only).
+
 ```json
-{
-  "concept_title": "Binary Search",
-  "teaching_strategy": "analogy",
-  "lesson_content": {
-    "title": "Analogy: Binary Search",
-    "content": "...",
-    "comprehension_checks": "..."
-  }
-}
+{ "concept_title": "Binary Search", "teaching_strategy": "analogy",
+  "lesson_content": { "title": "Analogy: Binary Search", "content": "...", "comprehension_checks": "..." } }
 ```

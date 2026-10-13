@@ -97,12 +97,15 @@ prerequisite-aware unlocking, with no measurable extra benefit from remediation 
   There is no control group, and the page says so. **No real learner has used it yet.**
 * **Preferences** (`/settings`): tone (written into the tutor prompt), default teaching style, planned session length.
 * **Leaderboard** (opt-in, nickname only, points derived from measured mastery) and **delete my learning data**.
-* **Landing page**: an opening count (the real 26-concept, 51-link prerequisite graph), a "draw a zero" gate, then a
-  five-part scroll story (`frontend/src/experience`). Its words come from this file and the README. Its city is built
-  from `curriculum/dsa_roadmap.md`: the 22 domains, real prerequisite roads between them, and tool chips only where the
-  tool exists. Tests check all three against their sources. With reduced motion the story is five still cards.
+* **Landing page**: an opening count (`00` rolling to `26`, the concepts in the curriculum; typography only), a "draw a
+  zero" gate, then a five-part scroll story (`frontend/src/experience`, described in [FRONTEND.md](FRONTEND.md)). Its words
+  come from this file and the README. Its city is built from `curriculum/dsa_roadmap.md`: the 22 domains, roads
+  between them drawn only along real prerequisite links of the concept graph (51 links), and tool chips only where the tool exists. Tests
+  check the city against those sources. With reduced motion the story is five still cards.
   The story can use third-party placeholder assets: in development, and on the hosted site (`VITE_PLACEHOLDERS=ship`).
   A default build draws every stage itself and is checked to contain none of them (`frontend/ASSET-TODO.md`).
+* **Appearance** (`/settings`): theme, text size, floating light, reduced motion and high contrast, stored per device and
+  synced to the learner's preferences.
 
 ## Not built (honest scope)
 

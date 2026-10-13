@@ -1,6 +1,6 @@
 # The RAG pipeline
 
-Code: [`backend/app/rag/`](../backend/app/rag). Measured results: [`eval/RESULTS.md`](eval/RESULTS.md)
+Code: [`backend/app/rag/`](../backend/app/rag). Measured results: [`eval/results.md`](eval/results.md)
 (regenerate with `python -m backend.app.rag.evaluation --neural`).
 
 ```mermaid
@@ -66,8 +66,21 @@ prerequisites, tags`.
   generated answers and the verifier is a signal, not a guarantee: see [eval/verifier.md](eval/verifier.md).
 * **Confidence** = f(top rerank score, mean support, citation coverage, unsupported fraction, invalid
   citations) — measured signals, never the model's self-report.
-* **Degradation**: provider failover (Gemini → Groq) with cool-down; if all fail, an extractive answer
-  quoted from the evidence with citations.
+* **Degradation**: the LLM router tries the providers in `LLM_PROVIDERS` order (default Mistral → Gemini → Groq). Each
+  rotates its API keys and walks its own model list on 429/5xx, a failing provider goes on cool-down (long for a blocked
+  account or bad key, short for a rate limit), and identical concurrent requests share one call. If all fail, an
+  extractive answer quoted from the evidence is returned with citations (the UI badge reads "Quoted from sources").
+
+## Local and hosted modes
+
+| Setting | Embeddings | Reranker | Claim checker | Used for |
+|---|---|---|---|---|
+| `EMBEDDINGS=local`, `RAG_NEURAL=true` (default) | `bge-small-en-v1.5` in-process | MiniLM cross-encoder | NLI (`nli-deberta-v3-xsmall`) + overlap | Development and hosts with ~1.5 GB RAM (`backend/Dockerfile` bakes the models in) |
+| `EMBEDDINGS=hosted`, `HF_TOKEN` | the **same model** through Hugging Face Inference (identical vectors, so nothing is re-ingested) | lexical fallback | lexical + embedding overlap | Small free hosts such as Render's 512 MB plan (`backend/Dockerfile.server`, no PyTorch, peaks near 160 MB) |
+| `RAG_NEURAL=false`, empty `DATABASE_URL` | hashing embedder, SQLite FTS5 store | lexical fallback | lexical overlap | Offline development and the whole CI suite |
+
+If the hosted embedding service is down, search falls back to keywords instead of failing, and the trace records which
+scorer ran. Models load in the background at start-up (`rag_service.warm_up`), so pages that only read the store never wait.
 
 ## Evaluation
 

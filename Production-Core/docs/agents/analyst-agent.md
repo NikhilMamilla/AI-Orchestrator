@@ -1,7 +1,14 @@
 
-# Analyst Agent (Behavioral Analyst) 🧠📊
+# Analyst Agent (Behavioural Analyst)
 
 The Analyst Agent is responsible for transforming raw student performance and interaction data into deep pedagogical and behavioral insights. It identifies learning patterns, detects misconceptions, and predicts future performance to drive adaptive learning decisions.
+
+> The signals learners see in *Learn* and *Insights* (struggle, rapid-wrong, slow, repeated confusion, plateau,
+> overconfidence, best time of day, each with its evidence and a minimum sample size) are computed by the rule-based
+> `learning/analyst.py` (see [LEARNING.md](../LEARNING.md#behavioural-analyst-analystpy)). This agent is the broader
+> session-analysis module behind the `/agents/analyst/*` endpoints; its short narrative insights come from the LLM
+> router (if no provider answers, that text is the plain "can't reach the language model" message); the pattern,
+> misconception, fatigue and plateau figures are rule-based and do not depend on it.
 
 ## Architecture
 

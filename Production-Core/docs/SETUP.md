@@ -28,6 +28,7 @@ python -m venv venv && venv/Scripts/activate          # source venv/bin/activate
 pip install --extra-index-url https://download.pytorch.org/whl/cpu torch   # small CPU build
 pip install -r backend/requirements-dev.txt
 cp .env.example backend/.env                          # fill DATABASE_URL, FIREBASE_PROJECT_ID, MISTRAL_API_KEY, ADMIN_EMAILS
+python scripts/migrate.py                             # creates the tables (safe to run again)
 python scripts/ingest_knowledge.py                    # embeds data/knowledge into Supabase (first run downloads ~130 MB of models)
 uvicorn backend.app.main:app --reload                 # http://127.0.0.1:8000/docs
 ```
@@ -47,32 +48,53 @@ npm run dev                       # http://localhost:5173
 ## 5. Verify
 
 ```bash
-python -m pytest                                   # offline suite (no network, no models)
+python -m pytest                                   # 221 offline tests (no network, no models)
 python -m backend.app.rag.evaluation --neural      # retrieval ablation, writes docs/eval/results.json
 python -m backend.app.rag.evaluation --neural --pg # same against Supabase
 python scripts/smoke_test.py                       # end-to-end through the real SSE endpoint
-cd frontend && npm run build
+cd frontend && npm run lint && npm test && npm run build   # 31 tests; the build also runs scripts/check-dist.mjs
 ```
 
 ## Environment variables
 
-See `.env.example` (backend) and `frontend/.env.example` — every variable is documented there. Key ones: `DATABASE_URL`, `FIREBASE_PROJECT_ID`,
-`MISTRAL_API_KEY` (plus optional `GEMINI_API_KEY`, `GROQ_API_KEYS`), `ADMIN_EMAILS`, `ALLOWED_ORIGINS`, `ENV`.
+See `.env.example` (backend) and `frontend/.env.example`: every variable is documented there. The README has the full
+tables. Key ones: `DATABASE_URL`, `FIREBASE_PROJECT_ID`, `MISTRAL_API_KEY` (plus optional `GEMINI_API_KEY`,
+`GROQ_API_KEYS`, `LLM_PROVIDERS`), `ADMIN_EMAILS`, `ALLOWED_ORIGINS`, `ENV`, and for small servers `EMBEDDINGS=hosted` with
+`HF_TOKEN`. Optional: `REDIS_URL` (agent message queue; nothing breaks without it), `JUDGE0_API_URL` / `JUDGE0_API_KEY`,
+`ADMIN_MIN_GROUP`, `RAG_RATE_LIMIT_PER_MIN`. `AUTH_DISABLED=true` is for local development only and the server refuses
+to start with it when `ENV=production`.
 
-Docker instead: `cd infrastructure && docker compose up --build` (reads `backend/.env`). Self-hosted Judge0:
+Docker instead: `cd infrastructure && docker compose up --build` (starts Redis, the backend from `backend/Dockerfile`
+and the frontend dev server; reads `backend/.env`). Self-hosted Judge0:
 `docker compose -f docker-compose.judge0.yml up -d`. Something failing? See [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
 
 ## Deployment (free options)
 
-* Backend on a small free host (Render free web service, 512 MB): deploy the image
-  `ghcr.io/nikhilmamilla/kiddoo-backend:server` (`backend/Dockerfile.server`, published by
-  `.github/workflows/backend-image.yml`). Set `EMBEDDINGS=hosted`, `HF_TOKEN`, `ENV=production` and
-  `ALLOWED_ORIGINS=<frontend url>`, plus the keys from `.env.example`.
-* Backend on a host with ~1.5 GB RAM: `backend/Dockerfile` (models baked into the image, full quality).
-* Frontend: Vercel / Netlify / Cloudflare Pages (`npm run build`, publish `dist/`), with `VITE_API_URL`
-  and the `VITE_FIREBASE_*` values; add the site to Firebase → Authentication → Authorised domains.
-* Behind the host's proxy the backend image trusts `X-Forwarded-For` (`FORWARDED_ALLOW_IPS` in `backend/Dockerfile`), so
-  per-client rate limits see real clients. Do not expose that image directly to the internet without a proxy.
+**Backend**
+
+* Small free host (Render free web service, 512 MB): deploy the image `ghcr.io/nikhilmamilla/kiddoo-backend:server`
+  (`backend/Dockerfile.server`, published by `.github/workflows/backend-image.yml` on every push to `main` that touches
+  the backend or its data). Set `EMBEDDINGS=hosted`, `HF_TOKEN`, `ENV=production` and `ALLOWED_ORIGINS=<frontend url>`,
+  plus the keys from `.env.example`. The image has no PyTorch; the reranker and claim checker use their built-in
+  fallbacks, and the process peaks near 160 MB.
+* Host with ~1.5 GB RAM: `backend/Dockerfile` (the three models are baked into the image, full quality).
+* Behind the host's proxy the image trusts `X-Forwarded-For` (`FORWARDED_ALLOW_IPS`), so per-client rate limits see real
+  clients. Do not expose it directly to the internet without a proxy.
 * Rate limits are in memory, per process: run one backend process (the default), or move them to Redis before scaling out.
-* Free-tier note: the model weights download on first start; mount a cache volume or accept a one-off
-  cold start.
+* Free hosts sleep when idle, so the first request after a quiet spell can take up to a minute. Model weights download on
+  first start in the full image; mount a cache volume or accept a one-off cold start.
+
+**Frontend** (any static host works: Vercel, Netlify, Cloudflare Pages)
+
+* Build with `npm run build` and publish `dist/`, with `VITE_API_URL`, `VITE_WS_URL` and the `VITE_FIREBASE_*` values set.
+* Add the site's domain under Firebase → Authentication → **Authorised domains**, and the site's URL to the backend's
+  `ALLOWED_ORIGINS`.
+* **The maintainer's Vercel project** (`.vercel/project.json`, root `Production-Core/frontend`, `vercel.json` for caching,
+  security headers and the SPA rewrite) is deployed from a machine that holds the landing story's placeholder asset
+  files, which are not in git: `npx vercel deploy --prod` uploads the local folder (`.vercelignore` excludes secrets,
+  the Python environment, dependencies and build output), and the Vercel env var `VITE_PLACEHOLDERS=ship` makes the build
+  include them. **A `git push` does not update that site.** Anyone else deploying gets the code-drawn story, which needs
+  no extra files. Details: [FRONTEND.md](FRONTEND.md) and [../frontend/ASSET-TODO.md](../frontend/ASSET-TODO.md).
+
+**CI** (GitHub Actions): backend tests on `Production-Core/backend|data|supabase` changes; frontend lint, tests and build
+on `Production-Core/frontend`, `curriculum` and challenge changes; the backend image on `main`.
