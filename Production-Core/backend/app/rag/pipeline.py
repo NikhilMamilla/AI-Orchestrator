@@ -116,7 +116,7 @@ class RAGPipeline:
             with trace.stage("screen"):
                 await emit("screen")
                 q = screen_query(query)
-                if self.guard is not None and self.guard.score(q) >= self.cfg.semantic_guard_threshold:
+                if self.guard is not None and await asyncio.to_thread(self.guard.score, q) >= self.cfg.semantic_guard_threshold:
                     raise QueryRejected(                       # paraphrased / translated / obfuscated attack
                         "That looks like an attempt to change my instructions. Ask a question about the "
                         "learning material instead.", "prompt_injection")
@@ -159,9 +159,11 @@ class RAGPipeline:
                 st.update(model=self.reranker.name if self.cfg.use_rerank else "off", kept=len(ranked))
             with trace.stage("context") as st:
                 await emit("context")
-                evidence = build_evidence(
-                    plan.original, ranked, self.store, self.titles(), max_items=self.cfg.evidence_items,
-                    char_budget=900 if self.cfg.use_compression else 10_000)
+                titles = await asyncio.to_thread(self.titles)                  # database reads: off the event loop
+                evidence = await asyncio.to_thread(
+                    lambda: build_evidence(
+                        plan.original, ranked, self.store, titles, max_items=self.cfg.evidence_items,
+                        char_budget=900 if self.cfg.use_compression else 10_000))
                 st.update(evidence=len(evidence))
         except Exception as e:
             logger.exception("retrieval failure")
