@@ -67,7 +67,8 @@ class AnswerEvaluator:
         
         correct_answer = question["correct_answer"]
         # Normalize answer: handle "A", "A)", "Option A"
-        clean_answer = re.sub(r'[^A-D]', '', answer.upper()[:2])
+        m = re.match(r"^\s*(?:option\s+|answer\s*[:\-]?\s*)?\(?([A-Da-d])(?![A-Za-z])", answer or "", re.I)
+        clean_answer = m.group(1).upper() if m else ""
         is_correct = clean_answer == correct_answer.upper()
 
         feedback = question.get("explanation", "")
