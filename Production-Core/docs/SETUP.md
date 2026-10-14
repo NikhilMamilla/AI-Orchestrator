@@ -78,8 +78,12 @@ and the frontend dev server; reads `backend/.env`). Self-hosted Judge0:
   plus the keys from `.env.example`. The image has no PyTorch; the reranker and claim checker use their built-in
   fallbacks, and the process peaks near 160 MB.
 * Host with ~1.5 GB RAM: `backend/Dockerfile` (the three models are baked into the image, full quality).
-* Behind the host's proxy the image trusts `X-Forwarded-For` (`FORWARDED_ALLOW_IPS`), so per-client rate limits see real
-  clients. Do not expose it directly to the internet without a proxy.
+* Behind the host's proxy the image reads the real client address from `X-Forwarded-For`, so per-client rate limits see
+  real clients. `FORWARDED_ALLOW_IPS` defaults to the private ranges (`127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16`):
+  only a proxy connecting from one of them is believed, and the header is read from the right, so an address the client
+  forged is ignored. Do not use `*` (it trusts the client-supplied left-most entry). **If your host's proxy connects from a
+  public address**, every client then looks like the proxy and the per-address limits (account check, share view) become
+  shared by everyone: set the `FORWARDED_ALLOW_IPS` environment variable on the service to that proxy's address or range.
 * Rate limits are in memory, per process: run one backend process (the default), or move them to Redis before scaling out.
 * Free hosts sleep when idle, so the first request after a quiet spell can take up to a minute. Model weights download on
   first start in the full image; mount a cache volume or accept a one-off cold start.

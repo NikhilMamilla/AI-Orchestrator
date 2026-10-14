@@ -42,7 +42,8 @@ data is in Supabase Postgres and is reached only through this API.
   The live session WebSocket allows 30 messages per learner per minute, 3 handlers in flight per connection and 16,000
   characters per message. Every request body is capped at 1 MB (3 MB for the document upload) and refused with 413 before it is parsed. Limits live in memory, per process:
   run one backend process or move them to Redis before scaling out. Behind a host's proxy the backend image trusts
-  `X-Forwarded-For` (`FORWARDED_ALLOW_IPS`), so do not expose that image directly to the internet.
+  `X-Forwarded-For` only from private proxy addresses (`FORWARDED_ALLOW_IPS`, never `*`) and reads it from the right, so
+  a forged address cannot dodge the per-address limits; see [SETUP.md](SETUP.md) if your host's proxy is on a public address.
 * **Errors:** clients get generic messages; details go to server logs. A database outage returns 503 with a plain message.
 * **Uploads (admin only):** type allow-list, 2 MB cap, UTF-8/binary checks, `%PDF` magic, encrypted PDFs refused.
 
