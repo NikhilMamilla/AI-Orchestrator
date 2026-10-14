@@ -88,7 +88,8 @@ prerequisite-aware unlocking, with no measurable extra benefit from remediation 
 * **Teach it back** (`POST /learning/teachback`): the learner explains a concept in their own words. Every sentence goes
   through the same claim verifier as the tutor's answers (accuracy), and the passage's key points are tested for being
   entailed by individual learner sentences (coverage). No LLM is involved, so nothing can be invented. A graded attempt
-  updates mastery once per concept per 24 h. Measured on LLM-simulated learners: `docs/eval/teachback.md`.
+  updates mastery once per concept per 24 h. An explanation that is mostly copied (more than 60 % of its word 5-grams appear in the
+  course material) is not graded and changes nothing: "Explain it in your own words". Measured on LLM-simulated learners: `docs/eval/teachback.md`.
 * **Draw it** (`POST /learning/sketch`): draw a BST or heap; a vision model reads it twice and **fixed rules** judge it.
   No verdict when the two readings disagree; the reading is always shown back. `docs/eval/sketch.md`.
 * **Evidence Lab** (`/lab`, `/learning/study/*`): an opt-in pre/post test (8 fresh questions per phase on four concepts,

@@ -10,6 +10,7 @@ Explanations too short to contain two factual sentences are not graded (a partia
 """
 from __future__ import annotations
 
+import re
 from typing import Any, Dict, List, Sequence
 
 import numpy as np
@@ -24,6 +25,22 @@ COVER_POINT = 0.25              # a point counts as included when one learner se
 COVER_SCALE = 0.30              # mean best-entailment at which coverage credit saturates; tuned on LLM-simulated learners
 PASS_SCORE = 0.50
 PASS_ACCURACY = 0.60
+COPY_LIMIT = 0.60               # more than this share of the explanation's word 5-grams found in the material = copied
+COPIED_MESSAGE = "Explain it in your own words: most of this is copied from the course material."
+
+
+def _five_grams(text: str) -> set:
+    words = re.findall(r"[a-z0-9']+", text.lower())
+    return {tuple(words[i:i + 5]) for i in range(len(words) - 4)}
+
+
+def copied_fraction(explanation: str, passages: Sequence[str]) -> float:
+    """Share of the explanation's word 5-grams that also appear in the course passages (0 when it is too short to tell)."""
+    grams = _five_grams(explanation)
+    if not grams:
+        return 0.0
+    material = set().union(*(_five_grams(p) for p in passages)) if passages else set()
+    return len(grams & material) / len(grams)
 
 
 def key_points(passages: Sequence[str], embedder, n: int = KEY_POINTS) -> List[str]:
@@ -72,6 +89,9 @@ def _coverage(explanation: str, points: Sequence[str], nli) -> List[Dict[str, An
 def grade(explanation: str, passages: Sequence[str], embedder, nli=None, threshold: float = 0.34, floor: float = 0.22,
           nli_weight: float = 0.35) -> Dict[str, Any]:
     explanation = " ".join(explanation.split())
+    if copied_fraction(explanation, passages) > COPY_LIMIT:                  # a pasted passage proves nothing: do not grade it
+        return {"graded": False, "reason": COPIED_MESSAGE, "score": None, "passed": False, "accuracy": None,
+                "coverage": None, "claims": [], "points": []}
     evidence = [Evidence(ref=i + 1, chunk_id=f"p{i}", doc_id="", doc_title="", heading_path="", text=t, score=1.0)
                 for i, t in enumerate(passages)]
     words = explanation.split()
