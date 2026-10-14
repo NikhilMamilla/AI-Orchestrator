@@ -21,6 +21,7 @@ from backend.app.learning import coding_profiles
 from .mastery import MASTERED, ReviewState, assisted, bkt_update, next_review, params_for_level, retention
 from .policy import ConceptNode, Decision, decide, learning_path, next_concepts
 from .analyst import HISTORY_CAP as ATTEMPT_CAP, analyse
+from . import localtime
 from .goals import plan_goal
 from .journal import build_journal
 from .planner import plan_session
@@ -233,7 +234,7 @@ class LearningService:
                 graph = await asyncio.to_thread(self.graph)
                 before = self.mastery_map(profile).get(doc_id, 0.0)
                 after, decision, new_profile = self._apply(
-                    profile, graph, doc_id, correct, now, attempt={"s": seconds, "x": confused, "h": local_hour, "k": confidence,
+                    profile, graph, doc_id, correct, now, attempt={"s": seconds, "x": confused, "h": local_hour, "k": confidence, "tz": tz_offset_min,
                                   "u": int(row.get("hints_used") or 0)}, quiz_id=quiz_id)
                 if not await self.profiles.update_profile(user_id, {
                         "concept_mastery": [m.model_dump(mode="json") for m in new_profile.concept_mastery],
@@ -297,9 +298,13 @@ class LearningService:
         del recent[:-6]
 
         stats = profile.overall_stats
-        today = now.date()
+        tz = localtime.valid_offset(a.get("tz"))
+        if tz is not None:
+            profile.patterns["tz_offset_min"] = tz              # the learner's own clock, for streaks, goals and the rhythm
+        offset = localtime.learner_offset(profile.patterns)
+        today = localtime.to_local(now, offset).date()
         last = profile.patterns.get("last_active")
-        last_day = datetime.fromisoformat(last).date() if last else None
+        last_day = localtime.to_local(datetime.fromisoformat(last), offset).date() if last else None
         if last_day == today:
             pass
         elif last_day == today - timedelta(days=1):
@@ -451,7 +456,7 @@ class LearningService:
         if not g:
             return {"goal": None}
         path = await self.path(user_id, g.get("concept"))
-        plan = plan_goal(path["steps"], date.fromisoformat(g["deadline"]), int(g["daily_minutes"]))
+        plan = plan_goal(path["steps"], date.fromisoformat(g["deadline"]), int(g["daily_minutes"]), localtime.local_today(profile.patterns))
         return {"goal": g, **plan}
 
     # ---------- journal ----------
@@ -723,7 +728,7 @@ class LearningService:
                            "total": len(challenges.load())},
             "progress": rhythm.daily_progress(profile.patterns.get("progress_history") or [], profile.patterns.get("attempts") or [],
                                        datetime.now(timezone.utc)),
-            "weekly": rhythm.rhythm(profile.patterns.get("attempts") or [], datetime.now(timezone.utc))["weekly"],
+            "weekly": rhythm.rhythm(profile.patterns.get("attempts") or [], datetime.now(timezone.utc), tz_offset_min=localtime.learner_offset(profile.patterns))["weekly"],
             "updated_at": datetime.now(timezone.utc).isoformat(),
         }
 

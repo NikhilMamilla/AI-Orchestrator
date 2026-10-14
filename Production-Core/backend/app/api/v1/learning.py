@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 
 from backend.app.learning.service import LearningError, LearningService, PgQuizRepo
 from backend.app.config import settings
-from backend.app.learning import prefs, rhythm, sketch, study
+from backend.app.learning import localtime, prefs, rhythm, sketch, study
 from backend.app.learning.coding_profiles import PLATFORMS as CODING_PLATFORMS
 from backend.app.security import RateLimiter, User, get_current_user, require_admin
 from backend.app.rag.llm import LLMUnavailable
@@ -300,7 +300,7 @@ async def recent_announcements(user: User = Depends(get_current_user)):
 async def my_rhythm(user: User = Depends(get_current_user), svc: LearningService = Depends(service)):
     """When and how much the caller studies, from their own answers."""
     profile = await svc._profile(user.uid)
-    return rhythm.rhythm(profile.patterns.get("attempts", []), datetime.now(timezone.utc))
+    return rhythm.rhythm(profile.patterns.get("attempts", []), datetime.now(timezone.utc), tz_offset_min=localtime.learner_offset(profile.patterns))
 
 
 @router.get("/export")

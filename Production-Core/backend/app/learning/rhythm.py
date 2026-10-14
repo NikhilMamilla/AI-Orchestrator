@@ -18,7 +18,7 @@ def _dt(v: Any):
         return None
 
 
-def rhythm(attempts: Sequence[Mapping[str, Any]], now: datetime, weeks: int = 8) -> Dict[str, Any]:
+def rhythm(attempts: Sequence[Mapping[str, Any]], now: datetime, weeks: int = 8, tz_offset_min: int = 0) -> Dict[str, Any]:
     grid = [[0] * 24 for _ in range(7)]
     per_week = [[0, 0] for _ in range(weeks)]                       # [answers, correct], oldest first
     days = set()
@@ -26,9 +26,10 @@ def rhythm(attempts: Sequence[Mapping[str, Any]], now: datetime, weeks: int = 8)
         t = _dt(a.get("t"))
         if not t:
             continue
-        hour = int(a["h"]) % 24 if a.get("h") is not None else t.hour  # local hour when the browser sent it
-        grid[t.weekday()][hour] += 1
-        days.add(t.date())
+        lt = t - timedelta(minutes=tz_offset_min)                        # the learner's own clock
+        hour = int(a["h"]) % 24 if a.get("h") is not None else lt.hour  # local hour when the browser sent it
+        grid[lt.weekday()][hour] += 1
+        days.add(lt.date())
         w = (now - t).days // 7
         if 0 <= w < weeks:
             per_week[weeks - 1 - w][0] += 1
@@ -36,7 +37,7 @@ def rhythm(attempts: Sequence[Mapping[str, Any]], now: datetime, weeks: int = 8)
     total = sum(map(sum, grid))
     peak = max(((d, h) for d in range(7) for h in range(24)), key=lambda dh: grid[dh[0]][dh[1]]) if total else None
     by_day = [sum(r) for r in grid]
-    today = now.date()
+    today = (now - timedelta(minutes=tz_offset_min)).date()
     streak, d = 0, today if today in days else today - timedelta(days=1)
     while d in days:
         streak, d = streak + 1, d - timedelta(days=1)
