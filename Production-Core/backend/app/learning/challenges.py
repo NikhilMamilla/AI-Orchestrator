@@ -52,6 +52,13 @@ def public_view(c: Dict[str, Any], state: Dict[str, Any]) -> Dict[str, Any]:
     return out
 
 
+def public_results(results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Per-test verdicts the learner may see. Only the sample test (the first) shows its stderr and actual output; the hidden
+    tests are pass/fail, because a program can print its input to stderr and read every hidden test that way."""
+    return [{"ok": r["ok"], "status": r["status"], "error": r["error"] if i == 0 else None, "got": r["got"] if i == 0 else None}
+            for i, r in enumerate(results)]
+
+
 async def run_one(client: httpx.AsyncClient, code: str, stdin: str) -> Dict[str, Any]:
     r = await client.post(f"{settings.JUDGE0_API_URL.rstrip('/')}/submissions",
                           params={"base64_encoded": "false", "wait": "true"},

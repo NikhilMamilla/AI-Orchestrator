@@ -199,10 +199,18 @@ class LearningService:
                 "options": quiz.options, "generated_by": quiz.generated_by}      # never includes the key
 
     # ---------- answer ----------
+    async def _refuse_study_question(self, user_id: str, quiz_id: str) -> None:
+        """Evidence Lab questions are answered only through the study (no feedback, no hints, no mastery change); the ordinary
+        answer and hint routes would hand back the key and the explanation."""
+        st = (await self._profile(user_id)).patterns.get("study") or {}
+        if any(quiz_id in (st.get(ph) or {}).get("quizzes", []) for ph in ("pre", "post")):
+            raise LearningError("That question belongs to the study test: answer it there.", 409)
+
     async def answer(self, user_id: str, quiz_id: str, chosen: int, tz_offset_min: Optional[int] = None,
                      confidence: Optional[str] = None) -> Dict[str, Any]:
         if not 0 <= chosen <= 3:
             raise LearningError("Choose one of the four options.")
+        await self._refuse_study_question(user_id, quiz_id)
         row = await self.quizzes.get(user_id, quiz_id)
         if not row:
             raise LearningError("Question not found.", 404)
@@ -456,6 +464,7 @@ class LearningService:
     # ---------- hints ----------
     async def hint(self, user_id: str, quiz_id: str) -> Dict[str, Any]:
         """Progressive help before answering. 1: rule one wrong option out. 2: show the source passage."""
+        await self._refuse_study_question(user_id, quiz_id)
         row = await self.quizzes.get(user_id, quiz_id)
         if not row:
             raise LearningError("Question not found.", 404)
@@ -582,7 +591,8 @@ class LearningService:
             if not row or not 0 <= chosen < len(row["options"]):
                 raise LearningError("Choose one of the options.")
             correct = chosen == int(row["answer_index"])
-            await self.quizzes.mark_answered(user_id, quiz_id, chosen, correct)
+            if not await self.quizzes.mark_answered(user_id, quiz_id, chosen, correct):
+                raise LearningError("Already answered.", 409)
             st[phase]["answers"][quiz_id] = correct
             st[phase]["score"] = study.phase_score(st[phase])
             await self.profiles.update_profile(user_id, {"patterns": profile.patterns})
@@ -773,8 +783,7 @@ class LearningService:
         if self.emit and decision is not None:
             await self.emit(user_id, "assessor", f"Challenge '{c['title']}' {'passed' if passed else 'not passed yet'}: "
                             f"{decision.reasoning}", {"challenge": challenge_id, "passed": passed})
-        shown = [{"ok": r["ok"], "status": r["status"], "error": r["error"], "got": r["got"] if i == 0 else None}
-                 for i, r in enumerate(results)]            # actual output only for the sample test; others are pass/fail
+        shown = challenges.public_results(results)          # stderr and actual output only for the sample test; others are pass/fail
         return {"passed": passed, "tests_passed": sum(r["ok"] for r in results), "tests_total": len(results), "results": shown,
                 "challenge": view, "mastery_before": round(before, 3), "mastery_after": round(after, 3),
                 "decision": None if decision is None else {"action": decision.action, "reasoning": decision.reasoning}}
