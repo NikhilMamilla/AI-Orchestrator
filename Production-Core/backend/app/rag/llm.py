@@ -88,22 +88,27 @@ class BaseLLM:
         ck = self.cache_key(messages, temperature, self._cache_extra())
         if use_cache and (hit := self.cache.get(ck)):
             return LLMResult(**{**hit.__dict__, "cached": True})
-        if ck in self._inflight:                                   # coalesce identical concurrent calls
-            return await self._inflight[ck]
-        fut: asyncio.Future = asyncio.get_running_loop().create_future()
-        self._inflight[ck] = fut
-        try:
-            res = await self._generate(messages, temperature, max_tokens)
-            if use_cache:
-                self.cache.put(ck, res)
-            fut.set_result(res)
-            return res
-        except Exception as e:
-            fut.set_exception(e)
-            fut.exception()                                        # mark retrieved: no "never retrieved" noise
-            raise
-        finally:
-            self._inflight.pop(ck, None)
+        task = self._inflight.get(ck)                              # coalesce identical concurrent calls
+        if task is None:
+            # the call runs in its own task and every caller awaits it through shield(): one caller being cancelled
+            # (a closed tab) must not strand the others waiting on the same call
+            task = asyncio.ensure_future(self._generate_and_cache(ck, messages, temperature, max_tokens, use_cache))
+            self._inflight[ck] = task
+
+            def _done(t: asyncio.Future) -> None:
+                if self._inflight.get(ck) is t:
+                    del self._inflight[ck]
+                if not t.cancelled():
+                    t.exception()                                  # mark retrieved: no "never retrieved" noise
+            task.add_done_callback(_done)
+        return await asyncio.shield(task)
+
+    async def _generate_and_cache(self, ck: str, messages: Messages, temperature: float, max_tokens: int,
+                                  use_cache: bool) -> LLMResult:
+        res = await self._generate(messages, temperature, max_tokens)
+        if use_cache:
+            self.cache.put(ck, res)
+        return res
 
     async def aclose(self) -> None:
         return None
