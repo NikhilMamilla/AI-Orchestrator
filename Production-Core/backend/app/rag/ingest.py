@@ -121,6 +121,8 @@ class Ingestor:
         if not passages:
             raise IngestError("no indexable passages after deduplication")
         vecs = self.embedder.encode_documents([embed_text(c) for c in passages])
+        if getattr(self.embedder, "degraded", False):           # the hosted service is down: these are offline stand-in vectors
+            raise IngestError("the embedding service is unavailable; nothing was stored, try again shortly")
         embeddings = {c.id: v for c, v in zip(passages, vecs)}
 
         doc = Document(id=doc_id, title=title, source=name, level=level,
