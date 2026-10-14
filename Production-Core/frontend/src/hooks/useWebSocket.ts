@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { getAccessToken } from '../lib/firebase';
+import { shouldReconnect } from '../lib/wsRetry';
 
 interface WebSocketMessage {
     type: string;
@@ -55,18 +56,16 @@ export function useWebSocket(sessionId: string | null, options: UseWebSocketOpti
                 return;
             }
             ws.send(JSON.stringify({ type: 'auth', token }));
-            setIsConnected(true);
-            reconnectAttemptsRef.current = 0;
-            optionsRef.current.onOpen?.();
+            // "connected" is announced when the server answers auth_ok (see onmessage), not before
         };
 
-        ws.onclose = () => {
+        ws.onclose = (event) => {
             setIsConnected(false);
             wsRef.current = null;
             optionsRef.current.onClose?.();
 
-            // Attempt to reconnect with exponential backoff
-            if (reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS) {
+            // Attempt to reconnect with exponential backoff (never after the server refused the login)
+            if (shouldReconnect(event.code, reconnectAttemptsRef.current, MAX_RECONNECT_ATTEMPTS)) {
                 const timeout = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000);
                 reconnectTimeoutRef.current = setTimeout(() => {
                     reconnectAttemptsRef.current += 1;
@@ -83,6 +82,12 @@ export function useWebSocket(sessionId: string | null, options: UseWebSocketOpti
         ws.onmessage = (event) => {
             try {
                 const message: WebSocketMessage = JSON.parse(event.data);
+                if (message.type === 'auth_ok') {                 // the server accepted the login
+                    setIsConnected(true);
+                    reconnectAttemptsRef.current = 0;
+                    optionsRef.current.onOpen?.();
+                    return;
+                }
                 setLastMessage(message);
 
                 // Handle streaming messages

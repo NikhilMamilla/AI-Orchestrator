@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+STREAM_CHUNK_CHARS = 6                 # characters per streamed frame (one frame per character was ~1,000 frames per lesson)
 WS_MAX_MESSAGE_CHARS = 16_000          # one frame; a student's answer is far shorter
 WS_MAX_IN_FLIGHT = 3                   # handlers running at once for one connection
 ws_limiter = RateLimiter(30)           # messages per learner per minute
@@ -79,8 +80,8 @@ class ConnectionManager:
             "message_type": message_type
         })
         
-        # Stream characters
-        for char in text:
+        # Stream the text a few characters at a time
+        for i in range(0, len(text), STREAM_CHUNK_CHARS):
             # Check for interruption signal
             if session_id in self.stop_signals:
                 self.stop_signals.remove(session_id)
@@ -89,7 +90,7 @@ class ConnectionManager:
 
             await websocket.send_json({
                 "type": "stream_chunk",
-                "chunk": char
+                "chunk": text[i:i + STREAM_CHUNK_CHARS]
             })
             await asyncio.sleep(0.02)  # Medium speed for readability
         
@@ -126,6 +127,10 @@ async def websocket_endpoint(
     # from here on the session is the verified user's own: every send below is routed by this scoped key
     session_id = manager.key(ws_user.uid, session_id)
     manager.register(websocket, session_id)
+    try:
+        await websocket.send_json({"type": "auth_ok"})    # the client shows "connected" only after this
+    except Exception:
+        return
     logger.info("WebSocket authenticated for session %s", session_id)
     
     try:
@@ -270,7 +275,7 @@ async def handle_start_session(
         traceback.print_exc()
         await websocket.send_json({
             "type": "error",
-            "message": f"Critical error initializing your profile: {str(e)}"
+            "message": "We couldn't load your learning profile. Please try again in a moment."
         })
         return
     

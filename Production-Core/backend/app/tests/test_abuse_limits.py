@@ -95,6 +95,7 @@ def test_websocket_refuses_oversized_messages(app, monkeypatch):
     client = _live_socket(app, monkeypatch, RateLimiter(100))
     with client as c, c.websocket_connect("/api/v1/ws/session/active") as sock:
         sock.send_json({"type": "auth", "token": "t"})
+        assert sock.receive_json() == {"type": "auth_ok"}
         sock.send_text('{"type":"request_hint","payload":{"x":"' + "a" * 40_000 + '"}}')
         msg = sock.receive_json()
         assert msg["type"] == "error" and "too long" in msg["message"].lower()
@@ -104,6 +105,7 @@ def test_websocket_limits_messages_per_minute(app, monkeypatch):
     client = _live_socket(app, monkeypatch, RateLimiter(2))
     with client as c, c.websocket_connect("/api/v1/ws/session/active") as sock:
         sock.send_json({"type": "auth", "token": "t"})
+        assert sock.receive_json() == {"type": "auth_ok"}
         for _ in range(3):
             sock.send_json({"type": "request_hint", "payload": {}})
         msg = sock.receive_json()
