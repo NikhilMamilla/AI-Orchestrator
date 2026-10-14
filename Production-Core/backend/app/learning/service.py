@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 import random
 import re
-from collections import defaultdict
+from backend.app.services.student_profile_service import user_lock
 from datetime import date, datetime, timedelta, timezone
 from typing import Any, Awaitable, Callable, Dict, List, Optional
 
@@ -130,7 +130,6 @@ class MemoryQuizRepo(QuizRepo):
 class LearningService:
     def __init__(self, profiles, quizzes: QuizRepo, store, llm=None, emit: Optional[EventFn] = None):
         self.profiles, self.quizzes, self.store, self.llm, self.emit = profiles, quizzes, store, llm, emit
-        self._locks: Dict[str, asyncio.Lock] = defaultdict(asyncio.Lock)    # serialise read-modify-write per user
         self.embedder, self.nli = None, None                                 # set by the API layer; needed for teach-back grading
 
     # ---------- graph ----------
@@ -220,7 +219,7 @@ class LearningService:
             raise LearningError("This question was already answered.", 409)
 
         doc_id = row["doc_id"]
-        async with self._locks[user_id]:
+        async with user_lock(self.profiles, user_id):
             try:
                 profile = await self._profile(user_id)
                 graph = await asyncio.to_thread(self.graph)
@@ -371,7 +370,7 @@ class LearningService:
         return {"style": strategy.choose(stats), **strategy.summary(stats)}
 
     async def note_explanation(self, user_id: str, concept: str, style: str) -> None:
-        async with self._locks[user_id]:
+        async with user_lock(self.profiles, user_id):
             profile = await self._profile(user_id)
             strategy.note_explanation(profile.patterns, concept, style)
             await self.profiles.update_profile(user_id, {"patterns": profile.patterns})
@@ -384,7 +383,7 @@ class LearningService:
 
     async def diagnostic_next(self, user_id: str, level: str = "beginner") -> Dict[str, Any]:
         """Start or continue the adaptive placement check; returns the next question, or the final placement."""
-        async with self._locks[user_id]:
+        async with user_lock(self.profiles, user_id):
             profile = await self._profile(user_id)
             graph = await asyncio.to_thread(self.graph)
             measured = self.mastery_map(profile)
@@ -408,7 +407,7 @@ class LearningService:
                                     f"{len(known)} concepts assumed known from the prerequisite graph.", {"asked": len(diag["asked"])})
                 return self._diag_view(diag)
         quiz = await self.create_quiz(user_id, probe, None, level)
-        async with self._locks[user_id]:
+        async with user_lock(self.profiles, user_id):
             profile = await self._profile(user_id)
             diag["pending_quiz"] = quiz["quiz_id"]
             profile.patterns["diagnostic"] = diag
@@ -422,7 +421,7 @@ class LearningService:
                 "likely_gaps": sorted(c for c, v in place.items() if v["status"] == "likely_gap")}
 
     async def diagnostic_reset(self, user_id: str) -> None:
-        async with self._locks[user_id]:
+        async with user_lock(self.profiles, user_id):
             profile = await self._profile(user_id)
             profile.patterns.pop("diagnostic", None)
             await self.profiles.update_profile(user_id, {"patterns": profile.patterns})
@@ -432,7 +431,7 @@ class LearningService:
         graph = await asyncio.to_thread(self.graph)
         if goal and goal not in graph:
             raise LearningError("Unknown goal concept.", 404)
-        async with self._locks[user_id]:
+        async with user_lock(self.profiles, user_id):
             profile = await self._profile(user_id)
             profile.patterns["goal"] = {"concept": goal, "deadline": deadline.isoformat(), "daily_minutes": daily_minutes}
             await self.profiles.update_profile(user_id, {"patterns": profile.patterns})
@@ -495,7 +494,7 @@ class LearningService:
         if not result["graded"]:
             return result
         now = datetime.now(timezone.utc)
-        async with self._locks[user_id]:
+        async with user_lock(self.profiles, user_id):
             profile = await self._profile(user_id)
             graph = await asyncio.to_thread(self.graph)
             before = self.mastery_map(profile).get(doc_id, 0.0)
@@ -531,7 +530,7 @@ class LearningService:
         return self._study_view((await self._profile(user_id)).patterns.get("study"))
 
     async def study_join(self, user_id: str) -> Dict[str, Any]:
-        async with self._locks[user_id]:
+        async with user_lock(self.profiles, user_id):
             profile = await self._profile(user_id)
             patterns = profile.patterns
             if not patterns.get("study"):
@@ -541,7 +540,7 @@ class LearningService:
 
     async def study_start(self, user_id: str, phase: str) -> Dict[str, Any]:
         """Create (once) the phase's questions; calling again returns the same ones."""
-        async with self._locks[user_id]:
+        async with user_lock(self.profiles, user_id):
             profile = await self._profile(user_id)
             st = profile.patterns.get("study")
             if not st:
@@ -572,7 +571,7 @@ class LearningService:
 
     async def study_answer(self, user_id: str, phase: str, quiz_id: str, chosen: int) -> Dict[str, Any]:
         """Record an answer without feedback or mastery changes, so the test does not teach."""
-        async with self._locks[user_id]:
+        async with user_lock(self.profiles, user_id):
             profile = await self._profile(user_id)
             st = profile.patterns.get("study")
             if not st or study.next_step(st) != phase or quiz_id not in st[phase]["quizzes"]:
@@ -605,7 +604,7 @@ class LearningService:
 
     async def set_prefs(self, user_id: str, raw: Dict[str, Any]) -> Dict[str, Any]:
         try:
-            async with self._locks[user_id]:
+            async with user_lock(self.profiles, user_id):
                 profile = await self._profile(user_id)
                 current = prefs.merged(profile.patterns.get("prefs"))
                 if "ui" in raw:                                       # a partial appearance change keeps the rest
@@ -621,7 +620,7 @@ class LearningService:
             nick = prefs.clean_nickname(nickname) if nickname else None
         except prefs.PrefsError as e:
             raise LearningError(str(e))
-        async with self._locks[user_id]:
+        async with user_lock(self.profiles, user_id):
             profile = await self._profile(user_id)
             if nick:
                 profile.patterns["leaderboard"] = {"nickname": nick}
@@ -653,7 +652,7 @@ class LearningService:
         code = coding_profiles.verification_code(settings.verify_secret, user_id, platform, handle)
         result = await coding_profiles.verify(platform, handle, code)
         if result["verified"]:
-            async with self._locks[user_id]:
+            async with user_lock(self.profiles, user_id):
                 profile = await self._profile(user_id)
                 profile.patterns.setdefault("coding_verified", {})[platform] = {"handle": handle, "at": datetime.now(timezone.utc).isoformat()}
                 await self.profiles.update_profile(user_id, {"patterns": profile.patterns})
@@ -664,7 +663,7 @@ class LearningService:
             clean = coding_profiles.clean_handles(raw)
         except coding_profiles.ProfileError as e:
             raise LearningError(str(e))
-        async with self._locks[user_id]:
+        async with user_lock(self.profiles, user_id):
             profile = await self._profile(user_id)
             merged = {**(profile.patterns.get("coding_profiles") or {}), **{k: v for k, v in clean.items()}}
             for k, v in raw.items():                                  # an empty value removes that link
@@ -727,7 +726,7 @@ class LearningService:
         c = challenges.get(challenge_id)
         if not c:
             raise LearningError("Unknown challenge.", 404)
-        async with self._locks[user_id]:
+        async with user_lock(self.profiles, user_id):
             profile = await self._profile(user_id)
             st = profile.patterns.setdefault("challenges", {}).setdefault(challenge_id, {"fails": 0, "passed": False})
             if not st.get("hint_taken"):
@@ -749,7 +748,7 @@ class LearningService:
             raise LearningError("The code execution service is unavailable right now.", 503)
         passed = all(r["ok"] for r in results)
 
-        async with self._locks[user_id]:
+        async with user_lock(self.profiles, user_id):
             profile = await self._profile(user_id)
             st = profile.patterns.setdefault("challenges", {}).setdefault(challenge_id, {"fails": 0, "passed": False})
             graph = await asyncio.to_thread(self.graph)

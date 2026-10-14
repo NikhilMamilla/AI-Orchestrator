@@ -7,6 +7,7 @@ platform and keeps the event loop free.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 from typing import Any, Optional, Sequence
 
@@ -27,6 +28,7 @@ class DatabaseUnavailable(RuntimeError):
 class Database:
     def __init__(self) -> None:
         self.pool: Optional[ConnectionPool] = None
+        self.lock_pool: Optional[ConnectionPool] = None   # only for advisory locks, so a held lock can never starve the main pool
 
     async def connect_to_database(self) -> None:
         if not settings.DATABASE_URL:
@@ -41,9 +43,19 @@ class Database:
             return pool
 
         self.pool = await asyncio.to_thread(open_pool)
+
+        def open_lock_pool() -> ConnectionPool:
+            pool = ConnectionPool(settings.DATABASE_URL, min_size=0, max_size=3, open=False,
+                                  kwargs={"row_factory": dict_row, "prepare_threshold": None})
+            pool.open(wait=False)
+            return pool
+
+        self.lock_pool = await asyncio.to_thread(open_lock_pool)
         logger.info("Connected to Postgres")
 
     async def close_database_connection(self) -> None:
+        if self.lock_pool:
+            await asyncio.to_thread(self.lock_pool.close)
         if self.pool:
             await asyncio.to_thread(self.pool.close)
 
@@ -67,6 +79,30 @@ class Database:
     def _execute_many(self, statements: Sequence[tuple[str, Sequence[Any]]]) -> int:
         with self._pool().connection() as c, c.transaction():          # all or nothing
             return sum(c.execute(sql, params).rowcount for sql, params in statements)
+
+    @contextlib.asynccontextmanager
+    async def advisory_lock(self, key: str):
+        """Hold a Postgres transaction-level advisory lock on `key` for the block. Every process that takes the same key
+        waits its turn, so a read-modify-write of one learner's profile cannot be interleaved by another worker. It is a
+        transaction lock, so it also works behind a transaction pooler, and it is released even if the block fails.
+        Without a database (tests, offline development) there is nothing to lock across processes."""
+        pool = self.lock_pool
+        if pool is None:
+            yield
+            return
+        conn = await asyncio.to_thread(pool.getconn)
+        try:
+            await asyncio.to_thread(conn.execute, "select pg_advisory_xact_lock(hashtextextended(%s, 0))", (key,))
+            yield
+        finally:
+            await asyncio.shield(asyncio.to_thread(self._release_lock, pool, conn))
+
+    @staticmethod
+    def _release_lock(pool: ConnectionPool, conn: Any) -> None:
+        try:
+            conn.rollback()                                 # ends the transaction, which releases the lock
+        finally:
+            pool.putconn(conn)
 
     async def fetch_all(self, sql: str, params: Sequence[Any] = ()) -> list[dict]:
         return await asyncio.to_thread(self._fetch_all, sql, params)

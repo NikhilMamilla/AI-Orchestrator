@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 from backend.app.config import settings
 from backend.app.security import RateLimiter, User, get_current_user
 from backend.app.services.database import db
-from backend.app.services.student_profile_service import StudentProfileService
+from backend.app.services.student_profile_service import StudentProfileService, user_lock
 
 router = APIRouter()
 check_limiter = RateLimiter(5)                       # per client address, per minute
@@ -42,10 +42,12 @@ async def account_seen(req: Seen, user: User = Depends(get_current_user)):
     email = user.get("email")
     if not email or db.pool is None:
         return {"ok": False}
-    await StudentProfileService(db).create_profile_safe(user.uid)
+    profiles = StudentProfileService(db)
+    await profiles.create_profile_safe(user.uid)
     record = {"email_hash": email_key(email), "providers": sorted(set(req.providers) & PROVIDERS)}
-    await db.execute("update student_profiles set data = jsonb_set(data, '{patterns,account}', %s::jsonb, true), "
-                     "updated_at = now() where user_id = %s", (json.dumps(record), user.uid))
+    async with user_lock(profiles, user.uid):           # the same lock the learning code takes, so neither overwrites the other
+        await db.execute("update student_profiles set data = jsonb_set(data, '{patterns,account}', %s::jsonb, true), "
+                         "updated_at = now() where user_id = %s", (json.dumps(record), user.uid))
     return {"ok": True}
 
 

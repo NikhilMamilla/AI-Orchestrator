@@ -1,15 +1,43 @@
 """Learner profile persistence (Supabase Postgres, one JSONB document per user, RLS-protected)."""
 from __future__ import annotations
 
-from typing import Optional
+import asyncio
+import contextlib
+import weakref
+from typing import Dict, Optional
 
 from backend.app.models.student_profile import StudentProfile
 from backend.app.services.database import Database, json_param
 
 
+_LOCKS: "weakref.WeakKeyDictionary[asyncio.AbstractEventLoop, Dict[str, asyncio.Lock]]" = weakref.WeakKeyDictionary()
+
+
+def local_user_lock(user_id: str) -> asyncio.Lock:
+    """One lock per learner in this process, shared by every request. (The API builds a new service per request, so a
+    lock stored on the service would protect nothing.)"""
+    return _LOCKS.setdefault(asyncio.get_running_loop(), {}).setdefault(user_id, asyncio.Lock())
+
+
+@contextlib.asynccontextmanager
+async def user_lock(profiles, user_id: str):
+    """Serialise a learner's profile read-modify-write: first against other requests in this process, then against other
+    worker processes through the store's advisory lock (when the store has one)."""
+    async with local_user_lock(user_id):
+        advisory = getattr(profiles, "advisory_lock", None)
+        if advisory is None:
+            yield
+        else:
+            async with advisory(user_id):
+                yield
+
+
 class StudentProfileService:
     def __init__(self, db: Database):
         self.db = db
+
+    def advisory_lock(self, user_id: str):
+        return self.db.advisory_lock(f"profile:{user_id}")
 
     async def get_profile_by_user_id(self, user_id: str) -> Optional[StudentProfile]:
         row = await self.db.fetch_one("select data from student_profiles where user_id = %s", (user_id,))
