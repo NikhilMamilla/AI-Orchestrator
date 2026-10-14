@@ -25,7 +25,7 @@ class FakeLLM:
     async def complete(self, messages, **kw):
         self.calls += 1
         user = messages[-1]["content"]
-        m = re.search(r'<evidence id="1"[^>]*>\s*(.+?)\s*</evidence>', user, re.S)
+        m = re.search(r'<evidence id="1" source="[^"]*">\s*(.+?)\s*</evidence>', user, re.S)
         first = re.split(r"(?<=[.!?])\s", m.group(1).strip())[0] if m else "No evidence."
         return LLMResult(text=f"{first} [1]", model="fake")
 
