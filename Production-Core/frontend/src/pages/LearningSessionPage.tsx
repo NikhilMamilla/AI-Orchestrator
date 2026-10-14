@@ -5,6 +5,7 @@ import Sidebar from '../components/Sidebar';
 import ChatInterface, { type Message } from '../components/session/ChatInterface';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAuthStore } from '../store/authStore';
+import type { RagAnswer } from '../lib/rag';
 import {
     ChevronLeft,
     Clock,
@@ -38,15 +39,16 @@ export default function LearningSessionPage() {
         return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     };
 
-    const addMessage = (role: 'user' | 'assistant' | 'system', content: string) => {
+    const addMessage = (role: 'user' | 'assistant' | 'system', content: string, answer?: RagAnswer) => {
         setMessages(prev => [...prev, {
             role,
             content,
-            timestamp: new Date()
+            timestamp: new Date(),
+            answer
         }]);
     };
 
-    const handleWebSocketMessage = useCallback((message: { type: string; current_activity?: { concept_id?: string }; full_text?: string; message?: string }) => {
+    const handleWebSocketMessage = useCallback((message: { type: string; current_activity?: { concept_id?: string }; full_text?: string; message?: string; answer?: RagAnswer }) => {
         switch (message.type) {
             case 'session_started':
                 addMessage('system', 'Session started. Ask anything about DSA!');
@@ -58,7 +60,7 @@ export default function LearningSessionPage() {
 
             case 'stream_end':
                 if (message.full_text) {
-                    addMessage('assistant', message.full_text);
+                    addMessage('assistant', message.full_text, message.answer);
                 }
                 break;
 

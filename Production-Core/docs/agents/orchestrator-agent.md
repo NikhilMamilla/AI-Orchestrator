@@ -20,21 +20,27 @@ adaptive rules (mastery, session plan, goals, placement) are in [LEARNING.md](..
 * **`agent.py`**: `OrchestratorAgent` starts a session (`start_learning_session`), greets the learner, processes each
   response (`process_student_response`), generates the tutor reply, and emits agent events to the learner's event log.
 
-## What is real in the live session, and what is a placeholder
+## The live session (`/session/:id`, WebSocket `/ws/session/{id}`)
 
-| Step in `OrchestratorAgent` | Status |
+The live session is a **grounded tutor chat**. Every chat turn goes through `RAGPipeline.answer()`, the same pipeline as the
+Ask page: screening, the semantic guard, the evidence gate, generation, per-sentence verification and citations. The reply
+arrives with its status, confidence, citations and sources, and the chat shows them exactly as Ask does (citation chips, a
+"Not enough evidence" card, a sources panel). An off-topic question is refused without calling the model; an injection is
+rejected. The client's chat history is screened and assistant turns are dropped.
+
+| Step in `OrchestratorAgent` | What it does |
 |---|---|
-| Session plan, greeting, decision engine, tutor reply, event emission | Real |
-| Lesson text (`_request_lesson`) | Real: one call to the shared LLM router (Mistral → Gemini → Groq) |
-| Content package (`_request_content`) | **Placeholder**: builds a title and one sentence from the concept id; it does not call the Knowledge agent |
-| Answer evaluation (`_evaluate_answer`) | **Placeholder**: returns a fixed "correct, 0.8" result |
-| Session analysis (`_request_analysis`) | **Partly placeholder**: publishes an `analyst.requests` message to Redis (if connected) and returns a fixed result |
-| Re-explanation (`_adapt_teaching`) | **Placeholder**: returns a fixed sentence |
+| Greeting | Plain text (no model): who Kiddoo is, how many concepts you've mastered, how to start |
+| "Start" | Only when the *whole* message is a start phrase ("start", "let's start", "ok", "dive in"…) and no concept is under way; begins with the first concept of your path, or the easiest concept with no prerequisites |
+| Content (`_request_content`) | The concept's own passages from the knowledge store; flagged unavailable when the notes don't have it |
+| Lesson (`_request_lesson`) | The grounded, cited explanation of the concept from the same pipeline; says plainly when there are no notes |
+| Answer grading (`_evaluate_answer`) | The Assessment agent's evaluator (exact for multiple choice); `is_correct` is `None` and nothing is counted when there is no active question |
+| Analysis (`_request_analysis`) | The rule-based Analyst over the graded answers; `mastery_level` is `None` when nothing was graded |
+| Re-explanation (`_adapt_teaching`) | The Teaching agent, starting from the concept's own notes |
+| Next concept / prerequisite / alternative | `DecisionEngine`, using the real prerequisite graph (`learning/policy.py`); it returns no concept (and the orchestrator says so) rather than inventing one |
 
-The real Knowledge, Teaching, Assessment and Analyst agents are fully wired behind the **`/agents/*` REST endpoints**
-(and their own pages). The measured, adaptive behaviour learners see in *Learn*, *Insights* and *Challenges* comes from the
-`learning/` modules, not from this live-session path. Connecting these placeholders to the real agents is the open
-work item for the live-session loop.
+The message-type key is `interaction_type` (`chat`, `assessment_answer`, `comprehension_check`); `type` is accepted as well. The
+current web UI sends chat turns only; the assessment and comprehension branches are exercised by tests.
 
 ## Messaging
 

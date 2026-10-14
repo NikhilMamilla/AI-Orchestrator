@@ -86,6 +86,7 @@ def _live_socket(app, monkeypatch, limiter):
     monkeypatch.setattr(ws, "LLMService", lambda: SimpleNamespace())
     monkeypatch.setattr(ws, "MessageQueue", Queue)
     monkeypatch.setattr(ws, "OrchestratorAgent", lambda *_a, **_k: SimpleNamespace())
+    monkeypatch.setattr(ws, "get_pipeline", noop)
     monkeypatch.setattr(ws, "handle_hint_request", noop)
     monkeypatch.setattr(ws, "ws_limiter", limiter)
     return TestClient(app)

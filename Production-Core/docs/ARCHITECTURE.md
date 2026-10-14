@@ -205,10 +205,9 @@ flowchart LR
   split; headings are prefixed to what is embedded (contextual retrieval).
 * **Honest degradation.** LLM down → extractive, cited answer. Hosted embeddings down → keyword search. Retrieval down →
   clear error. Weak evidence → "I don't have enough evidence" without calling the model.
-* **No fabricated metrics (with two known gaps).** Achievements are computed from stored progress; agent activity is read from
-  `agent_events`; code-run time and memory are reported only if the engine returns them. The gaps: the dashboard's
-  *Time invested* is not tracked yet and shows 0, and the live-session orchestrator still returns fixed placeholder values for
-  answer evaluation and analysis (see [agents/orchestrator-agent.md](agents/orchestrator-agent.md)).
+* **No fabricated metrics (with one known gap).** Achievements are computed from stored progress; agent activity is read from
+  `agent_events`; code-run time and memory are reported only if the engine returns them; the live session's answers, grading and
+  analysis are real or say plainly that they cannot be. The gap: the dashboard's *Time invested* is not tracked yet and shows 0.
 * **Privacy by construction.** Content gaps carry no user; admin views are aggregates with a minimum group size; share
   links expose an allow-list of fields; per-learner data is stripped before a trace reaches the admin buffer.
 * **One decorative particle.** The sign-in pages, the landing hero and every app page share one `Motes` component

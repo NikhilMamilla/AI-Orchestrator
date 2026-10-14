@@ -5,14 +5,16 @@ from backend.app.services.student_profile_service import StudentProfileService
 from backend.app.services.message_queue import MessageQueue
 from backend.app.agents.orchestrator.agent import OrchestratorAgent
 from backend.app.services.llm import LLMService
+from backend.app.services.rag_service import get_pipeline
 from backend.app.config import settings
 from backend.app.security import AuthError, RateLimiter, authenticate_websocket
 from backend.app.services.activity import make_sink
 import json
 import logging
 import asyncio
+import time
 import traceback
-from typing import Dict
+from typing import Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +69,8 @@ class ConnectionManager:
             websocket = self.active_connections[session_id]
             await websocket.send_json(message)
     
-    async def send_streaming_message(self, session_id: str, text: str, message_type: str = "agent_response"):
+    async def send_streaming_message(self, session_id: str, text: str, message_type: str = "agent_response",
+                                     answer: Optional[dict] = None):
         """Send message with streaming effect (character by character)"""
         if session_id not in self.active_connections:
             return
@@ -95,11 +98,14 @@ class ConnectionManager:
             await asyncio.sleep(0.02)  # Medium speed for readability
         
         # Send end signal
-        await websocket.send_json({
+        end = {
             "type": "stream_end",
             "message_type": message_type,
             "full_text": text
-        })
+        }
+        if answer is not None:                       # status, confidence, citations and evidence, as on the Ask page
+            end["answer"] = answer
+        await websocket.send_json(end)
 
 manager = ConnectionManager()
 
@@ -142,7 +148,7 @@ async def websocket_endpoint(
         logger.debug(f"Services ready for session {session_id}")
         
         profile_service = StudentProfileService(db)
-        orchestrator = OrchestratorAgent(llm_service, message_queue)
+        orchestrator = OrchestratorAgent(llm_service, message_queue, rag=await get_pipeline())   # every answer comes from the notes
         orchestrator.event_sink = make_sink(db, ws_user.uid)
         
         # Session state
@@ -153,7 +159,7 @@ async def websocket_endpoint(
             "evaluations": [],
             "interactions": [],
             "student_profile": None,
-            "elapsed_minutes": 0,
+            "started_at": time.monotonic(),
             "user_id": ws_user.uid,          # the verified user: never an id sent by the client
         }
     
@@ -324,6 +330,9 @@ async def handle_student_response(
     
     response_type = payload.get("response_type", "chat")
     answer = payload.get("answer")
+    if not isinstance(answer, str) or not answer.strip():
+        await websocket.send_json({"type": "error", "message": "Please type a message first."})
+        return
     
     # SAFEGUARD: Ensure student_profile exists
     if not session_state.get("student_profile"):
@@ -366,7 +375,8 @@ async def handle_student_response(
         await manager.send_streaming_message(
             session_id,
             next_action["content"],
-            "tutor_response"
+            "tutor_response",
+            answer=next_action.get("answer")
         )
         
     elif action_type == "provide_clarification":
@@ -404,7 +414,8 @@ async def handle_student_response(
             await manager.send_streaming_message(
                 session_id,
                 lesson_content,
-                "teaching_content"
+                "teaching_content",
+                answer=next_action["lesson"].get("answer")
             )
     
     elif action_type == "review":
@@ -434,7 +445,7 @@ async def handle_student_response(
         "type": "progress_update",
         "mastery_level": mastery_level,
         "questions_answered": len(session_state["evaluations"]),
-        "elapsed_minutes": session_state["elapsed_minutes"]
+        "elapsed_minutes": elapsed_minutes(session_state)
     })
 
 
@@ -488,10 +499,15 @@ async def handle_end_session(
             "total_questions": total_questions,
             "correct_answers": correct_answers,
             "accuracy": correct_answers / total_questions if total_questions > 0 else 0,
-            "time_spent_minutes": session_state["elapsed_minutes"],
+            "time_spent_minutes": elapsed_minutes(session_state),
             "concepts_covered": [session_state["current_concept_id"]]
         }
     })
+
+
+def elapsed_minutes(session_state: dict) -> float:
+    """Minutes since the session started (measured, not a fixed number)."""
+    return round((time.monotonic() - session_state.get("started_at", time.monotonic())) / 60, 1)
 
 
 def calculate_current_mastery(session_state: dict) -> float:

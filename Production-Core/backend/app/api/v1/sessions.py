@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 import logging
 from backend.app.security import RateLimiter, User, get_current_user
 from backend.app.services.database import get_database
+from backend.app.services.rag_service import get_pipeline
 from backend.app.services.student_profile_service import StudentProfileService
 from pydantic import BaseModel
 from typing import Optional, Dict
@@ -56,7 +57,7 @@ async def start_session(
         message_queue = MessageQueue(settings.REDIS_URL)
         await message_queue.connect()
         
-        orchestrator = OrchestratorAgent(llm_service, message_queue)
+        orchestrator = OrchestratorAgent(llm_service, message_queue, rag=await get_pipeline())
         
         # Start session
         session_data = await orchestrator.start_learning_session(
@@ -96,7 +97,7 @@ async def process_response(
         message_queue = MessageQueue(settings.REDIS_URL)
         await message_queue.connect()
         
-        orchestrator = OrchestratorAgent(llm_service, message_queue)
+        orchestrator = OrchestratorAgent(llm_service, message_queue, rag=await get_pipeline())
         
         next_action = await orchestrator.process_student_response(
             session_id=request.session_id,

@@ -5,11 +5,16 @@ import { Send, GraduationCap, User, Sparkles, Square } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkLooseStrong from '../../lib/remarkLooseStrong';
+import { safeMarkdownComponents } from '../../lib/safeMarkdown';
+import type { RagAnswer } from '../../lib/rag';
+import AnswerCard from '../ask/AnswerCard';
+import EvidencePanel from '../ask/EvidencePanel';
 
 export interface Message {
     role: 'user' | 'assistant' | 'system' | string;
     content: string;
     timestamp: Date;
+    answer?: RagAnswer;          // a tutor reply with its status, citations and sources (as on the Ask page)
 }
 
 interface ChatInterfaceProps {
@@ -28,6 +33,7 @@ export default function ChatInterface({
     streamingText
 }: ChatInterfaceProps) {
     const [input, setInput] = useState('');
+    const [active, setActive] = useState<{ index: number; ref: number } | null>(null);   // the citation chip last clicked
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -59,10 +65,10 @@ export default function ChatInterface({
                     <GraduationCap className="text-campus-gold w-5 h-5" />
                 </div>
                 <div>
-                    <h3 className="text-base font-heading font-semibold text-campus-navy">AI Orchestrator</h3>
+                    <h3 className="text-base font-heading font-semibold text-campus-navy">Kiddoo</h3>
                     <p className="text-[10px] font-accent font-medium text-campus-warm-300 uppercase tracking-wider flex items-center gap-1.5 mt-0.5">
                         <span className="w-1.5 h-1.5 rounded-full bg-campus-success" />
-                        {isStreaming ? 'Thinking...' : 'Ready to learn'}
+                        {isStreaming ? 'Looking in the notes...' : 'Ask from the course notes'}
                     </p>
                 </div>
             </div>
@@ -94,20 +100,31 @@ export default function ChatInterface({
 
                                 {/* Bubble */}
                                 <div className={`group flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
-                                    <div className={`px-5 py-4 relative transition-all duration-200
-                                        ${message.role === 'user'
-                                            ? 'bg-campus-primary text-white rounded-campus rounded-tr-sm shadow-campus-navy'
-                                            : message.role === 'system'
-                                                ? 'bg-campus-warm-100/50 text-campus-warm-400 rounded-full text-[10px] font-accent font-semibold uppercase tracking-wider px-6 py-2'
-                                                : 'bg-campus-ivory border border-campus-warm-100 text-campus-ink rounded-campus rounded-tl-sm hover:shadow-campus-md hover:border-campus-gold/20'}`}>
-
-                                        <div className={`markdown-content prose prose-sm max-w-none
-                                            ${message.role === 'user' ? 'prose-invert' : 'prose-campus'}`}>
-                                            <ReactMarkdown remarkPlugins={[remarkGfm, remarkLooseStrong]}>
-                                                {message.content}
-                                            </ReactMarkdown>
+                                    {message.answer ? (
+                                        <div className="w-full min-w-[min(100%,28rem)] space-y-4">
+                                            <AnswerCard answer={message.answer}
+                                                activeRef={active?.index === index ? active.ref : null}
+                                                onCite={(ref) => setActive({ index, ref })} />
+                                            <EvidencePanel evidence={message.answer.evidence} citations={message.answer.citations}
+                                                activeRef={active?.index === index ? active.ref : null}
+                                                onSelect={(ref) => setActive({ index, ref })} />
                                         </div>
-                                    </div>
+                                    ) : (
+                                        <div className={`px-5 py-4 relative transition-all duration-200
+                                            ${message.role === 'user'
+                                                ? 'bg-campus-primary text-white rounded-campus rounded-tr-sm shadow-campus-navy'
+                                                : message.role === 'system'
+                                                    ? 'bg-campus-warm-100/50 text-campus-warm-400 rounded-full text-[10px] font-accent font-semibold uppercase tracking-wider px-6 py-2'
+                                                    : 'bg-campus-ivory border border-campus-warm-100 text-campus-ink rounded-campus rounded-tl-sm hover:shadow-campus-md hover:border-campus-gold/20'}`}>
+
+                                            <div className={`markdown-content prose prose-sm max-w-none
+                                                ${message.role === 'user' ? 'prose-invert' : 'prose-campus'}`}>
+                                                <ReactMarkdown remarkPlugins={[remarkGfm, remarkLooseStrong]} components={safeMarkdownComponents}>
+                                                    {message.content}
+                                                </ReactMarkdown>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {message.role !== 'system' && (
                                         <span className="text-[10px] font-accent text-campus-warm-300 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -133,7 +150,7 @@ export default function ChatInterface({
                                 <div className="px-5 py-4 bg-campus-warm-50 border border-campus-warm-100/50 rounded-campus rounded-tl-sm">
                                     {streamingText ? (
                                         <div className="prose prose-sm prose-campus max-w-none">
-                                            <ReactMarkdown remarkPlugins={[remarkGfm, remarkLooseStrong]}>
+                                            <ReactMarkdown remarkPlugins={[remarkGfm, remarkLooseStrong]} components={safeMarkdownComponents}>
                                                 {streamingText}
                                             </ReactMarkdown>
                                             <span className="inline-block w-1.5 h-4 bg-campus-gold/40 ml-1 rounded-sm animate-pulse align-middle" />
@@ -160,7 +177,7 @@ export default function ChatInterface({
                         type="text"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        placeholder={isStreaming ? "AI is generating..." : "Ask your AI tutor..."}
+                        placeholder={isStreaming ? "Kiddoo is answering..." : "Ask Kiddoo about data structures and algorithms..."}
                         className="flex-1 bg-campus-ivory border border-campus-warm-100 rounded-campus-sm px-6 py-4 text-sm font-accent focus:outline-none focus:ring-2 focus:ring-campus-gold/20 transition-all placeholder:text-campus-warm-300"
                     />
                     <button

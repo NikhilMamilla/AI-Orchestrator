@@ -1,63 +1,87 @@
-
+import re
 import uuid
 import logging
+from dataclasses import asdict
 from typing import Dict, List, Optional, Any
 
+from backend.app.agents.assessment.evaluator import AnswerEvaluator
 from backend.app.agents.orchestrator.decision_engine import DecisionEngine, DecisionType
 from backend.app.agents.orchestrator.session_planner import SessionPlanner
-from backend.app.services.message_queue import MessageQueue
+from backend.app.agents.teaching.agent import TeachingAgent
+from backend.app.learning import analyst
+from backend.app.learning.policy import ConceptNode
+from backend.app.rag.types import Answer
 
 logger = logging.getLogger(__name__)
+
+# The whole message must be one of these to count as "start the lesson" (never a word inside a longer question).
+START_PHRASES = {"start", "begin", "go", "ok", "okay", "start learning", "begin learning", "lets start", "let us start",
+                 "lets begin", "start the lesson", "begin the lesson", "dive in", "first topic"}
+CONFUSED_PHRASES = ("dont understand", "do not understand", "confused", "not sure", "no idea", "dont get", "unclear",
+                    "makes no sense", "im lost", "i am lost")
+
+NO_KNOWLEDGE_BASE = ("The course notes aren't available right now, so I can't answer from them. "
+                     "Please try again in a moment.")
+
+
+def _normal(text: str) -> str:
+    """Lower-case, apostrophes removed, punctuation dropped, spaces collapsed: "Let's start!" -> "lets start"."""
+    return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9 ]", " ", text.lower().replace("'", "").replace("’", ""))).strip()
+
+
+def answer_payload(ans: Answer) -> Dict[str, Any]:
+    """The answer in the shape the Ask page already renders (text, status, confidence, citations, evidence)."""
+    t = ans.trace or {}
+    return {"text": ans.text, "status": ans.status, "confidence": ans.confidence, "citations": ans.citations,
+            "unsupported_claims": ans.unsupported_claims, "evidence": [asdict(e) for e in ans.evidence],
+            "trace": {"mode": t.get("mode"), "cache_hit": t.get("cache_hit")}}
+
 
 class OrchestratorAgent:
     """
     Master Orchestrator Agent
-    
+
     Responsibilities:
     - Coordinate all other agents
     - Make strategic decisions about learning journey
     - Plan sessions (short, medium, long-term)
     - Manage learning loop
     - Adapt entire system based on student needs
+
+    Every piece of teaching content comes from the course notes through the same pipeline as the Ask page (`rag`), and
+    a step that cannot be done for real says so; none returns a fixed stand-in result.
     """
 
     def __init__(
         self,
         llm_service: Any,
-        message_queue: MessageQueue
+        message_queue: Any = None,
+        rag: Any = None
     ):
         self.llm_service = llm_service
-        self.message_queue = message_queue
-        self.decision_engine = DecisionEngine()
+        self.message_queue = message_queue            # optional; nothing in the session depends on it
+        self.rag = rag                                # the RAGPipeline: knowledge store, retrieval, verified answers
+        self.decision_engine = DecisionEngine(self._graph)
         self.session_planner = SessionPlanner()
         self.agent_name = "orchestrator"
-        
-        # Fully detailed curriculum based on dsa_roadmap.md
-        self.curriculum = [
-            "1. Foundations (Complexity, Recursion, Bitwise basics)",
-            "2. Arrays (Sliding Window, Two Pointers, Kadane’s, Matrix)",
-            "3. Strings (Rabin–Karp, KMP, Z Algorithm, Tries)",
-            "4. Bit Manipulation (Low-Level Magic, Subset generation)",
-            "5. Mathematics for DSA (Primes, Sieve, Modular arithmetic)",
-            "6. Recursion & Backtracking (N-Queens, Sudoku, Combinations)",
-            "7. Linked List (Cycle Detection, Reversal, Doubly/Circular)",
-            "8. Stack (Monotonic Stack, Expression Evaluation)",
-            "9. Queue & Deque (Circular, Priority Queue, Monotonic)",
-            "10. Hashing (HashMap internals, Collision handling)",
-            "11. Sorting Algos (Quick/Merge/Heap, Linear sorts)",
-            "12. Binary Search (Search on Answer, Rotated Arrays)",
-            "13. Trees (DFS/BFS, LCA, Balanced Trees/AVL)",
-            "14. Binary Search Tree (Validation, Kth smallest)",
-            "15. Heaps (Heapify, Top K problems)",
-            "16. Greedy Algos (Huffman, Activity Selection, Scheduling)",
-            "17. Graph Algos (Dijkstra, MST, SCC, Bridges/Articulation)",
-            "18. Dynamic Programming (Knapsack, LCS/LIS, Tree DP, Bitmask)",
-            "19. Tries (Prefix match, XOR max pair)",
-            "20. Segment Trees & Fenwick Tree (Range queries, Lazy prop)",
-            "21. Advanced Topics (Mo's, SQRT Decomposition, Meet-in-middle)",
-            "22. Interview Patterns (Fast/Slow Pointers, Cyclic Sort)"
-        ]
 
+    # ---------------------------------------------------------------- helpers
+    @property
+    def _store(self):
+        return getattr(self.rag, "store", None)
+
+    def _graph(self) -> Dict[str, ConceptNode]:
+        store = self._store
+        if store is None:
+            return {}
+        return {d.id: ConceptNode(d.id, d.title, d.level, list(d.prerequisites), d.domain) for d in store.list_documents()}
+
+    @staticmethod
+    def _mastery_of(profile: Dict) -> Dict[str, float]:
+        return {str(m["concept_id"]): float(m.get("mastery_level", 0.0))
+                for m in (profile or {}).get("concept_mastery", []) if isinstance(m, dict) and "concept_id" in m}
+
+    # ---------------------------------------------------------------- session
     async def start_learning_session(
         self,
         student_id: str,
@@ -66,7 +90,7 @@ class OrchestratorAgent:
         available_time_minutes: int = 40
     ) -> Dict:
         """Start a new learning session"""
-        print(f"DEBUG: [Orchestrator] Starting session for {student_id}")
+        logger.info("[Orchestrator] Starting session for %s", student_id)
         session_id = f"session_{uuid.uuid4().hex[:8]}"
 
         # Create session plan
@@ -79,8 +103,7 @@ class OrchestratorAgent:
         # Determine starting concept
         if not initial_concept_id:
             initial_concept_id = self._determine_starting_concept(student_profile)
-        
-        # Initial content and lesson (pre-planned but used only if needed)
+
         student_level_int = self._get_student_level_score(student_profile)
         content_package = await self._request_content(
             concept_id=initial_concept_id,
@@ -112,29 +135,13 @@ class OrchestratorAgent:
         student_profile: Dict,
         session_id: str
     ) -> str:
-        """Generate a warm, conversational opening greeting"""
-        name = student_profile.get("name", "Student")
-        mastery_count = self._get_student_level_score(student_profile)
-        
-        prompt = f"""
-        Generate a warm, professional, yet high-energy greeting for {name}. 
-        Progress Context: They have mastered {mastery_count} concepts.
-        
-        Your goal:
-        1. Greet them as 'AI Orchestrator', their elite DSA master.
-        2. Use **Markdown** (bolding, emojis) to make it look premium.
-        3. Ask if they want to continue the roadmap or master a specific topic.
-        
-        Tone: Encouraging, concise, and mathematically elegant. Under 80 words.
-        """
-        
-        system_prompt = "You are the AI Orchestrator, the world's most engaging and elite DSA Tutor. You are starting a new learning session."
-        
-        try:
-            return await self.llm_service.generate_response(prompt, system_prompt, timeout=8.0)
-        except Exception as e:
-            logger.error(f"Greeting generation failed: {e}")
-            return f"Hi {name}! 👋 Ready to learn something amazing today? We can dive into your curriculum or cover a topic of your choice!"
+        """The opening message. Plain text, no language model: it states no facts about DSA, so there is nothing to ground."""
+        name = student_profile.get("name") or "there"
+        mastered = self._get_student_level_score(student_profile)
+        progress = f" You've mastered {mastered} concept{'s' if mastered != 1 else ''} so far." if mastered else ""
+        return (f"Hi {name}! I'm Kiddoo.{progress} Ask me anything about data structures and algorithms: every answer comes "
+                "from the course notes, with sources you can open, and if the notes don't cover it I'll say so. "
+                "Or type **start** and I'll begin with the next concept on your roadmap.")
 
     async def process_student_response(
         self,
@@ -143,167 +150,76 @@ class OrchestratorAgent:
         response_data: Dict,
         session_state: Dict
     ) -> Dict:
-        """Process student's response and decide next action"""
+        """Process a student's message and decide the next action"""
         logger.info(f"[{self.agent_name}] Processing response in session {session_id}")
 
+        kind = response_data.get("interaction_type") or response_data.get("type") or "chat"
+        raw = response_data.get("answer")
+        answer = raw.strip() if isinstance(raw, str) else ""
         current_concept = session_state.get("current_concept_id")
-        answer = response_data.get("answer", "")
-        
-        # 1. Handle Discovery/Chat Phase (If transition to teaching is requested)
-        start_keywords = ["start", "begin", "learn", "master", "go to", "first topic", "dive in", "okay", "ok"]
-        is_starting = any(kw in answer.lower() for kw in start_keywords) and not current_concept
-        
-        if is_starting:
-            next_concept = self._determine_starting_concept(session_state.get("student_profile", {}))
-            session_state["current_concept_id"] = next_concept
-            
-            # Use the decision engine approach to get content
-            content_package = await self._request_content(
-                concept_id=next_concept,
-                student_level=self._get_student_level_score(session_state.get("student_profile", {}))
+        profile = session_state.get("student_profile") or {}
+
+        if not answer:
+            return {"action": "chat_reply", "content": "Please type a question or an answer first."}
+
+        # Assessment answer
+        if kind == "assessment_answer":
+            evaluation = await self._evaluate_answer(question=session_state.get("current_question"), answer=answer)
+            if evaluation.get("is_correct") is None:                    # nothing could be graded: say so, do not count it
+                return {"action": "chat_reply", "content": evaluation["feedback"]}
+
+            session_state.setdefault("evaluations", []).append(evaluation)
+
+            if len(session_state["evaluations"]) >= session_state.get("total_questions", 5):
+                return await self._handle_assessment_complete(session_id, student_id, session_state)
+            if session_state.get("remaining_questions"):
+                return {"action": "ask_question", "question": session_state["remaining_questions"].pop(0)}
+            return await self._handle_assessment_complete(session_id, student_id, session_state)
+
+        # Comprehension check
+        if kind == "comprehension_check":
+            if self._quick_comprehension_check(response_data):
+                return {"action": "continue_teaching"}
+            adapted_explanation = await self._adapt_teaching(
+                current_concept=current_concept,
+                student_feedback=answer,
+                context=session_state
             )
+            return {"action": "provide_clarification", "content": adapted_explanation}
+
+        # An explicit "start": the whole message is a start phrase, and no concept is under way
+        if not current_concept and _normal(answer) in START_PHRASES:
+            next_concept = self._determine_starting_concept(profile)
+            session_state["current_concept_id"] = next_concept
+            student_level = self._get_student_level_score(profile)
+            content_package = await self._request_content(concept_id=next_concept, student_level=student_level)
             lesson = await self._request_lesson(
                 content_package=content_package,
-                student_context={
-                    "student_id": student_id,
-                    "student_level": self._get_student_level_score(session_state.get("student_profile", {}))
-                }
+                student_context={"student_id": student_id, "student_level": student_level}
             )
-            
             return {
                 "action": "advance",
-                "reasoning": f"Student requested to start the learning journey. Beginning with: {next_concept}",
+                "reasoning": f"You asked to start. Beginning with: {content_package.get('title') or next_concept}",
                 "next_concept": next_concept,
                 "lesson": lesson
             }
 
-        # Handle general chat
-        if not current_concept or response_data.get("interaction_type") == "chat":
-            tutor_reply = await self.generate_tutor_response(
-                user_message=answer,
-                student_profile=session_state.get("student_profile", {}),
-                session_history=session_state.get("interactions", [])[-5:]
-            )
-            return {
-                "action": "chat_reply",
-                "content": tutor_reply
-            }
+        # Everything else is a question for the tutor: answered from the notes, with sources, or refused
+        ans = await self.grounded_reply(answer, profile, session_state.get("interactions", [])[-5:])
+        return {"action": "chat_reply", "content": ans.text, "answer": answer_payload(ans)}
 
-        # 2. Handle Assessment Phase
-        if response_data.get("type") == "assessment_answer":
-            evaluation = await self._evaluate_answer(
-                question=session_state.get("current_question"),
-                answer=answer
-            )
+    async def grounded_reply(self, user_message: str, student_profile: Dict, session_history: List[Dict]) -> Answer:
+        """Answer one chat turn through the RAG pipeline: screen, guard, evidence gate, verify, cite. The pipeline also screens
+        the history and drops assistant turns, so nothing the client sends can steer the model."""
+        if self.rag is None:
+            return Answer(text=NO_KNOWLEDGE_BASE, status="error", confidence=0.0, citations=[], unsupported_claims=[],
+                          evidence=[], trace={})
+        return await self.rag.answer(user_message, level="auto", history=list(session_history),
+                                     mastery=self._mastery_of(student_profile))
 
-            if "evaluations" not in session_state:
-                session_state["evaluations"] = []
-            session_state["evaluations"].append(evaluation)
-
-            if len(session_state["evaluations"]) >= session_state.get("total_questions", 5):
-                return await self._handle_assessment_complete(session_id, student_id, session_state)
-            else:
-                if "remaining_questions" in session_state and session_state["remaining_questions"]:
-                    next_question = session_state["remaining_questions"].pop(0)
-                    return {
-                        "action": "ask_question",
-                        "question": next_question
-                    }
-                else:
-                    return await self._handle_assessment_complete(session_id, student_id, session_state)
-
-        # 3. Handle Comprehension Phase
-        elif response_data.get("type") == "comprehension_check":
-            is_understanding = self._quick_comprehension_check(response_data)
-            
-            if not is_understanding:
-                adapted_explanation = await self._adapt_teaching(
-                    current_concept=current_concept,
-                    student_feedback=answer,
-                    context=session_state
-                )
-                
-                return {
-                    "action": "provide_clarification",
-                    "content": adapted_explanation
-                }
-            else:
-                return {
-                    "action": "continue_teaching"
-                }
-
-        # Default: Treat as conversational chat
-        tutor_reply = await self.generate_tutor_response(
-            user_message=answer,
-            student_profile=session_state.get("student_profile", {}),
-            session_history=session_state.get("interactions", [])[-5:]
-        )
-        return {
-            "action": "chat_reply",
-            "content": tutor_reply
-        }
-
-    async def generate_tutor_response(
-        self,
-        user_message: str,
-        student_profile: Dict,
-        session_history: List[Dict]
-    ) -> str:
-        """Generate a conversational ChatGPT-like response from the tutor persona"""
-        name = student_profile.get("name", "Student")
-        msg_lower = user_message.lower()
-        
-        # Syllabus Command
-        if any(cmd in msg_lower for cmd in ["syllabus", "curriculum", "what can you teach"]):
-            syllabus_list = "\n".join([f"- **{topic}**" for topic in self.curriculum])
-            return f"I'm specially designed to help you master **Data Structures and Algorithms**! 🚀\n\n### **Our Professional Roadmap**\n{syllabus_list}\n\nWhich one shall we tackle first, Kiddo?"
-
-        # Mastery Command
-        if any(cmd in msg_lower for cmd in ["master", "start with", "learn"]):
-            for topic in self.curriculum:
-                topic_core = topic.split("(")[0].strip().lower()
-                if topic_core in msg_lower:
-                    topic_display = topic.split('(')[0].strip()
-                    return f"Excellent choice! Let's master **{topic_display}** together.\n\nI'll take you from the **absolute basics** (mental models) up to **advanced interview patterns**. \n\nReady to dive into the first concept? 🧠🔥"
-
-        history_str = "\n".join([f"{m.get('role', 'user')}: {m.get('content', '')}" for m in session_history])
-        
-        prompt = f"""
-        Student ({name}) says: "{user_message}"
-        
-        Recent History:
-        {history_str}
-        
-        Curriculum Context (22 Critical Domains):
-        {", ".join(self.curriculum)}
-        
-        Role: AI Orchestrator, an elite DSA specialist and Master Tutor.
-        
-        Your Goal: 
-        Generate a "Masterpiece" explanation. The student values depth and mathematical elegance, but wants the length to be controlled. 
-        Aim for a response length of **350-400 words**.
-        
-        Execution Style:
-        1. USE **BOLDING** for key technical terms, algorithmic complexities, and pivotal logical steps.
-        2. Provide **Deep In-depth intuition** first. Explain the "Why" and the mental model with extreme clarity.
-        3. Use professional **Markdown** (Headers, Tables, and Bullet Points) to structure content cleanly.
-        4. Specialization: ONLY DSA. If asked about the "Roadmap", provide a clear, categorized breakdown of the 22 topics.
-        5. Length: **350-400 words**. Be comprehensive but efficient. Don't be too long that it becomes boring, but don't be too short that it loses quality.
-        6. Tone: Premium, witty, high-energy, and intellectually stimulating.
-        
-        If asked to "Master" a topic, explain the transition from **Foundational intuition** -> **Implementation patterns** -> **Edge cases**.
-        
-        Formatting Requirement: STRICT Markdown usage for readability.
-        Response:
-        """
-        
-        system_prompt = "You are the AI Orchestrator. You provide exhaustive, brilliant, and MASTERPIECE-level DSA explanations that are both deeply technical and incredibly engaging."
-        
-        try:
-            return await self.llm_service.generate_response(prompt, system_prompt)
-        except Exception as e:
-            logger.error(f"Tutor chat generation failed: {e}")
-            return "DSA is my jam! Let's get back to mastering those algorithms. What's on your mind?"
+    async def generate_tutor_response(self, user_message: str, student_profile: Dict, session_history: List[Dict]) -> str:
+        """The text of a grounded reply (kept for callers that only want the words)."""
+        return (await self.grounded_reply(user_message, student_profile, session_history)).text
 
     async def _handle_assessment_complete(
         self,
@@ -333,7 +249,7 @@ class OrchestratorAgent:
         decision = self.decision_engine.decide_next_action(
             current_state={
                 "concept_id": session_state.get("current_concept_id"),
-                "mastery_level": analysis.get("performance_analysis", {}).get("mastery_level", 0)
+                "mastery_level": analysis.get("performance_analysis", {}).get("mastery_level") or 0.0
             },
             analyst_recommendations=analysis.get("recommendations", {}),
             student_profile=session_state.get("student_profile", {}),
@@ -361,8 +277,8 @@ class OrchestratorAgent:
     ) -> Dict:
         """Execute the decision made by decision engine"""
         decision_type = decision["decision"]
-        await self._emit("orchestrator", f"{decision_type.replace('_', ' ').title()}: {decision.get('reasoning', '')}",
-                         {"decision": decision_type, "next_concept_id": decision.get("next_concept_id"),
+        await self._emit("orchestrator", f"{decision_type.value.replace('_', ' ').title()}: {decision.get('reasoning', '')}",
+                         {"decision": decision_type.value, "next_concept_id": decision.get("next_concept_id"),
                           "teaching_strategy": decision.get("teaching_strategy")})
 
         if decision_type == DecisionType.ADVANCE:
@@ -421,73 +337,79 @@ class OrchestratorAgent:
         else:
             return {"action": "continue"}
 
-    async def _request_content(self, concept_id: str, student_level: int) -> Dict:
-        """Request content from Knowledge Agent"""
-        concept_str = str(concept_id)
-        return {
-            "concept_id": concept_str,
-            "title": concept_str.replace("_", " ").replace("-", " ").title(),
-            "content": {
-                "explanation": f"Let's dive into {concept_str}.",
-                "difficulty_context": self._level_to_string(student_level)
-            }
-        }
+    async def _request_content(self, concept_id: Optional[str], student_level: int) -> Dict:
+        """The concept's own notes from the knowledge store (flagged unavailable when there are none)."""
+        store = self._store
+        doc = store.get_document(concept_id) if (store is not None and concept_id) else None
+        if doc is None:
+            return {"concept_id": concept_id, "title": concept_id, "content": None, "unavailable": True}
+        passages = [text for _, text in store.passages_for_doc(doc.id)][:3]
+        return {"concept_id": doc.id, "title": doc.title,
+                "content": {"explanation": " ".join(passages)[:1500], "difficulty_context": self._level_to_string(student_level)}}
 
     async def _request_lesson(self, content_package: Dict, student_context: Dict) -> Dict:
-        """Request lesson from Teaching Agent"""
-        concept_title = content_package.get("title", "this topic")
-        level_score = student_context.get("student_level", 0)
-        level_str = self._level_to_string(level_score)
-        
-        prompt = f"""
-        Create a brief DSA lesson about '{concept_title}'.
-        Student Level: {level_str} ({level_score}/10).
-        
-        - level 0-2: Absolute basics.
-        - higher level: Advanced patterns.
-        """
-        
-        system_prompt = "You are Kiddoo, a brilliant DSA Tutor."
-        try:
-            lesson_text = await self.llm_service.generate_response(prompt, system_prompt)
-            return {
-                "lesson_content": lesson_text,
-                "teaching_strategy": "Socratic",
-                "concept_title": concept_title
-            }
-        except Exception as e:
-            logger.error(f"Lesson generation failed: {e}")
-            return {"lesson_content": f"Let's learn {concept_title}!", "teaching_strategy": "fallback"}
+        """A lesson is the grounded, cited explanation of the concept, written from the notes by the same pipeline as Ask."""
+        title = content_package.get("title") or "this topic"
+        if content_package.get("unavailable") or self.rag is None:
+            return {"lesson_content": f"I don't have course notes on {title} yet, so I can't teach it from the material.",
+                    "teaching_strategy": "none", "concept_title": title, "status": "unavailable"}
+        level = self._level_to_string(student_context.get("student_level", 0))
+        ans = await self.rag.answer(f"Explain {title}", level=level)
+        return {"lesson_content": ans.text, "teaching_strategy": "grounded", "concept_title": title,
+                "status": ans.status, "answer": answer_payload(ans)}
 
-    async def _evaluate_answer(self, question: Dict, answer: str) -> Dict:
-        """Request evaluation from Assessment Agent"""
-        return {"is_correct": True, "score": 0.8, "feedback": "Good job!"}
+    async def _evaluate_answer(self, question: Optional[Dict], answer: str) -> Dict:
+        """Grade an answer with the Assessment agent's evaluator (is_correct is None when nothing could be graded)."""
+        if not question:
+            return {"is_correct": None, "score": None, "feedback": "There is no active question to grade yet."}
+        try:
+            return await AnswerEvaluator(self.llm_service).evaluate_answer(question, answer, None)
+        except Exception:
+            logger.exception("answer evaluation failed")
+            return {"is_correct": None, "score": None, "feedback": "I couldn't grade that answer right now. Please try again."}
 
     async def _request_analysis(self, session_id: str, student_id: str, session_data: Dict) -> Dict:
-        """Request analysis from Analyst Agent"""
-        message = {
-            "message_id": f"msg_{uuid.uuid4().hex[:8]}",
-            "correlation_id": session_id,
-            "from_agent": self.agent_name,
-            "to_agent": "analyst_agent",
-            "action": "analyze_session",
-            "payload": {"session_id": session_id, "student_id": student_id, "session_data": session_data}
-        }
-        await self.message_queue.publish("analyst.requests", message)
-        return {"performance_analysis": {"mastery_level": 0.75}, "recommendations": {"primary_action": "advance"}}
+        """Analyse the session's graded answers with the rule-based Analyst (mastery_level is None when nothing was graded)."""
+        results = session_data.get("assessment_results") or [{}]
+        concept = results[0].get("concept_id") or "unknown"
+        graded = [e for r in results for e in (r.get("evaluations") or []) if e.get("score") is not None]
+        attempts = [{"c": concept, "ok": bool(e.get("is_correct")), "s": None, "t": None, "h": None, "x": None} for e in graded]
+        report = analyst.analyse(attempts) if attempts else {"signals": []}
+        signals = {s.get("id") for s in report.get("signals", [])}
+        mastery = round(sum(float(e["score"]) for e in graded) / len(graded), 3) if graded else None
+        if "struggle" in signals:
+            action = "review"
+        elif "rapid_wrong" in signals:
+            action = "break"
+        elif mastery is None:
+            action = "continue"
+        else:
+            action = "advance" if mastery >= 0.8 else "practice" if mastery >= 0.5 else "review"
+        return {"performance_analysis": {"mastery_level": mastery, "graded_answers": len(graded)},
+                "recommendations": {"primary_action": action}, "signals": report.get("signals", [])}
 
-    async def _adapt_teaching(self, current_concept: str, student_feedback: str, context: Dict) -> str:
-        """Request adapted explanation from Teaching Agent"""
-        return "Here's a simpler explanation..."
+    async def _adapt_teaching(self, current_concept: Optional[str], student_feedback: str, context: Dict) -> str:
+        """A simpler explanation from the Teaching agent, starting from the concept's own notes."""
+        notes = await self._request_content(current_concept, 1)
+        original = (notes.get("content") or {}).get("explanation") or ""
+        profile = context.get("student_profile") or {}
+        return await TeachingAgent(self.llm_service).adapt_explanation(
+            original_explanation=original or "(no course notes for this concept)",
+            student_feedback=student_feedback,
+            context={"student_level": self._level_to_string(self._get_student_level_score(profile)),
+                     "learning_style": (profile.get("learning_style") or {}).get("primary_modality", "visual")})
 
-    def _determine_starting_concept(self, profile: Dict) -> str:
-        """Determine where to start based on profile"""
-        learning_path = profile.get("current_learning_path", [])
-        return learning_path[0] if learning_path else "Foundations"
+    def _determine_starting_concept(self, profile: Dict) -> Optional[str]:
+        """The first concept of the learner's path, else the easiest concept in the notes that has no prerequisites."""
+        path = (profile or {}).get("current_learning_path", [])
+        if path:
+            return path[0]
+        roots = [n for n in self._graph().values() if not n.prerequisites]
+        return min(roots, key=lambda n: (n.level, n.title)).id if roots else None
 
     def _get_student_level_score(self, profile: Dict) -> int:
         """Determine student's current level as a score (0-10)"""
-        mastery = profile.get("concept_mastery", [])
+        mastery = (profile or {}).get("concept_mastery", [])
         mastery_count = len([m for m in mastery if (isinstance(m, dict) and m.get("mastery_level", 0) >= 0.8)])
         return min(mastery_count, 10)
 
@@ -498,6 +420,6 @@ class OrchestratorAgent:
         return "advanced"
 
     def _quick_comprehension_check(self, response: Dict) -> bool:
-        """Quick check if student understood"""
-        answer = response.get("answer", "").lower()
-        return len(answer) > 10 and "don't understand" not in answer
+        """The learner understood unless they said they are lost."""
+        answer = response.get("answer")
+        return isinstance(answer, str) and not any(p in _normal(answer) for p in CONFUSED_PHRASES)

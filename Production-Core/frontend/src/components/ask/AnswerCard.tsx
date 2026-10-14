@@ -71,6 +71,7 @@ export default function AnswerCard({ answer, activeRef, onCite }: Props) {
                 <ReactMarkdown
                     remarkPlugins={[remarkGfm, remarkLooseStrong]}
                     components={{
+                        img: () => null,                                    // a model-supplied image would be fetched the moment it is shown
                         a: ({ href, children }) => {
                             const m = /^#cite-(\d+)$/.exec(href ?? '');
                             if (!m) return <span>{children}</span>;          // never render model-supplied links

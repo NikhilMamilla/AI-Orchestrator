@@ -1,7 +1,9 @@
 
-from typing import Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 from enum import Enum
 import logging
+
+from backend.app.learning.policy import ConceptNode, next_concepts, weakest_prerequisite
 
 logger = logging.getLogger(__name__)
 
@@ -16,8 +18,19 @@ class DecisionType(Enum):
 class DecisionEngine:
     """Core decision-making logic for the Orchestrator"""
 
-    def __init__(self):
+    def __init__(self, graph_provider: Optional[Callable[[], Dict[str, ConceptNode]]] = None):
+        """`graph_provider` returns the real prerequisite graph (id -> ConceptNode). Without it the engine cannot name a
+        concept, and says so (a None concept id) instead of inventing one."""
         self.decision_history = []
+        self._graph_provider = graph_provider
+
+    def _graph(self) -> Dict[str, ConceptNode]:
+        return self._graph_provider() if self._graph_provider else {}
+
+    @staticmethod
+    def _mastery(profile: Dict) -> Dict[str, float]:
+        return {str(m["concept_id"]): float(m.get("mastery_level", 0.0))
+                for m in (profile or {}).get("concept_mastery", []) if isinstance(m, dict) and "concept_id" in m}
 
     def decide_next_action(
         self,
@@ -137,6 +150,14 @@ class DecisionEngine:
             current_concept_id=current_state["concept_id"],
             profile=profile
         )
+        if next_concept["concept_id"] is None:
+            return {
+                "decision": DecisionType.REVIEW,
+                "reasoning": "No further concept is unlocked yet, so keep practising this one.",
+                "next_concept_id": current_state["concept_id"],
+                "teaching_strategy": current_state.get("teaching_strategy", "worked_example"),
+                "parameters": {"focus_on": "weak_areas"}
+            }
 
         return {
             "decision": DecisionType.ADVANCE,
@@ -197,6 +218,8 @@ class DecisionEngine:
             current_state["concept_id"],
             profile
         )
+        if weak_prereq["concept_id"] is None:                     # nothing to remediate: stay on this concept
+            return self._decide_review_with_new_strategy(current_state, profile)
 
         return {
             "decision": DecisionType.REMEDIATE,
@@ -215,6 +238,8 @@ class DecisionEngine:
             current_state["concept_id"],
             profile
         )
+        if alternative_concept["concept_id"] is None:
+            return self._decide_deepen(current_state, profile)
 
         return {
             "decision": DecisionType.SWITCH,
@@ -228,21 +253,18 @@ class DecisionEngine:
         }
 
     def _check_prerequisites_for_next(self, concept_id: str, profile: Dict) -> bool:
-        """Check if prerequisites for next concept are met"""
-        # Would query concept graph for prerequisites
-        # For now, return True
-        return True
+        """True when none of the concept's prerequisites is weak, so the learner may move on."""
+        graph = self._graph()
+        node = graph.get(concept_id)
+        return node is None or weakest_prerequisite(node, graph, self._mastery(profile)) is None
 
     def _select_next_concept(self, current_concept_id: str, profile: Dict) -> Dict:
-        """Select the next concept in learning path"""
-        # Would use knowledge graph and student's learning path
-        # For now, return placeholder
-        return {
-            "concept_id": "next_concept",
-            "title": "Next Concept",
-            "difficulty": 2,
-            "estimated_time_minutes": 30
-        }
+        """The next unlocked, not yet mastered concept of the real roadmap (None when there is none)."""
+        graph, mastery = self._graph(), self._mastery(profile)
+        nxt = next((n for n in next_concepts(graph, mastery, 3) if n.id != current_concept_id), None)
+        if nxt is None:
+            return {"concept_id": None, "title": None, "difficulty": 2, "estimated_time_minutes": 25}
+        return {"concept_id": nxt.id, "title": nxt.title, "difficulty": nxt.level, "estimated_time_minutes": 25}
 
     def _recommend_teaching_strategy(self, concept: Dict, profile: Dict) -> str:
         """Recommend teaching strategy for concept"""
@@ -275,17 +297,14 @@ class DecisionEngine:
         return strategies[0]
 
     def _find_weakest_prerequisite(self, concept_id: str, profile: Dict) -> Dict:
-        """Find the weakest prerequisite concept"""
-        # Would query prerequisites and check mastery
-        return {
-            "concept_id": "prerequisite_concept",
-            "title": "Prerequisite Concept"
-        }
+        """The concept's weakest prerequisite from the real graph (None when none is weak)."""
+        graph = self._graph()
+        node = graph.get(concept_id)
+        weak = weakest_prerequisite(node, graph, self._mastery(profile)) if node else None
+        return {"concept_id": weak.id, "title": weak.title} if weak else {"concept_id": None, "title": None}
 
     def _select_alternative_concept(self, concept_id: str, profile: Dict) -> Dict:
-        """Select alternative concept for engagement"""
-        # Would select related but easier/more interesting concept
-        return {
-            "concept_id": "alternative_concept",
-            "title": "Alternative Concept"
-        }
+        """A different unlocked concept, to keep the learner engaged (None when there is none)."""
+        graph, mastery = self._graph(), self._mastery(profile)
+        alt = next((n for n in next_concepts(graph, mastery, 4) if n.id != concept_id), None)
+        return {"concept_id": alt.id, "title": alt.title} if alt else {"concept_id": None, "title": None}
