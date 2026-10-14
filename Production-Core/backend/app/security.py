@@ -22,8 +22,8 @@ from collections import defaultdict, deque
 from typing import Deque, Dict, Optional
 
 import httpx
+import jwt
 from fastapi import Depends, HTTPException, Request, WebSocket, status
-from jose import JWTError, jwt
 
 from backend.app.config import settings
 
@@ -35,6 +35,14 @@ ASYMMETRIC = {"ES256", "RS256"}
 
 class AuthError(Exception):
     pass
+
+
+def _verification_key(jwk: Dict):
+    """The public key a published JWK describes (PyJWT parses it, and rejects a malformed one)."""
+    try:
+        return jwt.PyJWK(jwk).key
+    except jwt.PyJWTError as e:
+        raise AuthError("unusable signing key") from e
 
 
 # ---------------------------------------------------------------- Firebase Auth
@@ -64,7 +72,7 @@ async def verify_firebase_token(token: str) -> Dict:
         raise AuthError("server auth is not configured")
     try:
         header = jwt.get_unverified_header(token)
-    except JWTError as e:
+    except jwt.PyJWTError as e:
         raise AuthError("malformed token") from e
     if header.get("alg") != "RS256":                          # Firebase signs with RS256 only
         raise AuthError("unexpected token algorithm")
@@ -78,9 +86,9 @@ async def verify_firebase_token(token: str) -> Dict:
     if key is None:
         raise AuthError("unknown signing key")
     try:
-        claims = jwt.decode(token, key, algorithms=["RS256"], audience=project,
-                            issuer=f"https://securetoken.google.com/{project}", options={"verify_at_hash": False})
-    except JWTError as e:
+        claims = jwt.decode(token, _verification_key(key), algorithms=["RS256"], audience=project,
+                            issuer=f"https://securetoken.google.com/{project}", options={"require": ["exp", "sub"]})
+    except jwt.PyJWTError as e:
         raise AuthError("invalid or expired token") from e
     if not claims.get("sub"):
         raise AuthError("token has no subject")
@@ -103,7 +111,7 @@ async def verify_supabase_token(token: str) -> Dict:
         raise AuthError("server auth is not configured")
     try:
         header = jwt.get_unverified_header(token)
-    except JWTError as e:
+    except jwt.PyJWTError as e:
         raise AuthError("malformed token") from e
     alg = header.get("alg")
     if alg == "HS256" and settings.SUPABASE_JWT_SECRET:
@@ -118,13 +126,13 @@ async def verify_supabase_token(token: str) -> Dict:
             raise AuthError("could not fetch signing keys") from e
         if key is None:
             raise AuthError("unknown signing key")
-        algs = [alg]
+        key, algs = _verification_key(key), [alg]
     else:
         raise AuthError("unexpected token algorithm")
     try:
         claims = jwt.decode(token, key, algorithms=algs, audience="authenticated",
-                            issuer=f"{settings.SUPABASE_URL.rstrip('/')}/auth/v1")
-    except JWTError as e:
+                            issuer=f"{settings.SUPABASE_URL.rstrip('/')}/auth/v1", options={"require": ["exp", "sub"]})
+    except jwt.PyJWTError as e:
         raise AuthError("invalid or expired token") from e
     if not claims.get("sub"):
         raise AuthError("token has no subject")
