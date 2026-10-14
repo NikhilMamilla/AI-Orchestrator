@@ -8,8 +8,7 @@ export const introState = {
     edges: 1,        // 0..1: how far the prerequisite links have grown
     settle: 1,       // 0 = centre-stage intro pose, 1 = resting hero pose
     spin: 0,         // extra rotation during the intro
-    fade: 1,         // 0..1: the whole graph shrinks away (the draw-a-zero gate and the first title card have no graph)
+    fade: 1,         // 0..1: the whole graph shrinks away (the first title card has no graph)
     ready: false,    // the WebGL scene has rendered its first frame
-    gateHand: false, // the draw-a-zero gate is showing: its hand follows the pointer
     cx: 0, cy: 0,    // the graph's centre on screen (px), so the reveal can open from it
 };

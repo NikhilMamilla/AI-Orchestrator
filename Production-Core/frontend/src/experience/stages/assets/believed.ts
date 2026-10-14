@@ -10,7 +10,7 @@ import { motes } from './motes';
  * meet. The words on top are Kiddoo's (Overlays.tsx).
  */
 
-// the background: the opening gradient, unchanged for the whole stage (no garden), so the count, the gate and this scene are one sky
+// the background: the opening gradient, unchanged for the whole stage (no garden), so the count and this scene are one sky
 const BG_VS = /* glsl */ `varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.9999, 1.0); }`;
 const BG_FS = /* glsl */ `
 varying vec2 vUv;
@@ -57,7 +57,7 @@ const factory: StageFactory = async (ctx: StageCtx) => {
     eth.scene.traverse((o) => { const m = (o as Mesh).material as { normalMap?: Texture } | undefined; if (!normalMap && m?.normalMap) normalMap = m.normalMap; });
     const mask = handsAtlas ? handsAtlas.clone() : null;
     if (mask) { mask.offset.set(0.75, 0.25); mask.repeat.set(0.25, -0.25); mask.needsUpdate = true; }
-    const ownMatcap = pearlMatcap();                                       // pearl and gold, like the gate's hand
+    const ownMatcap = pearlMatcap();                                       // pearl and gold
     const ethMat = new MeshMatcapMaterial({ matcap: ownMatcap, alphaMap: mask, normalMap, transparent: true, toneMapped: false });
     eth.scene.traverse((o) => { if ((o as Mesh).isMesh) { (o as Mesh).material = ethMat; o.frustumCulled = false; } });
 

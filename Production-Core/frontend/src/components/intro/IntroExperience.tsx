@@ -1,24 +1,15 @@
-import { lazy, Suspense, useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { introState } from '../../lib/introState';
-import { detectCircle, type Pt } from '../../lib/circleGesture';
 import { introFlag, introWillPlay } from '../../lib/introFlag';
-import { assetUrl } from '../../lib/experienceAssets';
-
-const GateHand = lazy(() => import('./GateHand'));
-// the gate is the count's sky; with the dev assets frost.webp adds texture over it, otherwise an SVG frost does
-const FROST = assetUrl('frost');
 
 /**
- * Opening sequence, in four scenes (the navigation bar is not part of any of them):
+ * Opening sequence, in three scenes (the navigation bar is not part of any of them):
  *   1. COUNT      a giant 00 rolls to 26 (the concepts in the curriculum) and the statement types itself in the top-left
  *                 corner. Typography only: no 3D graph.
- *   2. LOOP       a frost ring draws itself on the right like a big zero, closes, and bursts outward as an iris that
- *                 carries the scene into the gate.
- *   3. GATE       "Are you ready?  Draw a zero."  Draw a circle with the mouse or a finger;
- *                 the path is judged by detectCircle (closed, round, sweeps about 360 degrees). Enter also opens it.
- *   4. OPENING    the circle you drew becomes the opening: the gate dissolves outward from it and the "Every Learner"
- *                 title card is revealed inside, then the page continues as normal stages.
+ *   2. LOOP       a frost ring draws itself on the right like a big zero, closes, and bursts outward over the sky.
+ *   3. OPENING    the burst turns to white light and the "Every Learner" title card is revealed inside it, then the page
+ *                 continues as normal stages. (Escape or Enter skips straight to it.)
  * Plays once per page load (module flag survives route changes and StrictMode remounts); never with reduced motion.
  */
 
@@ -26,11 +17,6 @@ const FINAL = { active: false, reveal: 26, edges: 1, settle: 1, spin: 0, fade: 1
 const LINES = ['Every concept.', 'Every link.', 'One path. Yours.'];
 const RING = 100;
 const CIRC = 2 * Math.PI * RING;
-const HINTS: Record<string, string> = {
-    short: 'Keep going: draw a whole circle', small: 'A little bigger', open: 'Close the loop where you started',
-    wobbly: 'Smoother: one round loop', partial: 'All the way around',
-};
-
 function DigitColumn({ stripRef }: { stripRef: React.RefObject<HTMLSpanElement | null> }) {
     return (
         <span className="relative inline-block h-[1em] w-[0.6em] overflow-hidden">
@@ -56,11 +42,7 @@ export default function IntroExperience() {
     const glow = useRef<SVGCircleElement>(null);
     const head = useRef<SVGGElement>(null);
     const bloom = useRef<HTMLDivElement>(null);
-    const gate = useRef<HTMLDivElement>(null);
-    const pad = useRef<HTMLCanvasElement>(null);
     const flash = useRef<HTMLDivElement>(null);
-    const hint = useRef<HTMLParagraphElement>(null);
-    const live = useRef<HTMLParagraphElement>(null);
 
     useLayoutEffect(() => {
         document.getElementById('intro-pre')?.remove();                   // hand-off from the static first frame
@@ -70,14 +52,7 @@ export default function IntroExperience() {
         const ui = Array.from(document.querySelectorAll<HTMLElement>('[data-intro-ui]'));
         const rail = Array.from(document.querySelectorAll<HTMLElement>('[data-intro-rail]'));
         const W = () => window.innerWidth, H = () => window.innerHeight;
-        const hidden = () => -0.3 * Math.min(W(), H());                   // a closed iris: a negative radius hides everything
         const maxR = () => Math.hypot(W(), H()) * 1.1;
-        const setIris = (el: HTMLElement, x: number, y: number, r: number) => {
-            el.style.setProperty('--ix', `${x}px`);
-            el.style.setProperty('--iy', `${y}px`);
-            el.style.setProperty('--ir', `${r}px`);
-        };
-
         // the loop sits right of the statement (centred on phones); while opening it IS the iris edge
         // phones: centred in the free band between the statement and the label, clear of both (glow and head reach 1.09 R)
         const phoneBand = () => {
@@ -101,7 +76,6 @@ export default function IntroExperience() {
             head.current!.style.transform = `rotate(${loop.draw * 360 - 90}deg)`;
             bloom.current!.style.setProperty('--bx', `${introState.cx}px`);
             bloom.current!.style.setProperty('--by', `${introState.cy}px`);
-            if (!finished) setIris(gate.current!, introState.cx, introState.cy, loop.open > 0 ? r * 0.98 : hidden());
         };
 
         Object.assign(introState, { active: true, reveal: 0, edges: 0, settle: 0, spin: 0, fade: 1 });
@@ -113,71 +87,23 @@ export default function IntroExperience() {
             tens.current!.style.transform = `translate3d(0, ${(-carry / 30) * 100}%, 0)`;
         };
 
-        // ---------------- scene 3: drawing a circle ----------------
-        let gateOpen = false, finished = false, skipAll = false, drawing = false, pts: Pt[] = [];
+        let finished = false;
         let tl1: gsap.core.Timeline | null = null;
-        const cvs = pad.current!, g2 = cvs.getContext('2d')!;
-        let fadeTrail: gsap.core.Tween | null = null;
-        const sizeCanvas = () => {
-            const d = Math.min(window.devicePixelRatio || 1, 2);
-            cvs.width = Math.round(W() * d); cvs.height = Math.round(H() * d);
-            g2.setTransform(d, 0, 0, d, 0, 0);
-        };
-        const paintTrail = (alpha = 1) => {
-            g2.clearRect(0, 0, W(), H());
-            if (pts.length < 2) return;
-            g2.lineCap = g2.lineJoin = 'round';
-            for (const [w, a, blur] of [[16, 0.2, 18], [6, 0.9, 6], [2.4, 1, 0]] as const) {   // soft halo, frost body, bright core
-                g2.beginPath();
-                g2.lineWidth = w; g2.strokeStyle = `rgba(255,255,255,${a * alpha})`;
-                g2.shadowColor = 'rgba(255,255,255,0.9)'; g2.shadowBlur = blur;
-                pts.forEach((p, i) => (i ? g2.lineTo(p.x, p.y) : g2.moveTo(p.x, p.y)));
-                g2.stroke();
-            }
-            g2.shadowBlur = 0;
-        };
-        const onDown = (e: PointerEvent) => {
-            if (!gateOpen || finished || (e.pointerType === 'mouse' && e.button !== 0)) return;
-            fadeTrail?.kill();
-            drawing = true; pts = [{ x: e.clientX, y: e.clientY }];
-        };
-        const onMove = (e: PointerEvent) => {
-            if (!gateOpen || !drawing) return;
-            const prev = pts[pts.length - 1];
-            if (Math.hypot(e.clientX - prev.x, e.clientY - prev.y) > 3) { pts.push({ x: e.clientX, y: e.clientY }); paintTrail(); }
-        };
-        const onUp = () => {
-            if (!drawing) return;
-            drawing = false;
-            const res = detectCircle(pts, { w: W(), h: H() });
-            if (res.ok) { paintTrail(); open({ cx: res.cx, cy: res.cy, r: res.r }); return; }
-            const msg = HINTS[res.reason ?? 'short'];
-            if (hint.current) hint.current.textContent = msg;
-            if (live.current) live.current.textContent = msg;
-            const fade = { a: 1 };
-            fadeTrail = gsap.to(fade, { a: 0, duration: 0.7, ease: 'power2.in', onUpdate: () => paintTrail(fade.a), onComplete: () => { pts = []; g2.clearRect(0, 0, W(), H()); } });
-            gsap.fromTo(gate.current!.querySelector('.gate-title'), { x: -8 }, { x: 0, duration: 0.6, ease: 'elastic.out(1, 0.25)' });
-        };
         const onKey = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') skip();
-            else if (gateOpen && !finished && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); skip(); }
+            if (e.key === 'Escape' || e.key === 'Enter') skip();
         };
 
-        // ---------------- scene 4: white light, then the title card ----------------
+        // ---------------- scene 3: white light, then the title card ----------------
         function open(c: { cx: number; cy: number; r: number }) {
             if (finished) return;
-            finished = true; gateOpen = false;
-            introState.gateHand = false;
-            gate.current!.style.pointerEvents = 'none';
+            finished = true;
             const f = flash.current!;
             f.style.background = `radial-gradient(circle at ${c.cx}px ${c.cy}px, #ffffff 0%, #ffffff 100%)`;
             ctx.add(() => {
                 gsap.timeline({ onComplete: finish })
-                    .to(gate.current!.querySelectorAll('.gate-ui'), { autoAlpha: 0, duration: 0.35, ease: 'power2.out' }, 0)
                     .fromTo(f, { clipPath: `circle(${c.r}px at ${c.cx}px ${c.cy}px)`, autoAlpha: 0.0 },
                         { clipPath: `circle(${maxR()}px at ${c.cx}px ${c.cy}px)`, autoAlpha: 1, duration: 0.9, ease: 'power2.in' }, 0)
                     .add(() => {                                           // fully white: swap the scenes underneath
-                        gate.current!.style.display = 'none';
                         if (ui.length) gsap.set(ui, { autoAlpha: 1 });
                         html.dataset.intro = 'reveal';                     // the title card begins its own entrance
                     }, 0.95)
@@ -186,7 +112,7 @@ export default function IntroExperience() {
             });
         }
 
-        // ---------------- scene 1 + 2: count, links, loop, burst into the gate ----------------
+        // ---------------- scene 1 + 2: count, links, loop, burst into the light ----------------
         const ctx = gsap.context(() => {
             const q = gsap.utils.selector(root);
             if (ui.length) gsap.set(ui, { autoAlpha: 0 });
@@ -196,10 +122,6 @@ export default function IntroExperience() {
             gsap.set(q('.intro-line'), { yPercent: 112 });
             gsap.set(ring.current, { autoAlpha: 0 });
             gsap.set(bloom.current, { autoAlpha: 0 });
-            gsap.set(gate.current, { autoAlpha: 0 });
-            gsap.set(q('.gate-ui'), { autoAlpha: 0, y: 18 });
-            gate.current!.classList.add('intro-iris-in');
-            sizeCanvas();
             tick();
 
             tl1 = gsap.timeline({
@@ -226,61 +148,40 @@ export default function IntroExperience() {
                 .to(q('.intro-rise, .intro-links'), { yPercent: -110, duration: 0.45, ease: 'power3.in', stagger: 0.03 }, 'exit')
                 .to(q('.intro-hair'), { scaleX: 0, transformOrigin: '100% 50%', duration: 0.6, ease: 'power3.in' }, 'exit')
                 .to(counter.current, { autoAlpha: 0, yPercent: -12, duration: 0.5, ease: 'power2.in' }, 'exit+=0.3')
-                // the loop closes and bursts: the iris carries the scene into the gate, and the graph shrinks away
+                // the loop closes and bursts over the sky, and the burst turns to white light
                 .addLabel('burst', 3.95)
-                .set(gate.current, { autoAlpha: 1 }, 'burst')
                 .to(bloom.current, { autoAlpha: 1, duration: 0.35, ease: 'power2.out' }, 'burst')
                 .to(bloom.current, { autoAlpha: 0, duration: 0.9, ease: 'power2.in' }, 'burst+=0.35')
                 .to(loop, { open: 1, duration: 1.5, ease: 'expo.inOut' }, 'burst')
                 .to(ring.current, { autoAlpha: 0, duration: 0.5, ease: 'power1.in' }, 'burst+=1.0')
                 .to(introState, { fade: 0, duration: 1.0, ease: 'power3.in' }, 'burst')
-                // "Are you ready?  Draw a zero."
-                .to(q('.gate-ui'), { autoAlpha: 1, y: 0, duration: 1.0, stagger: 0.18, ease: 'power3.out' }, 'burst+=1.1')
-                .add(() => {
-                    gateOpen = true;
-                    introState.gateHand = true;
-                    gate.current!.style.pointerEvents = 'auto';
-                    if (skipAll) open({ cx: W() / 2, cy: H() / 2, r: Math.min(W(), H()) * 0.14 });
-                }, 'burst+=1.1');
+                .add(() => open({ cx: introState.cx, cy: introState.cy, r: Math.min(W(), H()) * 0.2 }), 'burst+=0.9');
         }, root);
 
         function finish() {
             introFlag.played = true;
             window.removeEventListener('keydown', onKey);
-            introState.gateHand = false;
             // hide the layer first: reverting its styles would show the count and lines again until React unmounts it
             if (root.current) root.current.style.visibility = 'hidden';
             ctx.revert();                                                   // removes every inline style the intro added
             Object.assign(introState, FINAL);                               // ...and leaves the scene in its final state
-            ui.forEach((el) => { el.classList.remove('intro-iris-in'); ['--ix', '--iy', '--ir'].forEach((v) => el.style.removeProperty(v)); });
             delete html.dataset.intro;
             html.style.cursor = '';
             setOn(false);                                                   // unmount the intro layer: nothing invisible stays on top
         }
         function skip() {
-            if (finished) return;
-            if (gateOpen) open({ cx: W() / 2, cy: H() / 2, r: Math.min(W(), H()) * 0.14 });
-            else { skipAll = true; tl1?.timeScale(8); }                     // race through the count, then open straight away
+            if (!finished) tl1?.timeScale(8);                               // race through the count into the light
         }
 
-        const resize = () => { sizeCanvas(); tick(); };
-        window.addEventListener('pointerdown', onDown);
-        window.addEventListener('pointermove', onMove);
-        window.addEventListener('pointerup', onUp);
-        window.addEventListener('pointercancel', onUp);
+        const resize = () => tick();
         window.addEventListener('keydown', onKey);
         window.addEventListener('resize', resize);
         return () => {
-            window.removeEventListener('pointerdown', onDown);
-            window.removeEventListener('pointermove', onMove);
-            window.removeEventListener('pointerup', onUp);
-            window.removeEventListener('pointercancel', onUp);
             window.removeEventListener('keydown', onKey);
             window.removeEventListener('resize', resize);
             if (!introFlag.played) {                                                  // unmounted mid-way (route change, StrictMode): leave nothing behind
                 ctx.revert();
                 Object.assign(introState, FINAL);
-                ui.forEach((el) => el.classList.remove('intro-iris-in'));
                 delete html.dataset.intro;
             }
         };
@@ -289,7 +190,7 @@ export default function IntroExperience() {
     if (!on) return null;
     return (
         <>
-            {/* scenes 1-2: stage one's sky, so the count, the gate and the first scene are one world */}
+            {/* scenes 1-2: stage one's sky, so the count and the first scene are one world */}
             <div aria-hidden className="intro-backdrop pointer-events-none fixed inset-0 z-0" />
 
             <div ref={root} className="fixed inset-0 z-[70] cursor-default select-none overflow-hidden text-[#173f4d]" role="presentation">
@@ -341,38 +242,6 @@ export default function IntroExperience() {
                     <p className="intro-links font-accent text-[10px] uppercase tracking-[0.28em] text-[#173f4d]/70 sm:text-[11px]">51 prerequisite links</p>
                 </div>
 
-                {/* scene 3: the gate. The same sky as the count; frost and light instead of a new colour. */}
-                <div ref={gate} className="gate absolute inset-0 cursor-default overflow-hidden" style={{ pointerEvents: 'none', touchAction: 'none' }}>
-                    <div aria-hidden className="gate-bg absolute inset-0" />
-                    {FROST && <div aria-hidden className="gate-frost-img absolute inset-[-4%]" style={{ backgroundImage: `url(${FROST})` }} />}
-                    {!FROST && <svg aria-hidden className="gate-frost absolute inset-[-8%] h-[116%] w-[116%]" preserveAspectRatio="none">
-                        <filter id="frostA" x="0" y="0" width="100%" height="100%">
-                            <feTurbulence type="fractalNoise" baseFrequency="0.006 0.011" numOctaves="5" seed="11" />
-                            <feColorMatrix type="matrix" values="0 0 0 0 0.78  0 0 0 0 0.84  0 0 0 0 1  0 0 0 1.9 -0.78" />
-                        </filter>
-                        <filter id="frostB" x="0" y="0" width="100%" height="100%">
-                            <feTurbulence type="turbulence" baseFrequency="0.018 0.03" numOctaves="3" seed="4" />
-                            <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 3.2 -1.35" />
-                        </filter>
-                        <rect width="100%" height="100%" filter="url(#frostA)" opacity="0.75" />
-                        <rect width="100%" height="100%" filter="url(#frostB)" opacity="0.5" />
-                    </svg>}
-                    <div aria-hidden className="gate-vignette absolute inset-0" />
-                    <Suspense fallback={null}><GateHand /></Suspense>
-
-                                        <canvas ref={pad} className="absolute inset-0 h-full w-full touch-none" />
-
-                    <div className="pointer-events-none absolute inset-x-0 top-[26svh] flex flex-col items-center text-center">
-                        <p className="gate-ui font-mono text-[11px] uppercase tracking-[0.5em] text-[#173f4d]/75 sm:text-xs">Are you ready?</p>
-                        <p className="gate-ui gate-title mt-5 font-mono text-[clamp(1.1rem,2.3vw,1.9rem)] font-semibold uppercase tracking-[0.42em] text-[#173f4d]">Draw a zero</p>
-                    </div>
-                    <div className="pointer-events-none absolute inset-x-0 bottom-[8svh] flex flex-col items-center gap-2 text-center">
-                        <p ref={hint} className="gate-ui font-mono text-[11px] uppercase tracking-[0.3em] text-[#173f4d]/80">One circle, any size, any direction</p>
-                        <p className="gate-ui font-mono text-[10px] uppercase tracking-[0.3em] text-[#173f4d]/55">or press Enter</p>
-                    </div>
-                    <p ref={live} className="sr-only" role="status" aria-live="polite">Draw a circle with the mouse or a finger to continue, or press Enter.</p>
-
-                </div>
 
             </div>
         </>

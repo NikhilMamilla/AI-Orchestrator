@@ -35,7 +35,7 @@ Keep an admin account in a second window for step 8.
 
 ## Newer moments worth showing (each about 30 to 60 seconds)
 
-1. **Landing page**: the count rolls to 26 (the real concept count), you draw a zero to enter, and the five-part story ends in a city of the 22 roadmap domains joined by real prerequisite roads. Click a district to see its concepts. The sky behind it all is the same one the app uses, with slowly rising light.
+1. **Landing page**: the count rolls to 26 (the real concept count), a ring bursts into white light, and the five-part story ends in a city of the 22 roadmap domains joined by real prerequisite roads. Click a district to see its concepts. The sky behind it all is the same one the app uses, with slowly rising light.
 2. **Teach it back** (Learn): explain binary search in your own words; sentences are ticked against the sources and the key points you missed are shown. Say that no LLM grades it, and show [eval/teachback.md](eval/teachback.md) for the measured limits.
 3. **Draw it** (Learn): sketch a BST with one subtle violation. The tutor shows what it read, then names the offending pair. Contrast: asking the same model "is this valid?" catches about a third ([eval/sketch.md](eval/sketch.md)).
 4. **Evidence Lab** (`/lab`): the app can measure its own learning gain with an opt-in pre/post test. Be explicit that no real cohort has used it yet.

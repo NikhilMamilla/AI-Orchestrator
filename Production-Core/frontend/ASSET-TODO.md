@@ -38,8 +38,6 @@ Every file below has a version drawn in code, which the production build uses in
 
 | File | Used for | Free replacement |
 |---|---|---|
-| `models/loader_hand.glb` | The draw-a-zero gate: the hand that follows the pointer | Sketchfab CC0 / CC-BY rigged hand, or a MakeHuman (CC0) hand exported to glTF |
-| `textures/frost.webp` | The gate's frosted glass | a CC0 frosted-glass texture (ambientCG) |
 | `models/fancy_hand_2.glb` | Stage 1: the sculpted hand | Sketchfab CC0 / CC-BY rigged hand, or a MakeHuman (CC0) hand exported to glTF |
 | `models/human_hand_1.glb` | Stage 1: the human hand | same |
 | `models/camera_1.glb` | Stage 1: the camera path | our own camera path (Blender) |
@@ -70,6 +68,7 @@ Every file below has a version drawn in code, which the production build uses in
 
 | File(s) | Why |
 |---|---|
+| `models/loader_hand.glb`, `textures/frost.webp` | Belonged to the removed "draw a zero" gate; the opening now goes from the count straight into the story |
 | `atlases/garden-godrays.ktx2`, `atlases/shards-petals-coins.ktx2`, `videos/stage2_background_video-*.mp4` | Replaced by the code-drawn sky, light motes and teal curtain; nothing loads them |
 | `atlases/leather-money-shreds.ktx2`, `textures/stage3_money-hand.webp` | Stage 3 burns our own pages of study notes (drawn in code), not money |
 | `atlases/board-certificates.ktx2` | Stage 3 draws its own sharp chalkboard (the mastery update, review schedule, prerequisite graph) |

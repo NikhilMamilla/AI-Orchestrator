@@ -52,7 +52,7 @@ python -m pytest                                   # 221 offline tests (no netwo
 python -m backend.app.rag.evaluation --neural      # retrieval ablation, writes docs/eval/results.json
 python -m backend.app.rag.evaluation --neural --pg # same against Supabase
 python scripts/smoke_test.py                       # end-to-end through the real SSE endpoint
-cd frontend && npm run lint && npm test && npm run build   # 31 tests; the build also runs scripts/check-dist.mjs
+cd frontend && npm run lint && npm test && npm run build   # 25 tests; the build also runs scripts/check-dist.mjs
 ```
 
 ## Environment variables

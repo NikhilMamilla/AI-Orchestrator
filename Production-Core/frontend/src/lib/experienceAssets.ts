@@ -48,9 +48,7 @@ export const EXPERIENCE_ASSETS = {
     // stage 4: the tunnel, stage 5: clouds
     clouds: PH('atlases/clouds.ktx2', 'ktx2', 'Stage 5: clouds parting over the city', 'Poly Haven (CC0) cloud textures'),
     cloudsMobile: PH('atlases/clouds-mobile.ktx2', 'ktx2', 'Stage 5: clouds (phones)', 'Poly Haven (CC0) cloud textures'),
-    frost: PH('textures/frost.webp', 'texture', 'The draw-a-zero gate: frosted glass', 'a CC0 frosted-glass texture (ambientCG)'),
     frostNormal: PH('textures/frost_normal.webp', 'texture', 'Stage 2: the surface of the glass shards (normal map)', 'a CC0 frosted-glass normal map (ambientCG)'),
-    loaderHand: PH('models/loader_hand.glb', 'model', 'The draw-a-zero gate: the hand that follows the pointer', HAND),
     // sound
     ambBelieved: PH('audio/amb_stage1.mp3', 'audio', 'Stage 1 ambience', 'Pixabay Music or Freesound CC0 ambient pad'),
     ambShatter: PH('audio/amb_stage2-3.mp3', 'audio', 'Stages 2-3 ambience', 'Freesound CC0 dark drone'),
@@ -77,7 +75,7 @@ export function assetUrl(key: AssetKey): string | null {
 
 /** What each stage loads; the next stage's set is prefetched while the current one plays. */
 export const STAGE_ASSETS: Record<'believed' | 'shatter' | 'burn' | 'tunnel' | 'city', AssetKey[]> = {
-    believed: ['loaderHand', 'handEth', 'handHuman', 'camera1', 'handMatcap', 'humanHandsAtlas'],
+    believed: ['handEth', 'handHuman', 'camera1', 'handMatcap', 'humanHandsAtlas'],
     shatter: ['glassShatter', 'glassShards', 'handHuman2', 'camera2', 'stage2Bg', 'humanHandsAtlas', 'frostNormal'],
     burn: ['stage3Bg'],                                                 // the pages and the board are drawn in code
     tunnel: [],

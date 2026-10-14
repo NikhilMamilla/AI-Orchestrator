@@ -8,7 +8,7 @@ import { STAGES } from './flow';
 import { useExperience } from './store';
 
 /**
- * The landing story: one canvas, five stages, the HUD on top. It mounts behind the opening (count and "Draw a zero")
+ * The landing story: one canvas, five stages, the HUD on top. It mounts behind the opening (the count)
  * while that plays, stays invisible, and takes over at the white flash. Loaded as its own chunk; nothing else in the
  * app loads three.js for it.
  */

@@ -461,17 +461,6 @@ select, option { background-color: rgb(var(--c-surface)); color: rgb(var(--c-ink
   -webkit-mask-image: radial-gradient(ellipse at 60% 50%, #000 30%, transparent 75%);
   mask-image: radial-gradient(ellipse at 60% 50%, #000 30%, transparent 75%);
 }
-/* the backdrop opens around the graph (a hole that grows) while the page appears through the same circle */
-.intro-iris-out {
-  -webkit-mask-image: radial-gradient(circle at var(--ix, 50%) var(--iy, 50%), transparent var(--ir, 0px), #000 calc(var(--ir, 0px) + 22vmin));
-  mask-image: radial-gradient(circle at var(--ix, 50%) var(--iy, 50%), transparent var(--ir, 0px), #000 calc(var(--ir, 0px) + 22vmin));
-}
-.intro-iris-in {
-  -webkit-mask-image: radial-gradient(circle at var(--ix, 50%) var(--iy, 50%), #000 var(--ir, 0px), transparent calc(var(--ir, 0px) + 22vmin));
-  mask-image: radial-gradient(circle at var(--ix, 50%) var(--iy, 50%), #000 var(--ir, 0px), transparent calc(var(--ir, 0px) + 22vmin));
-}
-
-
 /* ── Story stages: staggered rise + mask when the stage arrives ── */
 .stage .story-in { opacity: 0; transform: translateY(0.6em); clip-path: inset(0 0 100% 0); transition: opacity 0.8s ease, transform 1s cubic-bezier(0.22, 1, 0.36, 1), clip-path 1s cubic-bezier(0.22, 1, 0.36, 1); }
 .stage[data-pos="active"] .story-in { opacity: 1; transform: none; clip-path: inset(-20% -10% -25% -10%); }
@@ -489,24 +478,7 @@ select, option { background-color: rgb(var(--c-surface)); color: rgb(var(--c-ink
 .stages footer { display: none; }
 
 
-/* ── Gate scene (draw a zero): the same navy world as the count, lit from below with indigo frost ── */
-.gate-bg {
-  background:
-    radial-gradient(ellipse 85% 70% at 50% 0%, #aaebd7 0%, rgb(170 235 215 / 0) 100%),
-    radial-gradient(ellipse 85% 70% at 50% 100%, rgb(170 235 215 / 0.5) 0%, rgb(170 235 215 / 0) 100%),
-    #6ec8e6;
-}
-.gate-frost { mix-blend-mode: soft-light; opacity: 0.8; animation: frostDrift 38s ease-in-out infinite alternate; will-change: transform; }
 @keyframes frostDrift { from { transform: translate3d(-1.5%, -1%, 0) scale(1.02); } to { transform: translate3d(1.5%, 1.2%, 0) scale(1.07); } }
-.gate-vignette { background: radial-gradient(ellipse 75% 70% at 50% 52%, transparent 45%, rgb(23 63 77 / 0.22) 100%); }
-.gate-guide {
-  border-radius: 9999px;
-  border: 6px solid rgb(255 255 255 / 0.4);
-  -webkit-mask-image: conic-gradient(#000 0 58%, transparent 58% 100%);
-  mask-image: conic-gradient(#000 0 58%, transparent 58% 100%);
-  animation: guideSpin 7s linear infinite;
-}
-@keyframes guideSpin { to { rotate: 360deg; } }
 
 /* ── "You Believed": the first stage. Same navy world; pearl-to-gold calligraphy ── */
 .believed-bg {
@@ -531,7 +503,6 @@ html[data-intro='running'] .believed-in, html[data-intro='running'] .believed-la
 html[data-intro] .landing-nav { opacity: 0 !important; visibility: hidden !important; }
 @media (prefers-reduced-motion: reduce) {
   .believed-in, .believed-late { animation: none; opacity: 1; filter: none; transform: none; }
-  .gate-frost { animation: none; }
 }
 
 /* script swashes overhang the glyph box; extend the gradient-text box so nothing is clipped, without moving the text */
@@ -586,8 +557,6 @@ html[data-intro='running'] .exp { opacity: 0; visibility: hidden; }
 .halo::before { content: ''; position: absolute; inset: -12% -8%; z-index: -1; background: radial-gradient(closest-side, rgb(255 255 255 / 0.62), rgb(255 255 255 / 0) 100%); }
 .exp { --hud: 255 255 255; }
 .exp[data-tone='light'] { --hud: 23 63 77; }
-.gate-frost-img { background-size: cover; background-position: center; mix-blend-mode: soft-light; opacity: 0.5; filter: grayscale(1); animation: frostDrift 38s ease-in-out infinite alternate; }
-@media (prefers-reduced-motion: reduce) { .gate-frost-img { animation: none; } }
 
 /* while the opening or the story owns the screen, the page behind it is plain navy: no aurora, no grain overlay */
 html[data-intro] { background: #6ec8e6; }

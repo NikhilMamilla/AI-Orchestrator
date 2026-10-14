@@ -97,8 +97,7 @@ prerequisite-aware unlocking, with no measurable extra benefit from remediation 
   There is no control group, and the page says so. **No real learner has used it yet.**
 * **Preferences** (`/settings`): tone (written into the tutor prompt), default teaching style, planned session length.
 * **Leaderboard** (opt-in, nickname only, points derived from measured mastery) and **delete my learning data**.
-* **Landing page**: an opening count (`00` rolling to `26`, the concepts in the curriculum; typography only), a "draw a
-  zero" gate, then a five-part scroll story (`frontend/src/experience`, described in [FRONTEND.md](FRONTEND.md)). Its words
+* **Landing page**: an opening count (`00` rolling to `26`, the concepts in the curriculum; typography only) that bursts into light, then a five-part scroll story (`frontend/src/experience`, described in [FRONTEND.md](FRONTEND.md)). Its words
   come from this file and the README. Its city is built from `curriculum/dsa_roadmap.md`: the 22 domains, roads
   between them drawn only along real prerequisite links of the concept graph (51 links), and tool chips only where the tool exists. Tests
   check the city against those sources. With reduced motion the story is five still cards.

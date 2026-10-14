@@ -10,7 +10,7 @@ of the system is in [ARCHITECTURE.md](ARCHITECTURE.md).
 cd Production-Core/frontend
 npm run dev        # http://localhost:5173 (story placeholder assets on by default)
 npm run lint
-npm test           # 31 tests in 5 files (story rules, algorithm recorders, circle gesture, concept map, markdown)
+npm test           # 25 tests in 4 files (story rules and city data, algorithm recorders, concept map, markdown)
 npm run build      # tsc -b, vite build, then scripts/check-dist.mjs
 ```
 
@@ -26,7 +26,7 @@ switch exists for the landing story, `VITE_PLACEHOLDERS` (see [the story's asset
 | `src/components/` | `ask/` (answer card, evidence panel, claim checks, stage tracker), `learn/` (placement, quiz, goal, plan, analyst, teach-back, sketch pad, share manager), `concepts/`, `dashboard/`, `session/`, `auth/`, `intro/` (opening), `landing/`, `fx/` (backdrop, motes, motion, theme toggle) |
 | `src/admin/` | The admin console: a shell, a command palette, drawers and nine pages (overview, learners, content, quality, study, system, engagement, inspector, announcements) |
 | `src/experience/` | The animated landing story |
-| `src/lib/` | `api.ts` (axios, attaches the Firebase ID token), `firebase.ts`, `learning.ts`, `rag.ts` (SSE client), `theme.ts` (appearance), `algoSteps.ts` (visualiser recorders), `circleGesture.ts`, `share.ts`, `speech.ts`, `experienceAssets.ts` |
+| `src/lib/` | `api.ts` (axios, attaches the Firebase ID token), `firebase.ts`, `learning.ts`, `rag.ts` (SSE client), `theme.ts` (appearance), `algoSteps.ts` (visualiser recorders), `share.ts`, `speech.ts`, `experienceAssets.ts` |
 | `src/store/` | `authStore.ts` (zustand over Firebase Auth: sign-in, Google, verification, reset, linking, delete) |
 | `src/hooks/` | `useWebSocket`, `useAnnouncements`, `useIsAdmin`, `useDarkTheme` |
 | `src/index.css` | The shared look (below) |
@@ -56,9 +56,8 @@ A fresh visit to `/` plays, once per page load (a module flag survives route cha
 
 1. **Count** (`IntroExperience`): a giant `00` rolls to `26` (the concepts in the curriculum) while "Every concept. Every
    link. One path. Yours." types itself. Typography only.
-2. **Loop → gate**: a frost ring draws itself like a zero and bursts open into the gate, **"Draw a zero"**. The count,
-   the gate and stage 1 share one teal-blue sky. A pearl hand follows the pointer; the drawn path must be a closed,
-   round, roughly 360° loop (`circleGesture.ts`), or press Enter.
+2. **Loop → light**: a frost ring draws itself like a zero, closes and bursts outward over the same teal-blue sky that
+   stage 1 uses; the burst turns to white light that opens straight into the story. Escape or Enter skips the count.
 3. **The story** (`Experience.tsx` + `engine.ts`): one WebGL canvas, five stages, a HUD on top.
 
 | # | Stage | Scene | Words (taken from the README and the PRD) |

@@ -43,7 +43,7 @@ study next, explains why, and lets you practise on real code that is actually ru
 | **Insights and Journal** | Decisions the five agents made for you, with their reasoning; badges from real progress; a learning journal you can export as a PDF. |
 | **Share with a teacher or parent** | A private link that you can revoke and that expires. It shows your progress, never your answers or anything you typed. |
 | **Settings and privacy** | Tutor tone, teaching style, session length, appearance, linked coding profiles (GitHub, LeetCode, Codeforces…), and full control over your data: export it, or delete part or all of it. |
-| **Landing story** | A first visit opens with a count to 26, a "draw a zero" gate and a five-part scroll story that ends in a city of the 22 roadmap domains. With reduced motion it is five still cards. See [FRONTEND](Production-Core/docs/FRONTEND.md). |
+| **Landing story** | A first visit opens with a count to 26, and a five-part scroll story that ends in a city of the 22 roadmap domains. With reduced motion it is five still cards. See [FRONTEND](Production-Core/docs/FRONTEND.md). |
 | **Admin console** | For admins only: usage and answer-quality trends, content gaps, a question inspector, announcements and system health. Aggregates only, so no individual learner is identifiable. |
 
 ## How it works
@@ -212,7 +212,7 @@ python -m pytest                                   # 221 tests
 
 # frontend (from Production-Core/frontend/)
 npm run lint
-npm test                                           # 31 tests in 5 files
+npm test                                           # 25 tests in 4 files
 npm run build                                      # type-check, build, and verify the bundle
 
 # end to end against a running backend (from Production-Core/)
