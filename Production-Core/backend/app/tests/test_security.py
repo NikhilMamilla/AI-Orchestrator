@@ -186,22 +186,6 @@ async def test_firebase_admin_needs_a_verified_email(firebase, monkeypatch):
     assert not (await _sec._user_from_token(_fb_token(email_verified=False))).is_admin
 
 
-def test_account_registry_hashes_emails_and_checks_case_insensitively():
-    from backend.app.api.v1.auth import email_key
-    assert email_key("Kid@Example.com ") == email_key("kid@example.com")
-    assert "kid" not in email_key("kid@example.com") and len(email_key("a@b.co")) == 64
-
-
-def test_account_check_validates_and_rate_limits(client, monkeypatch):
-    from backend.app.api.v1 import auth
-    monkeypatch.setattr(auth.db, "pool", None)
-    monkeypatch.setattr(auth, "check_limiter", auth.RateLimiter(2))
-    assert client.post("/api/v1/auth/account-check", json={"email": "not-an-email"}).status_code == 422
-    assert client.post("/api/v1/auth/account-check", json={"email": "a@b.co"}).json() == {"exists": None, "password": None}
-    client.post("/api/v1/auth/account-check", json={"email": "a@b.co"})
-    assert client.post("/api/v1/auth/account-check", json={"email": "a@b.co"}).status_code == 429
-
-
 def test_rate_limiter_memory_is_bounded_by_dropping_expired_buckets():
     import time
     from backend.app.security import RateLimiter

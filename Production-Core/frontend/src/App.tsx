@@ -8,7 +8,6 @@ import BootLoader from './components/BootLoader';
 import { onIdTokenChanged } from 'firebase/auth';
 import { auth } from './lib/firebase';
 import { fetchPrefs } from './lib/learning';
-import { authed } from './lib/rag';
 import { applyUi } from './lib/theme';
 
 // every page's code, so it can be loaded on demand (lazy) and preloaded in the background after sign-in
@@ -144,8 +143,6 @@ function App() {
     if (!signedIn) return;
     preloadPages();
     fetchPrefs().then((p) => p.ui && applyUi(p.ui)).catch(() => undefined);   // appearance follows the learner across devices
-    const providers = (useAuthStore.getState().user?.providers ?? []).filter((x) => x === 'password' || x === 'google.com');
-    authed('/auth/seen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ providers }) }).catch(() => undefined);
   }, [signedIn]);
 
   // Firebase Auth owns the session; this fires once on load and on every sign-in, sign-out and token refresh

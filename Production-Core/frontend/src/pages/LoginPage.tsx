@@ -1,4 +1,5 @@
 
+import { RESET_LINK_MESSAGE } from '../lib/resetMessage';
 import { useState, useEffect } from 'react';
 import { errorMessage } from '../lib/errors';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
@@ -8,7 +9,6 @@ import { AuthShell, AuthField, GoogleButton } from '../components/auth/AuthShell
 import GoogleLogo from '../components/auth/GoogleLogo';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../lib/firebase';
-import { API } from '../lib/rag';
 
 const LoginPage = () => {
     useEffect(() => { void import('./DashboardPage'); }, []);   // fetched while you type: signing in shows it at once
@@ -75,13 +75,12 @@ const LoginPage = () => {
 export default LoginPage;
 
 
-type ResetState =
-    | { kind: 'idle' } | { kind: 'busy' } | { kind: 'sent'; email: string } | { kind: 'no-account' } | { kind: 'google-only' } | { kind: 'error'; text: string };
+type ResetState = { kind: 'idle' } | { kind: 'busy' } | { kind: 'sent' } | { kind: 'error'; text: string };
 
 /**
- * Forgot password: only for an email that already has a Kiddoo account. Our server keeps a keyed hash of each signed-in
- * email (Firebase never says whether an email exists), so it can answer: no account -> sign up first; Google-only ->
- * use Google; otherwise Firebase emails a reset link, and its page sets the new password.
+ * Forgot password: always sends the Firebase reset email and always shows the same neutral message, so the form can never
+ * be used to find out whether an email has an account. An address with no account (or a Google-only account) simply gets
+ * no email; the message tells Google users where to go.
  */
 function ForgotPassword({ initialEmail, onBack }: { initialEmail: string; onBack: () => void }) {
     const [email, setEmail] = useState(initialEmail);
@@ -92,16 +91,12 @@ function ForgotPassword({ initialEmail, onBack }: { initialEmail: string; onBack
         e.preventDefault();
         setState({ kind: 'busy' });
         try {
-            const res = await fetch(`${API}/auth/account-check`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email.trim() }) });
-            if (res.status === 429) return setState({ kind: 'error', text: 'Too many tries. Wait a minute and try again.' });
-            if (res.status === 422) return setState({ kind: 'error', text: 'Enter a valid email address.' });
-            const r: { exists: boolean | null; password: boolean | null; google?: boolean } = await res.json();
-            if (r.exists === false) return setState({ kind: 'no-account' });
-            if (r.exists && !r.password && r.google) return setState({ kind: 'google-only' });
             await sendPasswordResetEmail(auth, email.trim());
-            setState({ kind: 'sent', email: email.trim() });
+            setState({ kind: 'sent' });
         } catch (err) {
             const code = (err as { code?: string })?.code;
+            if (code === 'auth/user-not-found') return setState({ kind: 'sent' });          // same answer as for an address that exists
+            if (code === 'auth/invalid-email') return setState({ kind: 'error', text: 'Enter a valid email address.' });
             setState({ kind: 'error', text: code === 'auth/too-many-requests' ? 'Too many requests. Try again in a few minutes.' : 'Could not send the reset link right now. Try again.' });
         }
     };
@@ -113,28 +108,16 @@ function ForgotPassword({ initialEmail, onBack }: { initialEmail: string; onBack
             {state.kind === 'sent' ? (
                 <div className="space-y-3 text-center" role="status">
                     <MailCheck className="mx-auto h-10 w-10 text-campus-success" aria-hidden />
-                    <p className="text-sm text-campus-navy">We sent a reset link to <b className="break-all">{state.email}</b>.</p>
-                    <p className="text-xs leading-relaxed text-campus-warm-500">Open it, choose a new password, then come back and sign in. Check spam if it isn't there in a minute.</p>
+                    <p className="text-sm text-campus-navy">{RESET_LINK_MESSAGE}</p>
+                    <p className="text-xs leading-relaxed text-campus-warm-500">Check spam if it isn't there in a minute. Then choose a new password and come back to sign in.</p>
+                    <button type="button" onClick={() => void loginWithGoogle()} className="btn-glass max-btn flex h-10 w-full gap-2 text-sm"><GoogleLogo className="h-4 w-4" /> Continue with Google</button>
                     <button type="button" onClick={onBack} className="btn-skeu h-11 w-full text-sm">Back to sign in</button>
                 </div>
             ) : (
                 <form onSubmit={submit} className="space-y-3">
                     <AuthField icon={Mail} type="email" required autoComplete="email" value={email} onChange={(e) => { setEmail(e.target.value); if (state.kind !== 'busy') setState({ kind: 'idle' }); }} placeholder="Email address" />
-                    {state.kind === 'no-account' && (
-                        <div className="rounded-[16px] border-2 border-dashed border-campus-rose/50 p-3 text-xs leading-relaxed text-campus-warm-500" role="alert">
-                            <b className="block text-campus-rose">No Kiddoo account uses this email.</b>
-                            Sign up first; it takes a minute. <Link to="/register" className="font-bold text-campus-navy underline underline-offset-4">Create an account</Link>
-                        </div>
-                    )}
-                    {state.kind === 'google-only' && (
-                        <div className="rounded-[16px] border-2 border-dashed border-[var(--max-line)] p-3 text-xs leading-relaxed text-campus-warm-500" role="alert">
-                            <b className="block text-campus-navy">This account signs in with Google.</b>
-                            It has no password to reset. Use Google instead; you can add a password later in Settings.
-                            <button type="button" onClick={() => void loginWithGoogle()} className="btn-glass max-btn mt-2 flex h-9 w-full gap-2 text-xs"><GoogleLogo className="h-4 w-4" /> Continue with Google</button>
-                        </div>
-                    )}
                     <button type="submit" disabled={state.kind === 'busy' || !email.trim()} className="btn-skeu !mt-4 h-12 w-full text-base disabled:cursor-not-allowed disabled:opacity-60">
-                        {state.kind === 'busy' ? <><Loader2 className="h-5 w-5 animate-spin" />Checking…</> : <>Send reset link <ArrowRight className="h-4 w-4" /></>}
+                        {state.kind === 'busy' ? <><Loader2 className="h-5 w-5 animate-spin" />Sending…</> : <>Send reset link <ArrowRight className="h-4 w-4" /></>}
                     </button>
                 </form>
             )}

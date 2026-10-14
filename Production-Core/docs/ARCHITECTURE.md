@@ -158,7 +158,7 @@ bus, which keeps the data flow inspectable.
 | `0007_progress_shares` | share links, SHA-256 hashed tokens |
 | `0008_firebase_auth` | drops the foreign keys to `auth.users` (Firebase uids are mapped to UUIDs instead) |
 | `0009_admin_console` | `announcements`, `admin_audit` |
-| `0010_account_lookup_index` | index for the keyed-hash account lookup behind "forgot password" |
+| `0010_account_lookup_index` | an index that the removed account lookup used; harmless, and unused now |
 
 RLS is enabled on every table as a second layer, but **it does not isolate learners**: the API connects with the database's
 owner role (which bypasses RLS), and the policies use `auth.uid()`, which never matches a Firebase user (their ids are mapped

@@ -40,7 +40,7 @@ data is in Supabase Postgres and is reached only through this API.
   (`frontend/vercel.json`). In production the API docs and OpenAPI schema are switched off.
 * **Rate limits** (sliding window, per user, or per client address when unauthenticated): ask 20/min (configurable with
   `RAG_RATE_LIMIT_PER_MIN`), quiz 20, challenge submit 12, code run 30, teach-back 10, sketch 6, coding-profile verify 6,
-  share create 10, upload 5, `/agents/*` 12 and `/sessions/*` 20 (both reach the LLM), public share view 30 and account lookup 5 per address.
+  share create 10, upload 5, `/agents/*` 12 and `/sessions/*` 20 (both reach the LLM), and public share view 30 per address.
   The live session WebSocket allows 30 messages per learner per minute, 3 handlers in flight per connection and 16,000
   characters per message. Every request body is capped at 1 MB (3 MB for the document upload) and refused with 413 before it is parsed. Limits live in memory, per process:
   run one backend process or move them to Redis before scaling out. Behind a host's proxy the backend image trusts
@@ -87,11 +87,9 @@ and the "evidence only" contract are the backstops, and the verifier is a signal
   anonymised.
 * **Your data:** *Settings → Privacy & data* exports everything, or deletes a part or all of it. "Delete my data" runs in one
   transaction.
-* **Account lookup** (`POST /auth/account-check`, used by "Forgot password"): it looks an email up by a keyed HMAC hash
-  (the email itself is not stored for this) and says whether an account exists and which sign-in methods it has. That
-  lets someone test whether an address has an account, which is a deliberate usability trade-off, limited to 5 requests
-  per minute per address. A phishing-resistant alternative would be to always answer "if an account exists, we sent an
-  email".
+* **No account lookup.** Nothing in the API reveals whether an email has an account. The earlier lookup endpoint and the stored
+  email hash are gone: *Forgot password* always asks Firebase to send the reset email and always shows the same message ("If an
+  account exists for that email, we've sent a reset link. If you signed up with Google, use Continue with Google.").
 * **Coding profiles:** a verification code derived from a server-only secret proves ownership of a GitHub, LeetCode or
   Codeforces profile; each check is rate limited because it reads a third-party site.
 
