@@ -1,3 +1,5 @@
+import time
+
 from fastapi import Depends, FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -101,9 +103,25 @@ async def root():
     return {"message": "Kiddoo API is live"}
 
 
+_db_probe = {"at": 0.0, "state": None}                  # the last database answer, so health checks do not hammer the database
+DB_PROBE_TTL_S = 15.0
+
+
 @app.get(f"{P}/health")
 async def health_check():
-    return {"status": "ok", "service": "backend"}
+    """Always 200 while the process is up (hosts restart a service whose health check fails), but honest about the database."""
+    if db.pool is None:
+        state = "not_configured"
+    elif _db_probe["state"] and time.monotonic() - _db_probe["at"] < DB_PROBE_TTL_S:
+        state = _db_probe["state"]
+    else:
+        try:
+            await db.fetch_one("select 1 as ok")
+            state = "up"
+        except Exception:
+            state = "down"
+        _db_probe.update(at=time.monotonic(), state=state)
+    return {"status": "ok", "service": "backend", "database": state}
 
 
 if __name__ == "__main__":

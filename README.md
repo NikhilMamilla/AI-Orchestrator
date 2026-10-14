@@ -210,7 +210,7 @@ The frontend reads `Production-Core/frontend/.env.local`; the template is
 
 ```bash
 # backend (from Production-Core/, offline: no network or models needed)
-python -m pytest                                   # 264 tests
+python -m pytest                                   # 283 tests
 
 # frontend (from Production-Core/frontend/)
 npm run lint
@@ -244,7 +244,7 @@ GitHub Actions runs the backend tests and the frontend lint, tests and build on 
     │   │   ├── learning/    mastery, reviews, roadmap, challenges, teach-back, sketch, journal, preferences, coding profiles
     │   │   ├── admin/       admin statistics (aggregates only), question inspector, audit log
     │   │   ├── services/    database, LLM access, code execution, shared services
-    │   │   └── tests/       the backend test suite (264 tests, offline)
+    │   │   └── tests/       the backend test suite (283 tests, offline)
     │   ├── requirements*.txt, Dockerfile (full), Dockerfile.server (small hosts)
     ├── frontend/
     │   ├── src/

@@ -83,7 +83,7 @@ Kiddoo/
     │   ├── admin/         stats (aggregates only), inspect, audit
     │   ├── services/      database, rag_service, llm (agent-facing), code_execution, concept_service,
     │   │                  student_profile_service, message_queue, agent_factory, activity
-    │   └── tests/         264 offline tests
+    │   └── tests/         283 offline tests
     ├── frontend/src/
     │   ├── pages/         one file per screen
     │   ├── components/    ask · learn · concepts · dashboard · session · auth · fx · intro · landing

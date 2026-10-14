@@ -48,7 +48,7 @@ npm run dev                       # http://localhost:5173
 ## 5. Verify
 
 ```bash
-python -m pytest                                   # 264 offline tests (no network, no models)
+python -m pytest                                   # 283 offline tests (no network, no models)
 python -m backend.app.rag.evaluation --neural      # retrieval ablation, writes docs/eval/results.json
 python -m backend.app.rag.evaluation --neural --pg # same against Supabase
 python scripts/smoke_test.py                       # end-to-end through the real SSE endpoint
