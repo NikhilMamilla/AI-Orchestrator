@@ -1,4 +1,5 @@
 
+import { formatInvested } from '../lib/timeInvested';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -80,7 +81,7 @@ export default function DashboardPage() {
     const stats = [
         { icon: Trophy, label: 'Concepts mastered', value: String(dashboardData?.progress_overview?.concepts_mastered || 0), unit: '', tone: '#3fbf8a' },
         { icon: Flame, label: 'Current streak', value: String(dashboardData?.progress_overview?.current_streak || 0), unit: 'days', tone: '#ff8a73' },
-        { icon: Clock, label: 'Time invested', value: String(Math.round((dashboardData?.progress_overview?.total_time_minutes || 0) / 60)), unit: 'hours', tone: '#9b8cff' },
+        { icon: Clock, label: 'Time invested (estimated)', ...formatInvested(dashboardData?.progress_overview?.total_time_minutes), tone: '#9b8cff' },
     ];
     const firstName = user?.name?.split(' ')[0] || 'there';
     const SHAPES = ['40px 14px 40px 14px', '14px 40px 14px 40px', '40px 40px 14px 40px'];

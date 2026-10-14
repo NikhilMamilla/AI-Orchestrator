@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends
 
+from backend.app.learning.time_spent import estimated_minutes
 from backend.app.learning.rhythm import daily_progress
 from backend.app.security import User, get_current_user
 from backend.app.services.concept_service import ConceptService
@@ -42,7 +43,8 @@ async def get_dashboard_summary(user: User = Depends(get_current_user), db: Data
             "concepts_mastered": sum(1 for m in mastery.values() if m >= 0.8),
             "concepts_total": len(concepts),
             "current_streak": profile.overall_stats.current_streak,
-            "total_time_minutes": profile.overall_stats.total_time_minutes,
+            "total_time_minutes": estimated_minutes(profile.patterns.get("attempts") or []),   # an estimate from timed answers
+            "time_is_estimated": True,
         },
         "analytics": {"progress_over_time": history,
                       "has_history": any(p["answers"] for p in history), "as_of": datetime.now(timezone.utc).isoformat()},
