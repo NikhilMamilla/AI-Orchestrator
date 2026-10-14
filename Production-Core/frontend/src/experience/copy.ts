@@ -2,9 +2,9 @@
  * Words the 3D scenes need as well as the overlays. Every factual line is quoted from the README or docs/LEARNING.md.
  */
 
-/** Stage 2: the shards that fly in after the pane breaks (README, opening paragraph and "What is different"). */
+/** Stage 2: the glass lines, read top to bottom as one sentence that continues "Even when they are wrong." (README, opening paragraph and "What is different"). */
 export const EVIDENCE_SHARDS = [
-    { big: 'Answers', rest: 'only from a curated knowledge base' },
+    { big: 'Kiddoo', rest: 'answers only from a curated knowledge base' },
     { big: 'Cites', rest: 'every claim' },
     { big: 'Checks', rest: 'each sentence against its sources' },
     { big: 'Refuses', rest: 'topics it has no evidence for' },

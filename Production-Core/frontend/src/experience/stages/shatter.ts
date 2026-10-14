@@ -91,7 +91,7 @@ const factory: StageFactory = async () => {
     const pane = glassMesh(geo, paneMat);
     scene.add(pane);
 
-    const slabs = EVIDENCE_SHARDS.slice(1, 5).map((s, k) => {     // four slabs fit the procedural timing
+    const slabs = EVIDENCE_SHARDS.slice(0, 4).map((s, k) => {     // four slabs fit the procedural timing
         const tex = slabTexture(s.big, s.rest);
         const mat = glassMaterial(tex, null);
         const mesh = glassMesh(glassSlab(4.2, 2.1, 11 + k), mat);
