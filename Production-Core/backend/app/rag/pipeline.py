@@ -74,6 +74,22 @@ class RAGPipeline:
     def titles(self) -> Dict[str, str]:
         return {d.id: d.title for d in self.store.list_documents()}
 
+    def screened_history(self, history: Sequence[Dict[str, str]]) -> List[Dict[str, str]]:
+        """Conversation context sent by the client is untrusted. Assistant turns are dropped (the client could have
+        forged them) and every user turn goes through the same screens as the question; a turn that fails is dropped."""
+        out: List[Dict[str, str]] = []
+        for m in list(history or [])[-4:]:
+            if m.get("role") != "user":
+                continue
+            try:
+                text = screen_query(m.get("content", ""))
+            except QueryRejected:
+                continue
+            if self.guard is not None and self.guard.score(text) >= self.cfg.semantic_guard_threshold:
+                continue
+            out.append({"role": "user", "content": text})
+        return out
+
     # ----- retrieval only (used by eval and by the knowledge agent) -----
     def retrieve(self, query: str, level: int = 1, weak_concepts: Sequence[str] = ()
                  ) -> tuple[QueryPlan, List[Candidate], List[Candidate]]:
@@ -124,6 +140,7 @@ class RAGPipeline:
             return done(Answer(text=e.reason, status="rejected", confidence=0.0, citations=[],
                                unsupported_claims=[], evidence=[], trace={}), failure=e.code)
 
+        history = await asyncio.to_thread(self.screened_history, history)
         lvl = LEVELS.get(level, 1)
         try:
             with trace.stage("understand") as st:
