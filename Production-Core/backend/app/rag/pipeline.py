@@ -15,7 +15,7 @@ from dataclasses import dataclass, field, replace
 from typing import Any, Awaitable, Callable, Dict, List, Mapping, Optional, Sequence
 
 from .generate import (SENTINEL, build_messages, confidence, extractive_answer, normalize_citations,
-                       repair_citations, verify_answer)
+                       drop_code_blocks, repair_citations, verify_answer)
 from .guard import QueryRejected, screen_query
 from .llm import LLMUnavailable
 from .observability import Trace, metrics
@@ -233,7 +233,7 @@ class RAGPipeline:
             report = await asyncio.to_thread(verify_answer, text, evidence, self.embedder, threshold,
                                              self.nli, self.cfg.nli_weight,
                                              self.cfg.nli_floor if self.nli is not None else None)
-            text = repair_citations(text, report)
+            text = repair_citations(drop_code_blocks(text, report.get("unverified_code", [])), report)
             st.update(claims=len(report["claims"]), unsupported=len(report["unsupported"]), verifier=report["verifier"])
             trace.set(claim_checks=[{"text": c["text"][:240], "support": c["support"], "supported": c["supported"],
                                      "entailment": c["entailment"], "status": c["status"], "cited": c["cited"] or ([c["repaired_ref"]] if c["repaired_ref"] else [])}

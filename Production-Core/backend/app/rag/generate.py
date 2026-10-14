@@ -75,6 +75,27 @@ def _sentences(text: str) -> List[str]:
     return [p.strip() for p in parts if p and p.strip()]
 
 
+def unverified_code_blocks(answer: str, evidence: Sequence[Evidence]) -> List[str]:
+    """Fenced code blocks of the answer that do not appear in any evidence passage (whitespace and the language tag
+    ignored). The prompt allows code only if it is quoted from the evidence; nothing else may ride along unchecked."""
+    squash = lambda t: re.sub(r"\s+", "", t)
+    haystack = [squash(e.text) for e in evidence]
+    bad = []
+    for block in _CODE.findall(answer):
+        body = re.sub(r"^```[^\n]*\n?", "", block)
+        body = re.sub(r"```$", "", body)
+        code = squash(body)
+        if code and not any(code in h for h in haystack):
+            bad.append(block)
+    return bad
+
+
+def drop_code_blocks(text: str, blocks: Sequence[str]) -> str:
+    for b in blocks:
+        text = text.replace(b, "", 1)
+    return re.sub(r"\n{3,}", "\n\n", text).strip()
+
+
 def _stem(w: str) -> str:
     for suf in ("ing", "ed", "es", "s"):
         if w.endswith(suf) and len(w) - len(suf) >= 3:
@@ -153,8 +174,15 @@ def verify_answer(answer: str, evidence: Sequence[Evidence], embedder,
                        "repaired_ref": best_ref if (supported and not it["cited"]) else None})
         if status == "unsupported":
             unsupported.append(it["sent"])
+    unverified = unverified_code_blocks(answer, evidence)
+    for block in unverified:                           # a made-up code block is an unsupported claim like any other
+        label = "Code block not found in the sources: " + re.sub(r"\s+", " ", re.sub(r"```[^\n]*", "", block)).strip()[:120]
+        claims.append({"text": label, "cited": [], "support": 0.0, "lexical": 0.0, "entailment": None,
+                       "supported": False, "status": "unsupported", "repaired_ref": None})
+        unsupported.append(label)
+        supports.append(0.0)
     mean_support = float(np.mean(supports)) if supports else 0.0
-    return {"claims": claims, "unsupported": unsupported, "mean_support": mean_support,
+    return {"claims": claims, "unsupported": unsupported, "mean_support": mean_support, "unverified_code": unverified,
             "invalid_citations": invalid_cites, "verifier": "nli+lexical" if nli is not None else "lexical",
             "citation_coverage": (sum(1 for c in claims if c["cited"]) / len(claims)) if claims else 0.0}
 
