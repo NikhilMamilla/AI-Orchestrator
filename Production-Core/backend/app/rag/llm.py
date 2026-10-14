@@ -180,7 +180,7 @@ class _HttpProvider(BaseLLM):
     @staticmethod
     def _is_account_problem(r: httpx.Response) -> bool:
         t = r.text.lower()
-        return r.status_code in (401, 403) or any(s in t for s in ("restricted", "api key", "api_key", "permission", "invalid"))
+        return r.status_code in (401, 403) or any(s in t for s in ("restricted", "api key", "api_key", "permission", "organization"))   # not a bare "invalid": a bad parameter is not a bad key
 
     async def _generate(self, messages: Messages, temperature: float, max_tokens: int) -> LLMResult:
         last: Exception = LLMUnavailable(f"{self.name}: no models")
