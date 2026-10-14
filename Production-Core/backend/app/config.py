@@ -44,6 +44,10 @@ class Settings(BaseSettings):
     EMBEDDINGS: str = "local"
     HF_TOKEN: str = ""
     RAG_RATE_LIMIT_PER_MIN: int = 20
+    # Evidence gate: refuse a question whose best passage scores below this. Each configuration scores on its own scale, so each
+    # has its own value; RAG_GATE_HOSTED is for EMBEDDINGS=hosted (see docs/RAG.md for how to measure it).
+    RAG_GATE_LOCAL: float = 0.14
+    RAG_GATE_HOSTED: float = 0.14
 
     @property
     def groq_keys_list(self) -> list[str]:

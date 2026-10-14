@@ -24,12 +24,11 @@ from typing import Dict, List, Optional
 
 from backend.app.config import settings
 
-from .embeddings import load_embedder
-from .evaluation import ROOT, build_system
+from .configurations import pipeline_config
+from .evaluation import ROOT, build_system, reranker_for
 from .llm import BaseLLM, LLMRouter, LLMUnavailable, MistralClient
 from .nli import load_nli
-from .pipeline import RAGConfig, RAGPipeline
-from .rerank import CrossEncoderReranker
+from .pipeline import RAGPipeline
 
 JUDGE_PROMPT = """You are a strict fact-checker. Compare the ANSWER to the EVIDENCE.
 Split the ANSWER into its factual claims. For each claim decide whether the EVIDENCE alone supports it
@@ -88,14 +87,14 @@ async def judge(llm: BaseLLM, question: str, evidence: str, answer: str) -> Opti
             "claims": len(sup)}
 
 
-async def run(limit: int, concurrency: int, out: Path) -> Dict:
-    store, embedder = build_system(neural=True)
-    reranker = CrossEncoderReranker(enabled=True)
-    nli = load_nli()
+async def run(limit: int, concurrency: int, out: Path, hosted: bool = False) -> Dict:
+    store, embedder = build_system(neural=True, hosted=hosted)
+    reranker = reranker_for(neural=True, hosted=hosted)
+    nli = None if hosted else load_nli()                  # the small server has no entailment model
     keys = settings.mistral_keys_list
     gen = Capture(LLMRouter([MistralClient(keys)]))
     judge_llm = LLMRouter([MistralClient(keys, models=("open-mistral-nemo", "ministral-8b-latest"))])
-    pipe = RAGPipeline(store, embedder, reranker, gen, RAGConfig(), nli)
+    pipe = RAGPipeline(store, embedder, reranker, gen, pipeline_config(hosted), nli)
     items = json.loads((ROOT / "data" / "eval" / "questions.json").read_text(encoding="utf-8"))["items"]
     scoped = [i for i in items if i["kind"] in ("direct", "paraphrase", "multi")][:limit]
     oos = [i for i in items if i["kind"] == "oos"]
@@ -162,13 +161,22 @@ def summarise(rows: List[dict], out: Path) -> Dict:
     return res
 
 
-def main() -> None:
+def make_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int, default=40)
     ap.add_argument("--concurrency", type=int, default=2)
-    ap.add_argument("--out", default=str(ROOT / "docs" / "eval" / "generation.json"))
-    a = ap.parse_args()
-    res = asyncio.run(run(a.limit, a.concurrency, Path(a.out)))
+    ap.add_argument("--hosted", action="store_true", help="the small-server setup: hosted embeddings (needs HF_TOKEN), lexical reranker, no NLI")
+    ap.add_argument("--out", default=None, help="default docs/eval/generation.json, or generation_hosted.json with --hosted")
+    return ap
+
+
+def output_path(a) -> Path:
+    return Path(a.out) if a.out else ROOT / "docs" / "eval" / ("generation_hosted.json" if a.hosted else "generation.json")
+
+
+def main() -> None:
+    a = make_parser().parse_args()
+    res = asyncio.run(run(a.limit, a.concurrency, output_path(a), a.hosted))
     print(json.dumps(res, indent=2))
 
 

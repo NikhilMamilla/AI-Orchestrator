@@ -20,6 +20,9 @@ from dataclasses import asdict, replace
 from pathlib import Path
 from typing import Dict, List, Sequence
 
+from backend.app.config import settings
+
+from .configurations import pipeline_config
 from .embeddings import load_embedder
 from .guard import QueryRejected, screen_query
 from .ingest import Ingestor
@@ -110,10 +113,23 @@ def calibrate_gate(inscope: List[float], oos: List[float]) -> Dict:
     return {"best": best, "sweep": sweep[::5]}
 
 
-def build_system(neural: bool, pg: bool = False):
-    embedder = load_embedder(prefer_neural=neural)
+def build_embedder(neural: bool, hosted: bool = False):
+    """Local models, or (hosted) the same embeddings through Hugging Face Inference, as the small server runs them."""
+    if hosted:
+        if not settings.HF_TOKEN:
+            raise SystemExit("--hosted needs a Hugging Face token: set HF_TOKEN in the environment (see docs/RAG.md).")
+        return load_embedder(prefer_neural=False, hosted_token=settings.HF_TOKEN)
+    return load_embedder(prefer_neural=neural)
+
+
+def reranker_for(neural: bool, hosted: bool = False) -> CrossEncoderReranker:
+    """The cross-encoder, or (hosted) the lexical fallback the small server uses."""
+    return CrossEncoderReranker(enabled=neural and not hosted)
+
+
+def build_system(neural: bool, pg: bool = False, hosted: bool = False):
+    embedder = build_embedder(neural, hosted)
     if pg:                                   # evaluate the production store (Supabase pgvector + FTS)
-        from backend.app.config import settings
         from .pg_store import PostgresKnowledgeStore
         store = PostgresKnowledgeStore(settings.DATABASE_URL)
         Ingestor(store, embedder).ingest_directory(ROOT / "data" / "knowledge")   # no-op when unchanged
@@ -128,7 +144,7 @@ def render_markdown(r: Dict) -> str:
     out = [
         "# Retrieval evaluation",
         "",
-        f"Store: **{r['store']}** | embedder: `{r['embedder']}` | reranker: `{r['reranker']}` | "
+        f"Configuration: **{r.get('configuration', 'local models')}** | Store: **{r['store']}** | embedder: `{r['embedder']}` | reranker: `{r['reranker']}` | "
         f"corpus: {r['corpus']['documents']} docs / {r['corpus']['passages']} passages | "
         f"{r['n_scoped']} labelled in-scope questions.",
         "",
@@ -150,21 +166,31 @@ def render_markdown(r: Dict) -> str:
     return chr(10).join(out)
 
 
-def main():
+def make_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser()
     ap.add_argument("--neural", action="store_true", help="use bge embeddings + cross-encoder")
     ap.add_argument("--pg", action="store_true", help="evaluate against Supabase Postgres (DATABASE_URL)")
-    ap.add_argument("--out", default=str(ROOT / "docs" / "eval" / "results.json"))
-    args = ap.parse_args()
+    ap.add_argument("--hosted", action="store_true", help="the small-server setup: hosted embeddings (needs HF_TOKEN), lexical reranker")
+    ap.add_argument("--out", default=None, help="default docs/eval/results.json, or results_hosted.json with --hosted")
+    return ap
 
-    store, embedder = build_system(args.neural, args.pg)
-    reranker = CrossEncoderReranker(enabled=args.neural)
+
+def output_path(args) -> Path:
+    return Path(args.out) if args.out else ROOT / "docs" / "eval" / ("results_hosted.json" if args.hosted else "results.json")
+
+
+def main():
+    args = make_parser().parse_args()
+    out = output_path(args)
+
+    store, embedder = build_system(args.neural, args.pg, args.hosted)
+    reranker = reranker_for(args.neural, args.hosted)
     data = json.loads((ROOT / "data" / "eval" / "questions.json").read_text(encoding="utf-8"))["items"]
     scoped = [i for i in data if i["kind"] in ("direct", "paraphrase", "multi")]
     oos = [i for i in data if i["kind"] == "oos"]
     inj = [i for i in data if i["kind"] == "injection"]
 
-    base = RAGConfig()
+    base = pipeline_config(args.hosted)               # the gate threshold of the configuration being measured
     configs = {
         "bm25_only": replace(base, use_dense=False, multi_query=False, expand_prereqs=False, use_rerank=False),
         "dense_only": replace(base, use_bm25=False, multi_query=False, expand_prereqs=False, use_rerank=False),
@@ -173,7 +199,8 @@ def main():
         "hybrid+multiquery+rerank": replace(base, expand_prereqs=False),
         "full (+prereq hop)": base,
     }
-    results = {"store": "postgres" if args.pg else "sqlite", "embedder": embedder.name, "reranker": reranker.name, "corpus": store.stats(),
+    results = {"configuration": "hosted (hosted embeddings, lexical reranker, no NLI)" if args.hosted else "local models",
+               "store": "postgres" if args.pg else "sqlite", "embedder": embedder.name, "reranker": reranker.name, "corpus": store.stats(),
                "n_scoped": len(scoped), "configs": {}}
     for name, cfg in configs.items():
         pipe = RAGPipeline(store, embedder, reranker, None, cfg)
@@ -196,10 +223,12 @@ def main():
     results["injection_guard"] = {"queries": len(inj), "rejected": caught}
     print(f"injection guard: {caught}/{len(inj)} rejected")
 
-    Path(args.out).parent.mkdir(parents=True, exist_ok=True)
-    Path(args.out).write_text(json.dumps(results, indent=2), encoding="utf-8")
-    Path(args.out).with_suffix(".md").write_text(render_markdown(results), encoding="utf-8")
-    print("wrote", args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(results, indent=2), encoding="utf-8")
+    out.with_suffix(".md").write_text(render_markdown(results), encoding="utf-8")
+    print("wrote", out)
+    if args.hosted:
+        print(f"set RAG_GATE_HOSTED={results['evidence_gate']['best']['threshold']} on the server to use this configuration's calibrated gate")
 
 
 if __name__ == "__main__":

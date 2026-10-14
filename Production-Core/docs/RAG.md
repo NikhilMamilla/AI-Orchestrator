@@ -104,12 +104,22 @@ The retrieval results ([eval/results.md](eval/results.md)) were measured on the 
 embeddings, MiniLM reranker). The verifier and teach-back numbers use the local NLI model. The generation and red-team scripts likewise load their embedder locally.
 
 The **small-server deployment** (`EMBEDDINGS=hosted`, `Dockerfile.server`) differs: the same embeddings, but a lexical reranker, a
-lexical claim checker and a Postgres store. The evidence-gate threshold (0.14) was calibrated on the reranker's scale, so the
-"refuses every out-of-scope question" result is **not measured for that configuration**. The evaluation scripts cannot measure it
-today (`evaluation.py` and `redteam_eval.py` always call `load_embedder` without the hosted token and have no switch for the
-lexical reranker). To measure the full-model setup on the production database, run
-`python -m backend.app.rag.evaluation --neural --pg` from `Production-Core/`. Measuring the hosted setup needs a small
-addition to those scripts (a `--hosted` option) and a re-calibration of the gate for the lexical scale.
+lexical claim checker and a Postgres store. Its scores sit on a different scale, so the evidence gate has its **own setting**
+(`RAG_GATE_HOSTED`, next to `RAG_GATE_LOCAL`; both default to the calibrated 0.14). The "refuses every out-of-scope question"
+result is **not yet measured for the hosted setup**: measure it with the `--hosted` option.
+
+```powershell
+# from Production-Core/, with your Hugging Face token (never put it in a file you commit)
+$env:HF_TOKEN = "hf_..."
+python -m backend.app.rag.evaluation --hosted            # retrieval + gate calibration -> docs/eval/results_hosted.md
+python -m backend.app.rag.evaluation --hosted --pg       # the same on Supabase Postgres (also needs DATABASE_URL)
+python -m backend.app.rag.redteam_eval --hosted          # injection guard         -> docs/eval/redteam_hosted.md
+```
+
+None of these calls a language model. The first prints `set RAG_GATE_HOSTED=<value> ...`: put that value in the server's
+environment. `python -m backend.app.rag.gen_eval --hosted` does call the language model (Mistral keys) and is optional.
+For the full-model setup use `python -m backend.app.rag.evaluation --neural --pg`. Hosted runs write their own `*_hosted` files,
+so the existing local results are never overwritten.
 
 ## Generation and verifier evaluation
 

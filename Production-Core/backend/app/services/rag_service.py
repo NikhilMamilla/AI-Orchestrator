@@ -10,6 +10,7 @@ from typing import Optional
 from backend.app.config import settings
 from backend.app.rag.embeddings import load_embedder
 from backend.app.rag.ingest import Ingestor
+from backend.app.rag.configurations import pipeline_config
 from backend.app.rag.pipeline import RAGConfig, RAGPipeline
 from backend.app.rag.guard import SemanticGuard
 from backend.app.rag.nli import load_nli
@@ -48,7 +49,7 @@ def _build() -> tuple[RAGPipeline, Ingestor]:
                 len(report.added), len(report.updated), len(report.unchanged), len(report.failed))
     nli = load_nli(enabled=local_models)                      # entailment-based claim verification
     guard = SemanticGuard(embedder) if (settings.RAG_NEURAL or hosted) else None   # needs real embeddings
-    return RAGPipeline(store, embedder, reranker, llm, RAGConfig(), nli, guard), ingestor
+    return RAGPipeline(store, embedder, reranker, llm, pipeline_config(hosted), nli, guard), ingestor
 
 
 async def get_pipeline() -> RAGPipeline:

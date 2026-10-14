@@ -14,7 +14,7 @@ from pathlib import Path
 
 import numpy as np
 
-from .embeddings import load_embedder
+from .evaluation import build_embedder
 from .evaluation import ROOT
 from .guard import QueryRejected, SemanticGuard, screen_query
 
@@ -27,18 +27,27 @@ def regex_blocks(q: str) -> bool:
         return True
 
 
-def main() -> None:
+def make_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser()
     ap.add_argument("--neural", action="store_true")
-    ap.add_argument("--out", default=str(ROOT / "docs" / "eval" / "redteam.md"))
-    args = ap.parse_args()
+    ap.add_argument("--hosted", action="store_true", help="the small-server setup: hosted embeddings (needs HF_TOKEN)")
+    ap.add_argument("--out", default=None, help="default docs/eval/redteam.md, or redteam_hosted.md with --hosted")
+    return ap
+
+
+def output_path(args) -> Path:
+    return Path(args.out) if args.out else ROOT / "docs" / "eval" / ("redteam_hosted.md" if args.hosted else "redteam.md")
+
+
+def main() -> None:
+    args = make_parser().parse_args()
 
     data = json.loads((ROOT / "data" / "eval" / "redteam.json").read_text(encoding="utf-8"))
     questions = json.loads((ROOT / "data" / "eval" / "questions.json").read_text(encoding="utf-8"))["items"]
     attacks = data["attacks"]
     benign = data["benign"] + [i["q"] for i in questions if i["kind"] in ("direct", "paraphrase", "multi", "oos")]
 
-    embedder = load_embedder(prefer_neural=args.neural)
+    embedder = build_embedder(args.neural, args.hosted)
     guard = SemanticGuard(embedder)
     a_sem = np.array([guard.score(q) for q in attacks])
     b_sem = np.array([guard.score(q) for q in benign])
@@ -69,7 +78,7 @@ def main() -> None:
         lines += [f"* {q}" for q in miss] or ["* none"]
     else:
         lines += ["", "No threshold gives zero false positives; consider more exemplars."]
-    Path(args.out).write_text("\n".join(lines) + "\n", encoding="utf-8")
+    output_path(args).write_text("\n".join(lines) + "\n", encoding="utf-8")
     sys.stdout.buffer.write(("\n".join(lines) + "\n").encode("utf-8", "replace"))      # Windows consoles can't print every script
 
 
