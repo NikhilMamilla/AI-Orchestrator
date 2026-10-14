@@ -1,4 +1,4 @@
-"""Free-tier LLM layer: Gemini and Groq providers behind a router with automatic failover.
+"""Free-tier LLM layer: Mistral, Gemini and Groq providers behind a router with automatic failover (order: LLM_PROVIDERS).
 
 * Each provider rotates API keys and walks its own model chain on 429/5xx.
 * The router tries providers in order and puts a failing one on cool-down (long for

@@ -1,7 +1,13 @@
 import os
 from pathlib import Path
 
-os.environ.setdefault("ENV", "development")     # the suite runs in development mode; the default for real runs is production
+# Environment variables beat backend/.env, so setting these before anything imports the settings keeps a developer's local
+# .env (a dead DATABASE_URL, real API keys) out of the tests. The suite runs in development mode; real runs default to production.
+for _name, _value in {"ENV": "development", "EMBEDDINGS": "local", "AUTH_DISABLED": "false", "DATABASE_URL": "", "SUPABASE_URL": "",
+                      "SUPABASE_JWT_SECRET": "", "FIREBASE_PROJECT_ID": "", "HF_TOKEN": "", "ADMIN_EMAILS": "", "APP_SECRET": "",
+                      "MISTRAL_API_KEY": "", "MISTRAL_API_KEYS": "", "GEMINI_API_KEY": "", "GEMINI_API_KEYS": "", "GROQ_API_KEY": "",
+                      "GROQ_API_KEYS": "", "JUDGE0_API_KEY": ""}.items():
+    os.environ[_name] = _value
 
 import pytest
 
