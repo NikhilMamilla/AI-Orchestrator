@@ -19,6 +19,7 @@ from pgvector.psycopg import register_vector
 from psycopg.rows import dict_row
 from psycopg_pool import ConnectionPool
 
+from backend.app.services.database import pool_options
 from .types import Chunk, Document
 
 
@@ -26,7 +27,7 @@ class PostgresKnowledgeStore:
     def __init__(self, dsn: str, pool_size: int = 8):
         self.pool = ConnectionPool(dsn, min_size=1, max_size=pool_size, open=True,
                                    configure=register_vector,
-                                   kwargs={"row_factory": dict_row, "prepare_threshold": None})
+                                   kwargs={"row_factory": dict_row, "prepare_threshold": None}, **pool_options())
         # Document metadata and counts change only on ingest; caching them removes 2-3 network
         # round-trips from every query (the database is remote). Cleared on any local write,
         # and expires after TTL so other writers' changes are picked up.

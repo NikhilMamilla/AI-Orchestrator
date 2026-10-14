@@ -21,6 +21,13 @@ from backend.app.config import settings
 logger = logging.getLogger(__name__)
 
 
+def pool_options() -> dict:
+    """A free host sleeps, and its pooled connections die with it: have the pool test a connection before handing it out
+    (psycopg_pool 3.2 and later), so the first request after a quiet spell does not fail on a dead one."""
+    check = getattr(ConnectionPool, "check_connection", None)
+    return {"check": check} if check is not None else {}
+
+
 class DatabaseUnavailable(RuntimeError):
     """No database is configured or reachable; the API answers 503 (see main.py)."""
 
@@ -38,7 +45,7 @@ class Database:
         def open_pool() -> ConnectionPool:
             # prepare_threshold=None: the Supabase pooler (pgbouncer) does not support prepared statements
             pool = ConnectionPool(settings.DATABASE_URL, min_size=1, max_size=5, open=False,
-                                  kwargs={"row_factory": dict_row, "prepare_threshold": None})
+                                  kwargs={"row_factory": dict_row, "prepare_threshold": None}, **pool_options())
             pool.open(wait=True, timeout=20)
             return pool
 
@@ -46,7 +53,7 @@ class Database:
 
         def open_lock_pool() -> ConnectionPool:
             pool = ConnectionPool(settings.DATABASE_URL, min_size=0, max_size=3, open=False,
-                                  kwargs={"row_factory": dict_row, "prepare_threshold": None})
+                                  kwargs={"row_factory": dict_row, "prepare_threshold": None}, **pool_options())
             pool.open(wait=False)
             return pool
 
