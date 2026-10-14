@@ -34,20 +34,26 @@ export default function Overlays() {
             {/* stage 1 plays over a light scene (the garden), so its words are in deep teal; text windows follow the reference */}
             <Stage id="believed" title="Every learner is different. Yet courses teach everyone the same way: the same pages, the same pace, no matter what you already know.">
                 {/* the scroll pill lives in ScrollHint: it comes back after 2 s without scrolling, on every stage */}
-                {/* straight after the zero: the opening words are already on screen */}
-                <L a={-0.1} b={0.6} className="halo absolute left-[6vw] top-[9svh]">
+                {/* the premise comes first, so "Yet courses teach everyone the same way" has something to answer */}
+                <L a={-0.1} b={0.22} className="halo absolute inset-0 grid place-items-center text-center">
+                    <div>
+                        <p className="ink-deep-flat font-display text-[clamp(1.6rem,4vw,4.4rem)] font-medium italic leading-none">Every learner is</p>
+                        <Script deep first="D" rest="ifferent." size="clamp(3rem, 9.4vw, 10.5rem)" tuck={0.72} />
+                    </div>
+                </L>
+                <L a={0.2} b={0.6} className="halo absolute left-[6vw] top-[9svh]">
                     <p className="ink-deep-flat ml-[1vw] font-display text-[clamp(1.6rem,4vw,4.4rem)] font-medium italic leading-none">Yet</p>
                     <Script deep first="C" rest="ourses" size="clamp(3rem, 9.4vw, 10.5rem)" tuck={0.72} className="mt-[0.6vw]" />
                     <p className="ink-deep-flat -mt-[3vw] text-right font-display text-[clamp(1.6rem,4.6vw,5rem)] font-medium italic leading-none">teach</p>
                 </L>
-                <L a={0.24} b={0.6} className="halo absolute bottom-[15svh] right-[6vw] text-right">
+                <L a={0.3} b={0.6} className="halo absolute bottom-[15svh] right-[6vw] text-right">
                     <Script deep first="E" rest="veryone" size="clamp(3rem, 9.4vw, 10.5rem)" />
                     <p className="ink-deep-flat -mt-[3vw] font-display text-[clamp(1.6rem,4.6vw,5rem)] font-medium italic leading-none">the same way.</p>
                 </L>
                 <L a={0.62} b={0.95} className="absolute inset-0 grid place-items-center text-center max-sm:px-8">
                     <div className="halo relative">
                         <p className="ink-deep-flat font-display text-[clamp(1.9rem,4.8vw,5rem)] font-semibold leading-[1.05]">The same pages,<br />the same pace,</p>
-                        <p className="ink-deep mt-1 inline-block font-script text-[clamp(2.6rem,6.6vw,7rem)] leading-[1.1] max-sm:mx-0 max-sm:mt-2 max-sm:px-0 max-sm:text-[1.75rem]">no matter what you know.</p>
+                        <p className="ink-deep mt-1 inline-block font-script text-[clamp(2.6rem,6.6vw,7rem)] leading-[1.1] max-sm:mx-0 max-sm:mt-2 max-sm:px-0 max-sm:text-[1.75rem]">no matter what you already know.</p>
                     </div>
                 </L>
             </Stage>
@@ -81,11 +87,11 @@ export default function Overlays() {
                     </div>
                 </L>
                 <L a={ASSETS ? 0.78 : 0.64} b={1.06} className="absolute bottom-[15svh] right-[6vw] max-w-[22rem] text-right text-sm leading-relaxed text-white/75 max-sm:inset-x-8 max-sm:bottom-auto max-sm:top-[44svh] max-sm:mx-auto max-sm:max-w-[19rem] max-sm:text-center max-sm:text-[15px] max-sm:text-white/85">
-                    Kiddoo only answers from a curated knowledge base, cites every claim, and checks each sentence against its sources.
+                    Every claim in an answer carries a numbered citation you can open.
                 </L>
             </Stage>
 
-            <Stage id="burn" title="Hours re-reading what you already know. Guessing instead of evidence. Kiddoo measures what you know, so you only study what you don't.">
+            <Stage id="burn" title="Hours re-reading what you already know. Guessing what to study. Kiddoo measures what you know, so you only study what you don't.">
                 <L a={0.04} b={0.28} className="absolute bottom-[15svh] left-[6vw] [&>*]:drop-shadow-[0_3px_14px_rgb(0_0_0/0.85)]">
                     <p className="story-ink font-display text-[clamp(1.8rem,5vw,5.4rem)] font-semibold leading-none">Hours</p>
                     <Script first="R" rest="e-reading" size="clamp(2.6rem, 7.6vw, 8.4rem)" className="ml-[5vw]" />
@@ -97,7 +103,7 @@ export default function Overlays() {
                 <L a={0.3} b={0.46} className="absolute inset-0 grid place-items-center text-center">
                     <div>
                         <Script first="G" rest="uessing" size="clamp(3rem, 8.6vw, 9.4rem)" tuck={0.66} />
-                        <p className="story-ink -mt-[0.6vw] font-display text-[clamp(1.5rem,4.2vw,4.4rem)] font-medium italic leading-none">instead of evidence.</p>
+                        <p className="story-ink -mt-[0.6vw] font-display text-[clamp(1.5rem,4.2vw,4.4rem)] font-medium italic leading-none">what to study.</p>
                     </div>
                 </L>
                 {/* centred over the board: "Kiddoo" in italics beside the top of the calligraphic "M" */}
@@ -141,10 +147,10 @@ export default function Overlays() {
             </Stage>
 
             {/* the city's opening, over the clouds: what is real about Kiddoo (README, docs/LEARNING.md), then the map */}
-            <Stage id="city" title="Introducing Kiddoo: real sources, real practice, real progress. Explore the 22 domains of DSA.">
+            <Stage id="city" title="Meet Kiddoo: real sources, real practice, real progress. Explore the 22 domains of DSA.">
                 <L a={-0.1} b={0.2} className="halo absolute inset-0 grid place-items-center text-center">
                     <div>
-                        <Script deep first="I" rest="ntroducing" size="clamp(1.8rem, 4.6vw, 4.6rem)" />
+                        <Script deep first="M" rest="eet" size="clamp(1.8rem, 4.6vw, 4.6rem)" />
                         <p className="ink-deep-flat font-display text-[clamp(3.4rem,11vw,11rem)] font-semibold leading-none tracking-[-0.02em]">Kiddoo</p>
                     </div>
                 </L>

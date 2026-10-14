@@ -62,11 +62,11 @@ A fresh visit to `/` plays, once per page load (a module flag survives route cha
 
 | # | Stage | Scene | Words (taken from the README and the PRD) |
 |---|---|---|---|
-| 1 | Every learner | The opening sky, drifting light motes, deep-teal type. *Tap & hold* to continue | Every learner is different… the same pages, the same pace, no matter what you already know |
-| 2 | Confident, not right | Teal glass pane cracks and shatters; slabs of glass carry what Kiddoo does instead | Most AI tutors sound confident, even when they are wrong |
-| 3 | Wasted study | Pages of study notes burn; ash drifts to a navy chalkboard. *Tap & hold* to zoom in | Hours re-reading what you already know… so you only study what you don't |
+| 1 | Every learner | The opening sky, drifting light motes, deep-teal type. *Tap & hold* to continue | Every learner is different. Yet courses teach everyone the same way: the same pages, the same pace, no matter what you already know |
+| 2 | Confident, not right | Teal glass pane cracks and shatters; slabs of glass carry what Kiddoo does instead | Most AI tutors sound confident, even when they are wrong. Then the glass lines read on as one sentence: Kiddoo answers only from a curated knowledge base, cites every claim, checks each sentence, refuses, measures its confidence, says "I don't have enough evidence". Kiddoo shows its evidence |
+| 3 | Wasted study | Pages of study notes burn; ash drifts to a navy chalkboard. *Tap & hold* to zoom in | Hours re-reading what you already know. Guessing what to study. Kiddoo measures what you know, so you only study what you don't |
 | 4 | Five agents | A flight down a green tunnel through five gold gates, one per agent | The five agents and their roles from [LEARNING.md](LEARNING.md) |
-| 5 | The DSA city | Descent through clouds into a city of the 22 roadmap domains joined by real prerequisite roads; browse by click, d-pad, arrow keys, drag, wheel | Built from `curriculum/dsa_roadmap.md` and `domains.ts` |
+| 5 | The DSA city | Descent through clouds into a city of the 22 roadmap domains joined by real prerequisite roads; browse by click, d-pad, arrow keys, drag, wheel | Meet Kiddoo: real sources, real practice, real progress; explore the 22 domains of DSA (built from `curriculum/dsa_roadmap.md` and `domains.ts`) |
 
 Mechanics (`flow.ts`, `engine.ts`): scrolling is **virtual**. The page never scrolls; wheel, touch and keys move a target
 in 0..1 for the current stage and the shown value eases after it. A hold gate stops the target until the ring has been

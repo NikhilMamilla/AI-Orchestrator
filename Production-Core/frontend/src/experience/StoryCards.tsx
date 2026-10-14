@@ -7,7 +7,7 @@ import { AGENTS } from './copy';
 const BEATS = [
     { k: 'Every learner', title: 'Every learner is different. Yet courses teach everyone the same way.', body: 'The same pages, the same pace, no matter what you already know.' },
     { k: 'Confident, not right', title: 'Most AI tutors sound confident, even when they are wrong.', body: 'Kiddoo only answers from a curated knowledge base, cites every claim, checks each sentence against its sources, and says “I don’t have enough evidence” instead of guessing.' },
-    { k: 'Wasted study', title: 'Hours re-reading what you already know.', body: 'Kiddoo measures what you know (Bayesian Knowledge Tracing + spaced repetition), so you only study what you don’t.' },
+    { k: 'Wasted study', title: 'Hours re-reading what you already know, guessing what to study.', body: 'Kiddoo measures what you know (Bayesian Knowledge Tracing + spaced repetition), so you only study what you don’t.' },
     { k: 'Five agents', title: 'Five cooperating agents decide what you study next.', body: AGENTS.map((a) => a.name).join(' · ') },
     { k: 'The DSA city', title: '22 roadmap domains, joined by real prerequisite links.', body: 'Each domain lists what you will cover and the Kiddoo tools you can use for it.' },
 ];
