@@ -200,3 +200,14 @@ def test_account_check_validates_and_rate_limits(client, monkeypatch):
     assert client.post("/api/v1/auth/account-check", json={"email": "a@b.co"}).json() == {"exists": None, "password": None}
     client.post("/api/v1/auth/account-check", json={"email": "a@b.co"})
     assert client.post("/api/v1/auth/account-check", json={"email": "a@b.co"}).status_code == 429
+
+
+def test_rate_limiter_memory_is_bounded_by_dropping_expired_buckets():
+    import time
+    from backend.app.security import RateLimiter
+    rl = RateLimiter(5, window=0.01)
+    for i in range(10_100):
+        rl.check(f"ip-{i}")
+    time.sleep(0.05)                                   # every bucket's hits are now outside the window
+    rl.check("fresh")
+    assert len(rl._hits) < 10_100                      # expired buckets are evicted, not kept forever

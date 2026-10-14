@@ -217,7 +217,8 @@ class RateLimiter:
                                 headers={"Retry-After": str(retry)})
         q.append(now)
         if len(self._hits) > 10_000:                          # bound memory
-            for k in [k for k, v in self._hits.items() if not v][:5000]:
+            cutoff = now - self.window                    # a bucket whose newest hit is outside the window can never block again
+            for k in [k for k, v in self._hits.items() if not v or v[-1] < cutoff][:5000]:
                 self._hits.pop(k, None)
 
 
