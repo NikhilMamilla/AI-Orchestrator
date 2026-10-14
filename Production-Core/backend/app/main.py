@@ -79,6 +79,9 @@ async def database_unavailable(_: Request, exc: DatabaseUnavailable):
 async def startup_event():
     if settings.AUTH_DISABLED and settings.is_production:
         raise RuntimeError("AUTH_DISABLED must not be set in production")
+    if settings.is_production and not settings.APP_SECRET:
+        logger.warning("APP_SECRET is not set: verification codes, the account-lookup hash and the export salt fall back to "
+                       "weaker derived values. Set a long random APP_SECRET (see .env.example).")
     if settings.AUTH_DISABLED:
         logger.warning("AUTH_DISABLED is on: every request is treated as 'dev-user' (development only)")
     if not settings.AUTH_DISABLED and not settings.SUPABASE_URL and not settings.FIREBASE_PROJECT_ID:

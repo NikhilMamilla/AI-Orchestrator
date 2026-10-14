@@ -61,7 +61,7 @@ See `.env.example` (backend) and `frontend/.env.example`: every variable is docu
 tables. Key ones: `DATABASE_URL`, `FIREBASE_PROJECT_ID`, `MISTRAL_API_KEY` (plus optional `GEMINI_API_KEY`,
 `GROQ_API_KEYS`, `LLM_PROVIDERS`), `ADMIN_EMAILS`, `ALLOWED_ORIGINS`, `ENV`, and for small servers `EMBEDDINGS=hosted` with
 `HF_TOKEN`. Optional: `REDIS_URL` (agent message queue; nothing breaks without it), `JUDGE0_API_URL` / `JUDGE0_API_KEY`,
-`ADMIN_MIN_GROUP`, `RAG_RATE_LIMIT_PER_MIN`. `AUTH_DISABLED=true` is for local development only and the server refuses
+`ADMIN_MIN_GROUP`, `RAG_RATE_LIMIT_PER_MIN`. Set `APP_SECRET` to a long random string in production (the server warns at start-up if it is missing). `AUTH_DISABLED=true` is for local development only and the server refuses
 to start with it when `ENV=production`.
 
 Docker instead: `cd infrastructure && docker compose up --build` (starts Redis, the backend from `backend/Dockerfile`

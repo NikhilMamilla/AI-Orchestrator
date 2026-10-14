@@ -348,7 +348,7 @@ async def study_report(user: User = Depends(require_admin), db: Database = Depen
 async def study_export(user: User = Depends(require_admin), db: Database = Depends(get_database)):
     """Anonymised per-learner scores (salted hash prefix, no email or id) for analysis in a spreadsheet or R."""
     rows = await _study_rows(db)
-    salt = settings.SUPABASE_URL or "kiddoo"
+    salt = settings.export_salt
     lines = ["learner,pre,post,gain"]
     for r in rows:
         s = r["study"]
