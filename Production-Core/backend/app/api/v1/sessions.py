@@ -1,13 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException
 import logging
-from backend.app.security import User, get_current_user
+from backend.app.security import RateLimiter, User, get_current_user
 from backend.app.services.database import get_database
 from backend.app.services.student_profile_service import StudentProfileService
 from pydantic import BaseModel
 from typing import Optional, Dict
 
 logger = logging.getLogger(__name__)
-router = APIRouter()
+session_limiter = RateLimiter(20)                  # per learner per minute: every call here reaches the LLM
+
+
+async def _limit(user: User = Depends(get_current_user)) -> None:
+    session_limiter.check(user.uid)
+
+
+router = APIRouter(dependencies=[Depends(_limit)])
 
 class StartSessionRequest(BaseModel):
     student_id: str

@@ -38,7 +38,9 @@ data is in Supabase Postgres and is reached only through this API.
   (`frontend/vercel.json`). In production the API docs and OpenAPI schema are switched off.
 * **Rate limits** (sliding window, per user, or per client address when unauthenticated): ask 20/min (configurable with
   `RAG_RATE_LIMIT_PER_MIN`), quiz 20, challenge submit 12, code run 30, teach-back 10, sketch 6, coding-profile verify 6,
-  share create 10, upload 5, public share view 30 and account lookup 5 per address. Limits live in memory, per process:
+  share create 10, upload 5, `/agents/*` 12 and `/sessions/*` 20 (both reach the LLM), public share view 30 and account lookup 5 per address.
+  The live session WebSocket allows 30 messages per learner per minute, 3 handlers in flight per connection and 16,000
+  characters per message. Every request body is capped at 1 MB (3 MB for the document upload) and refused with 413 before it is parsed. Limits live in memory, per process:
   run one backend process or move them to Redis before scaling out. Behind a host's proxy the backend image trusts
   `X-Forwarded-For` (`FORWARDED_ALLOW_IPS`), so do not expose that image directly to the internet.
 * **Errors:** clients get generic messages; details go to server logs. A database outage returns 503 with a plain message.

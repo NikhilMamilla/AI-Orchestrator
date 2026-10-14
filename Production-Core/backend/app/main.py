@@ -20,6 +20,24 @@ class SecurityHeaders(BaseHTTPMiddleware):
         return resp
 
 
+MAX_BODY_BYTES = 1_000_000              # every JSON route; the document upload has its own, larger cap
+MAX_UPLOAD_BODY_BYTES = 3_000_000      # the upload route accepts files up to 2 MB plus multipart overhead
+
+
+class BodySizeLimit(BaseHTTPMiddleware):
+    """Refuse a request whose declared body is too large before FastAPI parses it."""
+
+    async def dispatch(self, request, call_next):
+        try:
+            size = int(request.headers.get("content-length") or 0)
+        except ValueError:
+            size = 0
+        limit = MAX_UPLOAD_BODY_BYTES if request.url.path.endswith("/rag/documents") else MAX_BODY_BYTES
+        if size > limit:
+            return JSONResponse(status_code=413, content={"detail": "Request body too large."})
+        return await call_next(request)
+
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=None if settings.is_production else f"{settings.API_V1_STR}/openapi.json",
@@ -28,6 +46,7 @@ app = FastAPI(
 )
 
 app.add_middleware(SecurityHeaders)
+app.add_middleware(BodySizeLimit)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins,          # explicit origins only; never "*" with credentials

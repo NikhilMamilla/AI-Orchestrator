@@ -9,12 +9,19 @@ from typing import Any, Awaitable, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from backend.app.security import User, get_current_user
+from backend.app.security import RateLimiter, User, get_current_user
 from backend.app.services.agent_factory import AgentFactory
 from backend.app.services.database import get_database
 from backend.app.services.rag_service import get_pipeline
 
-router = APIRouter()
+agent_limiter = RateLimiter(12)                    # per learner per minute: these routes spend LLM and sandbox quota
+
+
+async def _limit(user: User = Depends(get_current_user)) -> None:
+    agent_limiter.check(user.uid)
+
+
+router = APIRouter(dependencies=[Depends(_limit)])
 logger = logging.getLogger(__name__)
 
 

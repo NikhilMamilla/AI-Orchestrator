@@ -1,12 +1,12 @@
 from datetime import datetime
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
+from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect, Depends
 from backend.app.services.database import get_database
 from backend.app.services.student_profile_service import StudentProfileService
 from backend.app.services.message_queue import MessageQueue
 from backend.app.agents.orchestrator.agent import OrchestratorAgent
 from backend.app.services.llm import LLMService
 from backend.app.config import settings
-from backend.app.security import AuthError, authenticate_websocket
+from backend.app.security import AuthError, RateLimiter, authenticate_websocket
 from backend.app.services.activity import make_sink
 import json
 import logging
@@ -17,6 +17,10 @@ from typing import Dict
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+WS_MAX_MESSAGE_CHARS = 16_000          # one frame; a student's answer is far shorter
+WS_MAX_IN_FLIGHT = 3                   # handlers running at once for one connection
+ws_limiter = RateLimiter(30)           # messages per learner per minute
 
 class ConnectionManager:
     """Manage WebSocket connections"""
@@ -169,9 +173,14 @@ async def websocket_endpoint(
                 traceback.print_exc()
             return False
 
+        in_flight: set = set()
+
         while True:
             try:
                 data = await websocket.receive_text()
+                if len(data) > WS_MAX_MESSAGE_CHARS:
+                    await websocket.send_json({"type": "error", "message": "That message is too long."})
+                    continue
                 message = json.loads(data)
                 msg_type = message.get("type")
                 payload = message.get("payload", {})
@@ -185,8 +194,18 @@ async def websocket_endpoint(
                     await handle_end_session(websocket, session_id, session_state, profile_service)
                     break
                 
+                try:
+                    ws_limiter.check(ws_user.uid)
+                except HTTPException:
+                    await websocket.send_json({"type": "error", "message": "Please slow down and try again in a moment."})
+                    continue
+                if len(in_flight) >= WS_MAX_IN_FLIGHT:
+                    await websocket.send_json({"type": "error", "message": "Still working on your last messages."})
+                    continue
                 # Run other handlers in background to keep loop responsive for "stop"
-                asyncio.create_task(message_processor(msg_type, payload))
+                task = asyncio.create_task(message_processor(msg_type, payload))
+                in_flight.add(task)
+                task.add_done_callback(in_flight.discard)
                 
             except WebSocketDisconnect:
                 logger.debug(f"WebSocketDisconnect caught in loop for session {session_id}")
