@@ -73,7 +73,7 @@ export default function DashboardPage() {
     const trend = active && history.length >= 2 ? history[history.length - 1].mastery - history[0].mastery : null;
 
     const startLearningSession = () => {
-        navigate('/session/active');
+        navigate('/learn');             // the live session is not the way in yet (see docs/agents/orchestrator-agent.md)
     };
 
 
