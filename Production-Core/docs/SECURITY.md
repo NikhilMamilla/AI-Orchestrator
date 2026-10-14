@@ -23,8 +23,10 @@ data is in Supabase Postgres and is reached only through this API.
 * **Admin** = a verified email listed in `ADMIN_EMAILS`, or (legacy mode) `app_metadata.role == "admin"`. With Firebase
   an admin email counts only once **`email_verified`** is true, so nobody can claim an admin address by signing up with
   it. Every admin route depends on `require_admin`.
-* **Database:** RLS on every table; knowledge tables are read-only to users; `rag_requests`, `content_gaps`,
-  `announcements` and `admin_audit` have RLS on and no policies, so only the API's database role can touch them.
+* **Database:** RLS is on for every table but is **not** what isolates learners (the API's owner role bypasses it and
+  `auth.uid()` never matches a Firebase user). Isolation is the API's `where user_id = <verified uid>` on every query.
+  Knowledge tables are read-only to users; `rag_requests`, `content_gaps`, `announcements` and `admin_audit` have RLS on and
+  no policies, and only the API touches them. A dedicated non-owner role with policies would add a real second layer.
 * **WebSocket:** the token travels in the first frame (`{"type":"auth","token":…}`), never in the URL, where it would end
   up in logs. A connection is registered only after authentication and is keyed by `user_id:session_id`, so two learners
   can never share or replace one another's connection. A bad first frame closes with code 4401.
@@ -63,8 +65,7 @@ system assert false things confidently.
    unsupported claims are flagged and a mostly-unsupported answer is withheld.
 6. **FTS injection.** Free text is reduced to quoted alphanumeric tokens before it reaches `MATCH` / `to_tsquery`; SQL is
    parameterised throughout.
-7. **XSS.** Answers render through React-Markdown; model-supplied links are never rendered as anchors (only `[n]`
-   citation chips are interactive).
+7. **XSS.** Ask answers render through React-Markdown with links disabled (only `[n]` citation chips are interactive). The live-session chat renders the model's Markdown, including links and images, so this protection does not cover it yet.
 
 **Honest limits.** Pattern matching cannot catch every paraphrased injection: the guard blocked 72% of 40 attacks with
 zero false positives on 101 benign questions ([eval/redteam.md](eval/redteam.md)). It is one layer; the claim verifier

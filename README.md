@@ -71,7 +71,8 @@ study next, explains why, and lets you practise on real code that is actually ru
 * **Retrieval.** Several reformulations of the question are searched by meaning (dense vectors) and by keywords (BM25).
   The results are fused, weighted for your level and for prerequisites, then reranked by a cross-encoder.
 * **Honesty.** If the best evidence is too weak, Kiddoo refuses before spending an AI call. After generation, each
-  sentence is checked for support, and unsupported answers are withheld.
+  sentence is checked for support. An answer is withheld when most of its claims are unsupported, and a single weak
+  claim is flagged instead. Code blocks must come from the sources, or they are dropped.
 * **Cost.** Every service used has a free tier, and the language model fails over automatically between Mistral,
   Gemini and Groq.
 
@@ -209,11 +210,11 @@ The frontend reads `Production-Core/frontend/.env.local`; the template is
 
 ```bash
 # backend (from Production-Core/, offline: no network or models needed)
-python -m pytest                                   # 221 tests
+python -m pytest                                   # 264 tests
 
 # frontend (from Production-Core/frontend/)
 npm run lint
-npm test                                           # 25 tests in 4 files
+npm test                                           # 27 tests in 5 files
 npm run build                                      # type-check, build, and verify the bundle
 
 # end to end against a running backend (from Production-Core/)
@@ -243,7 +244,7 @@ GitHub Actions runs the backend tests and the frontend lint, tests and build on 
     │   │   ├── learning/    mastery, reviews, roadmap, challenges, teach-back, sketch, journal, preferences, coding profiles
     │   │   ├── admin/       admin statistics (aggregates only), question inspector, audit log
     │   │   ├── services/    database, LLM access, code execution, shared services
-    │   │   └── tests/       the backend test suite (221 tests, offline)
+    │   │   └── tests/       the backend test suite (264 tests, offline)
     │   ├── requirements*.txt, Dockerfile (full), Dockerfile.server (small hosts)
     ├── frontend/
     │   ├── src/
@@ -317,7 +318,7 @@ More fixes are in [docs/TROUBLESHOOTING.md](Production-Core/docs/TROUBLESHOOTING
 **© 2026 NikhilMamilla. All rights reserved.**
 
 This project is proprietary. You may view it on GitHub, but you may not copy, modify, redistribute or reuse any part of
-it, including the code, the course notes, the challenges or the designs, without written permission. See
+it, including the code, the course notes or the challenges, without written permission. See
 [LICENSE](LICENSE) for the full terms. To ask for permission, contact [NikhilMamilla on GitHub](https://github.com/NikhilMamilla).
 
 Third-party libraries and models used by the project remain under their own licences.

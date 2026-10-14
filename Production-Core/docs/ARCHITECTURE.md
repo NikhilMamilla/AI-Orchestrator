@@ -54,7 +54,7 @@ flowchart LR
 | Frontend | React 19, TypeScript, Vite 7, Tailwind 3, react-router 7, zustand, framer-motion, GSAP, three.js, Recharts, Monaco | A static bundle any free host can serve; three.js only loads inside the landing story's own chunk. |
 | Sign-in | **Firebase Authentication** (email/password, Google). Sign-in only: no learner data lives in Firebase | Free, solid account handling (verification, reset, linking). |
 | Token check | The backend verifies every Firebase ID token itself (RS256, Google's published keys, audience = project id, issuer, expiry) and maps the Firebase uid to a stable UUID (uuid5) | The server never trusts a `user_id` from the client; the Postgres `user_id uuid` columns stay unchanged. A legacy Supabase-JWT mode still exists for projects without `FIREBASE_PROJECT_ID`. |
-| Data | **Supabase Postgres** with `pgvector` (HNSW), full-text (GIN `tsvector`) and row-level security | One free, hosted store for relational data, vectors and keyword search. |
+| Data | **Supabase Postgres** with `pgvector` (HNSW), full-text (GIN `tsvector`) and row-level security (as a second layer, see the data model) | One free, hosted store for relational data, vectors and keyword search. |
 | Embeddings | `BAAI/bge-small-en-v1.5` (384-d) running locally, or the same model through Hugging Face Inference (`EMBEDDINGS=hosted`) | Same vectors either way, so a small server without PyTorch needs no re-ingestion. |
 | Reranker | `cross-encoder/ms-marco-MiniLM-L-6-v2` (local); lexical fallback on small servers | Joint query–passage scoring fixes bi-encoder near-misses. |
 | Claim checker | NLI cross-encoder `nli-deberta-v3-xsmall` blended with word/embedding overlap; lexical fallback | Per-sentence faithfulness check without a second LLM call. |
@@ -83,7 +83,7 @@ Kiddoo/
     │   ├── admin/         stats (aggregates only), inspect, audit
     │   ├── services/      database, rag_service, llm (agent-facing), code_execution, concept_service,
     │   │                  student_profile_service, message_queue, agent_factory, activity
-    │   └── tests/         221 offline tests
+    │   └── tests/         264 offline tests
     ├── frontend/src/
     │   ├── pages/         one file per screen
     │   ├── components/    ask · learn · concepts · dashboard · session · auth · fx · intro · landing
@@ -160,8 +160,12 @@ bus, which keeps the data flow inspectable.
 | `0009_admin_console` | `announcements`, `admin_audit` |
 | `0010_account_lookup_index` | index for the keyed-hash account lookup behind "forgot password" |
 
-RLS is enabled on every table. Knowledge tables are read-only to users; `rag_requests`, `content_gaps`,
-`announcements` and `admin_audit` have no user policy at all and are reached only by the API's database role.
+RLS is enabled on every table as a second layer, but **it does not isolate learners**: the API connects with the database's
+owner role (which bypasses RLS), and the policies use `auth.uid()`, which never matches a Firebase user (their ids are mapped
+to UUIDs by the API). Per-learner isolation is done by the API itself: every query is scoped with `where user_id = <the uid
+from the verified token>`. Knowledge tables are read-only to users; `rag_requests`, `content_gaps`, `announcements` and
+`admin_audit` have RLS on and no policy at all. Moving to a dedicated non-owner database role with policies keyed on a
+session variable is the open hardening step.
 
 ## Frontend in one paragraph
 
@@ -201,8 +205,10 @@ flowchart LR
   split; headings are prefixed to what is embedded (contextual retrieval).
 * **Honest degradation.** LLM down → extractive, cited answer. Hosted embeddings down → keyword search. Retrieval down →
   clear error. Weak evidence → "I don't have enough evidence" without calling the model.
-* **No fabricated metrics.** Achievements are computed from stored progress; agent activity is read from
-  `agent_events`; code-run time and memory are reported only if the engine returns them.
+* **No fabricated metrics (with two known gaps).** Achievements are computed from stored progress; agent activity is read from
+  `agent_events`; code-run time and memory are reported only if the engine returns them. The gaps: the dashboard's
+  *Time invested* is not tracked yet and shows 0, and the live-session orchestrator still returns fixed placeholder values for
+  answer evaluation and analysis (see [agents/orchestrator-agent.md](agents/orchestrator-agent.md)).
 * **Privacy by construction.** Content gaps carry no user; admin views are aggregates with a minimum group size; share
   links expose an allow-list of fields; per-learner data is stripped before a trace reaches the admin buffer.
 * **One decorative particle.** The sign-in pages, the landing hero and every app page share one `Motes` component

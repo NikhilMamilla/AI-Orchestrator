@@ -71,3 +71,5 @@
 | 0.85 | 0.58 | 85% | 85% | 5/5 |
 
 **Chosen:** NLI weight 0.00, threshold 0.10: flags 0% of faithful claims, refuses 0% of faithful answers, catches 0/5 unfaithful answers (small sample: only 5 unfaithful answers, so recall is uncertain).
+
+> **Shipped configuration (differs from the row above).** The sweep above picked NLI weight 0.00 / threshold 0.10, which flags nothing and catches 0 of the 5 unfaithful answers. The pipeline ships NLI weight 0.35, support threshold 0.34 and floor 0.22 (`RAGConfig` in `backend/app/rag/pipeline.py`); see [verifier.md](verifier.md) for why a high NLI weight over-flags paraphrased answers.

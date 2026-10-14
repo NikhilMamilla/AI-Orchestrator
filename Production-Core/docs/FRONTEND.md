@@ -10,7 +10,7 @@ of the system is in [ARCHITECTURE.md](ARCHITECTURE.md).
 cd Production-Core/frontend
 npm run dev        # http://localhost:5173 (story placeholder assets on by default)
 npm run lint
-npm test           # 25 tests in 4 files (story rules and city data, algorithm recorders, concept map, markdown)
+npm test           # 27 tests in 5 files (story rules and city data, algorithm recorders, concept map, markdown, reconnect rule)
 npm run build      # tsc -b, vite build, then scripts/check-dist.mjs
 ```
 

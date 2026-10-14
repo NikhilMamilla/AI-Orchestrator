@@ -98,6 +98,19 @@ Honest notes: the corpus is small (26 documents), so absolute numbers are high; 
 each component is the useful result. Labels are doc/phrase based, so a correct passage that does not
 contain the phrase counts as a miss (conservative). The prerequisite hop showed no measurable retrieval gain.
 
+## Which configuration the numbers come from
+
+The retrieval results ([eval/results.md](eval/results.md)) were measured on the **SQLite store with the local models** (bge-small
+embeddings, MiniLM reranker). The verifier and teach-back numbers use the local NLI model. The generation and red-team scripts likewise load their embedder locally.
+
+The **small-server deployment** (`EMBEDDINGS=hosted`, `Dockerfile.server`) differs: the same embeddings, but a lexical reranker, a
+lexical claim checker and a Postgres store. The evidence-gate threshold (0.14) was calibrated on the reranker's scale, so the
+"refuses every out-of-scope question" result is **not measured for that configuration**. The evaluation scripts cannot measure it
+today (`evaluation.py` and `redteam_eval.py` always call `load_embedder` without the hosted token and have no switch for the
+lexical reranker). To measure the full-model setup on the production database, run
+`python -m backend.app.rag.evaluation --neural --pg` from `Production-Core/`. Measuring the hosted setup needs a small
+addition to those scripts (a `--hosted` option) and a re-calibration of the gate for the lexical scale.
+
 ## Generation and verifier evaluation
 
 * [`gen_eval.py`](../backend/app/rag/gen_eval.py): LLM-judged faithfulness, relevance, citation accuracy and

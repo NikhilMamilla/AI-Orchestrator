@@ -52,7 +52,7 @@ learner picks reveals what they confuse the topic with. No model is involved.
 
 ## Meta-learning (`strategy.py`)
 
-A per-learner multi-armed bandit over teaching styles (Socratic, worked example, analogy, concise). With style set to
+A per-learner multi-armed bandit over teaching styles (Socratic, worked example, analogy, and the default "clear and concise" style). With style set to
 "auto", Thompson sampling picks the style from Beta posteriors; the reward is whether the learner answers the next
 check question on that concept correctly. The UI shows measured wins out of trials and names a best style only when
 two or more styles have at least 3 trials.
