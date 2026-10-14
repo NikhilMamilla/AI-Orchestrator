@@ -6,7 +6,7 @@ import os
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Kiddoo AI"
     API_V1_STR: str = "/api/v1"
-    ENV: str = "development"                      # "production" disables every dev shortcut
+    ENV: str = "production"                       # the safe default; set ENV=development locally to get /docs and the dev shortcuts
 
     # Supabase Postgres (free tier). Use the *pooler* connection string.
     DATABASE_URL: str = ""

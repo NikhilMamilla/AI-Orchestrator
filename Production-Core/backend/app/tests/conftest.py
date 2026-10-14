@@ -1,4 +1,7 @@
+import os
 from pathlib import Path
+
+os.environ.setdefault("ENV", "development")     # the suite runs in development mode; the default for real runs is production
 
 import pytest
 

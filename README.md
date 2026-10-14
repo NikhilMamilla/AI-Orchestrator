@@ -182,7 +182,7 @@ The backend reads `Production-Core/backend/.env`; the template is
 | `LLM_PROVIDERS` | optional | Order to try providers (default `mistral,gemini,groq`) |
 | `ADMIN_EMAILS` | optional | Comma-separated admin emails (they count only once verified) |
 | `ALLOWED_ORIGINS` | yes in production | The frontend URL(s) allowed to call the API |
-| `ENV` | yes in production | Set to `production` to switch off all development shortcuts and the API docs |
+| `ENV` | for local development | Defaults to `production` (no development shortcuts, no API docs). Set `ENV=development` locally, as `.env.example` does |
 | `JUDGE0_API_URL`, `JUDGE0_API_KEY` | optional | Code-execution server (defaults to the free public Judge0 CE; the key is only for RapidAPI) |
 | `APP_SECRET` | recommended in production | A long random string used for coding-profile verification codes, the keyed email hash behind "Forgot password" and the research-export salt. Keep it stable: changing it invalidates existing codes and hashes |
 | `ADMIN_MIN_GROUP` | optional | Smallest learner group the admin console will show (default 5, production only) |
