@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     # --- auth (Firebase ID tokens, or legacy Supabase JWTs, are verified server-side) ---
     AUTH_DISABLED: bool = False                   # honoured ONLY when ENV != production
     ADMIN_EMAILS: str = ""                        # comma separated; verified emails here open the admin console
+    STUDY_MIN_GAP_HOURS: int = 72                 # Evidence Lab: the post-test opens this long after the pre-test is completed
     APP_SECRET: str = ""                          # long random server secret for verification codes, the account-lookup hash and the export salt
     ADMIN_MIN_GROUP: int = 5                      # admin console hides any group smaller than this (production only)
     ALLOWED_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173"

@@ -95,7 +95,7 @@ prerequisite-aware unlocking, with no measurable extra benefit from remediation 
 * **Evidence Lab** (`/lab`, `/learning/study/*`): an opt-in pre/post test (8 fresh questions per phase on four concepts,
   no hints, no feedback, mastery untouched). The organiser's report gives n, mean gain, a bootstrap 95% CI, paired t,
   Cohen's dz and Hake's normalised gain, and refuses to claim an effect below 10 completers. Anonymised CSV export.
-  There is no control group, and the page says so. **No real learner has used it yet.**
+  The post-test opens `STUDY_MIN_GAP_HOURS` (default 72) after the pre-test is completed, and the page shows when. There is no control group, and the page says so. **No real learner has used it yet.**
 * **Preferences** (`/settings`): tone (written into the tutor prompt), default teaching style, planned session length.
 * **Leaderboard** (opt-in, nickname only, points derived from measured mastery) and **delete my learning data**.
 * **Landing page**: an opening count (`00` rolling to `26`, the concepts in the curriculum; typography only) that bursts into light, then a five-part scroll story (`frontend/src/experience`, described in [FRONTEND.md](FRONTEND.md)). Its words

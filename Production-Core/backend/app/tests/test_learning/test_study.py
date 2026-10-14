@@ -3,6 +3,7 @@ import asyncio
 
 import pytest
 
+from backend.app.config import settings
 from backend.app.learning import study
 from backend.app.learning.service import LearningError
 
@@ -44,7 +45,8 @@ def _run(coro):
     return asyncio.run(coro)
 
 
-def test_full_flow_gives_no_feedback_and_leaves_mastery_alone(svc, kb):
+def test_full_flow_gives_no_feedback_and_leaves_mastery_alone(svc, kb, monkeypatch):
+    monkeypatch.setattr(settings, "STUDY_MIN_GAP_HOURS", 0)      # this test is about the instrument, not the waiting time
     uid = "s1"
     assert _run(svc.study_status(uid))["step"] == "join"
     with pytest.raises(LearningError):

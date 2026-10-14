@@ -186,6 +186,7 @@ The backend reads `Production-Core/backend/.env`; the template is
 | `ENV` | for local development | Defaults to `production` (no development shortcuts, no API docs). Set `ENV=development` locally, as `.env.example` does |
 | `JUDGE0_API_URL`, `JUDGE0_API_KEY` | optional | Code-execution server (defaults to the free public Judge0 CE; the key is only for RapidAPI) |
 | `APP_SECRET` | recommended in production | A long random string used for coding-profile verification codes, and the research-export salt. Keep it stable: changing it invalidates existing codes and hashes |
+| `STUDY_MIN_GAP_HOURS` | optional | Evidence Lab: hours between finishing the pre-test and the post-test opening (default 72) |
 | `ADMIN_MIN_GROUP` | optional | Smallest learner group the admin console will show (default 5, production only) |
 | `RAG_RATE_LIMIT_PER_MIN` | optional | Ask requests per user per minute (default 20) |
 | `REDIS_URL` | optional | Agent message queue; the app works without it |

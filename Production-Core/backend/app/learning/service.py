@@ -531,9 +531,14 @@ class LearningService:
     def _study_view(st: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         if not st:
             return {"joined": False, "step": "join", "concepts": study.CONCEPTS}
-        return {"joined": True, "step": study.next_step(st), "concepts": st["concepts"],
+        step = study.next_step(st)
+        opens = study.post_opens_at(st, settings.STUDY_MIN_GAP_HOURS)
+        post_open = opens is None or datetime.now(timezone.utc) >= opens
+        return {"joined": True, "step": step, "concepts": st["concepts"],
                 "pre_score": st["pre"]["score"], "post_score": st["post"]["score"],
-                "pre_answered": len(st["pre"]["answers"]), "post_answered": len(st["post"]["answers"])}
+                "pre_answered": len(st["pre"]["answers"]), "post_answered": len(st["post"]["answers"]),
+                "post_open": post_open, "post_opens_at": opens.isoformat() if opens else None,
+                "min_gap_hours": settings.STUDY_MIN_GAP_HOURS}
 
     async def study_status(self, user_id: str) -> Dict[str, Any]:
         return self._study_view((await self._profile(user_id)).patterns.get("study"))
@@ -557,6 +562,10 @@ class LearningService:
             step = study.next_step(st)
             if step != phase:
                 raise LearningError(f"The {phase}-test is not available now (current step: {step}).", 409)
+            opens = study.post_opens_at(st, settings.STUDY_MIN_GAP_HOURS) if phase == "post" else None
+            if opens and datetime.now(timezone.utc) < opens:
+                raise LearningError(f"The post-test opens on {opens.strftime('%d %b %Y at %H:%M')} UTC, "
+                                    f"{settings.STUDY_MIN_GAP_HOURS} hours after you finished the pre-test.", 409)
             ph = st[phase]
             if not ph["quizzes"]:
                 async def two(c):
@@ -595,6 +604,8 @@ class LearningService:
                 raise LearningError("Already answered.", 409)
             st[phase]["answers"][quiz_id] = correct
             st[phase]["score"] = study.phase_score(st[phase])
+            if st[phase]["score"] is not None and not st[phase].get("done_at"):
+                st[phase]["done_at"] = datetime.now(timezone.utc).isoformat()       # the post-test opens a while after this
             await self.profiles.update_profile(user_id, {"patterns": profile.patterns})
             view = self._study_view(st)
         return {"recorded": True, **view}

@@ -279,6 +279,9 @@ export interface StudyStatus {
     post_score?: number | null;
     pre_answered?: number;
     post_answered?: number;
+    post_open?: boolean;               // false until the minimum gap after the pre-test has passed
+    post_opens_at?: string | null;     // ISO time the post-test opens
+    min_gap_hours?: number;
 }
 export interface StudyItem { quiz_id: string; doc_id: string; question: string; options: string[]; answered: boolean }
 export interface StudyResult { pre: number; post: number; gain: number; items_per_test: number }

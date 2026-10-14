@@ -11,6 +11,7 @@ There is no control group: a gain here is evidence of learning during use, not p
 from __future__ import annotations
 
 import hashlib
+from datetime import datetime, timedelta
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
 import numpy as np
@@ -39,6 +40,13 @@ def next_step(state: Optional[Mapping[str, Any]]) -> str:
     if state["pre"]["score"] is None:
         return "pre"
     return "done" if state["post"]["score"] is not None else "post"
+
+
+def post_opens_at(state: Optional[Mapping[str, Any]], gap_hours: float) -> Optional[datetime]:
+    """When the post-test opens: `gap_hours` after the pre-test was completed. None when there is no completion time to
+    count from (a state saved before the gap existed), which means it is open."""
+    done = ((state or {}).get("pre") or {}).get("done_at")
+    return datetime.fromisoformat(done) + timedelta(hours=gap_hours) if done else None
 
 
 def pseudonym(uid: str, salt: str) -> str:

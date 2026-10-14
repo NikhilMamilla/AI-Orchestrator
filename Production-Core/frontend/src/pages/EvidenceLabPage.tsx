@@ -1,3 +1,4 @@
+import { postTestOpensText } from '../lib/studyGap';
 import { useCallback, useEffect, useState } from 'react';
 import { Check, FlaskConical, Loader2 } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
@@ -142,8 +143,10 @@ export default function EvidenceLabPage() {
 
                         {st && (st.step === 'pre' || st.step === 'post') && (
                             <div aria-label={st.step === 'pre' ? 'Pre-test' : 'Post-test'}>
-                                {st.step === 'post' && <p className="j-note mb-4 text-xs text-campus-warm-500">Your pre-test is recorded (<b className="text-campus-navy">{pct(st.pre_score)}</b>). Learn for a while, then take this parallel test: new questions, same topics.</p>}
-                                <Test key={st.step} phase={st.step} onDone={() => void load()} />
+                                {st.step === 'post' && <p className="j-note mb-4 text-xs text-campus-warm-500">Your pre-test is recorded (<b className="text-campus-navy">{pct(st.pre_score)}</b>). {postTestOpensText(st) ?? 'Learn for a while, then take this parallel test: new questions, same topics.'}</p>}
+                                {st.step === 'post' && st.post_open === false
+                                    ? <p className="rounded-campus-sm border border-campus-warm-100 p-4 text-sm text-campus-navy" role="status">The post-test is not open yet.</p>
+                                    : <Test key={st.step} phase={st.step} onDone={() => void load()} />}
                             </div>
                         )}
 
