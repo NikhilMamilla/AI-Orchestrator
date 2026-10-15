@@ -1,4 +1,8 @@
-import type { Gated } from './api';
+import type { Gated, ProfileCoverage } from './api';
+
+/** A sentence for the page header when the statistics do not cover every learner; empty when they do. */
+export const coverageNote = (c: ProfileCoverage | undefined) =>
+    c?.capped ? ` These statistics cover the ${c.profiles_used.toLocaleString()} most recently active learners of ${c.profiles_total.toLocaleString()}.` : '';
 
 /** A gated learner count: the number, or "<k" when the server hid a group too small to show. */
 export const gated = (v: Gated | undefined, k: number) => (v == null ? `<${k}` : v.toLocaleString());

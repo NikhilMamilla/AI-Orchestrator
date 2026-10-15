@@ -40,6 +40,9 @@ class Trace:
                 "stages": self.stages, **self.data}
 
 
+PRIVATE_KEYS = {"personalization", "claim_checks"}      # what a learner was shown (answer sentences) or is like, never kept here
+
+
 class Metrics:
     def __init__(self, cap: int = 500):
         self._buf: Deque[Dict[str, Any]] = deque(maxlen=cap)
@@ -48,7 +51,7 @@ class Metrics:
 
     def record(self, trace: Dict[str, Any]) -> None:
         with self._lock:
-            self._buf.append({k: v for k, v in trace.items() if k != "personalization"})   # per-learner data stays out of admin views
+            self._buf.append({k: v for k, v in trace.items() if k not in PRIVATE_KEYS})   # per-learner data and answer text stay out of admin views
             self.counters["requests"] += 1
             self.counters[f"status:{trace.get('status', 'unknown')}"] += 1
             if trace.get("cache_hit"):

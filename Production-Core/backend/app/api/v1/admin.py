@@ -42,9 +42,27 @@ async def _rows(sql: str, params: tuple = ()) -> List[Dict[str, Any]]:
         return []
 
 
+PROFILE_TTL_S = 60.0
+_profile_cache: Dict[str, Any] = {"at": 0.0, "rows": [], "total": 0}
+
+
 async def _profiles() -> List[Dict[str, Any]]:
+    """The learner profiles the statistics are built from, read at most once a minute (every page of the console needs them,
+    and the concept page needs them twice). At most MAX_PROFILES are used; `profile_coverage()` says when that cuts anyone off."""
+    if _profile_cache["at"] and time.monotonic() - _profile_cache["at"] < PROFILE_TTL_S:
+        return _profile_cache["rows"]
     rows = await _rows("select data from student_profiles order by updated_at desc limit %s", (MAX_PROFILES,))
-    return [r["data"] if isinstance(r["data"], dict) else json.loads(r["data"]) for r in rows]
+    profiles = [r["data"] if isinstance(r["data"], dict) else json.loads(r["data"]) for r in rows]
+    count = await _rows("select count(*) as n from student_profiles")
+    total = int(count[0].get("n", len(profiles))) if count else len(profiles)
+    _profile_cache.update(at=time.monotonic(), rows=profiles, total=max(total, len(profiles)))
+    return profiles
+
+
+def profile_coverage() -> Dict[str, Any]:
+    """How many learners the statistics cover, so a cap is stated rather than silent."""
+    used, total = len(_profile_cache["rows"]), _profile_cache["total"]
+    return {"profiles_used": used, "profiles_total": total, "capped": total > used}
 
 
 async def _titles() -> Dict[str, str]:
@@ -70,6 +88,7 @@ async def admin_overview(days: int = Query(14, ge=7, le=60), user: User = Depend
     ov["alerts"] = stats.alerts(ov, top, sys["docs_without_passages"],
                                 {s["name"]: s["ok"] for s in sys["services"] if s["required"] and s["ok"] is not None})
     ov["min_group"] = settings.admin_min_group
+    ov["profile_coverage"] = profile_coverage()
     return ov
 
 
@@ -89,6 +108,7 @@ async def admin_learners(user: User = Depends(require_admin)):
                        "from quiz_items where answered_at is not null order by answered_at desc limit 3000")
     out["missed_questions"] = stats.missed_questions(quiz, titles, k)
     out["min_group"] = k
+    out["profile_coverage"] = profile_coverage()
     return out
 
 

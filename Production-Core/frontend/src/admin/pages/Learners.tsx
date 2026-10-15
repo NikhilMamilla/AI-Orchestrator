@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { adminLearners, type Gated, type Learners as L } from '../api';
 import { ConceptDrawer } from '../drawers';
-import { downloadCsv, gated, num, pct } from '../format';
+import { coverageNote, downloadCsv, gated, num, pct } from '../format';
 import { useLive } from '../useLive';
 import { Empty, ErrorLine, ExportButton, Kpi, Legend, LiveChip, Loading, PageHead, Panel } from '../ui';
 
@@ -42,7 +42,7 @@ export default function Learners() {
 
     return (
         <>
-            <PageHead title="Learners, as a group" sub={`How the whole cohort is doing: never one person. ${k > 1 ? `Groups smaller than ${k} show as “<${k}”.` : 'Exact counts (development mode).'}`}
+            <PageHead title="Learners, as a group" sub={`How the whole cohort is doing: never one person. ${k > 1 ? `Groups smaller than ${k} show as “<${k}”.` : 'Exact counts (development mode).'}${coverageNote(d?.profile_coverage)}`}
                 right={<><LiveChip updated={live.updated} loading={live.loading} onRefresh={() => void live.reload()} /><ExportButton onClick={exportCsv} /></>} />
             {live.error && !d && <ErrorLine text={live.error} />}
             {!d ? <Loading /> : <Body d={d} k={k} onOpen={setOpen} />}

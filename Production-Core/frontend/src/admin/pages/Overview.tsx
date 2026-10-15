@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { adminOverview, adminSystem } from '../api';
 import { fetchMetrics } from '../../lib/rag';
-import { downloadCsv, gated, ms, num, pct, shortDay, sum } from '../format';
+import { coverageNote, downloadCsv, gated, ms, num, pct, shortDay, sum } from '../format';
 import { useLive } from '../useLive';
 import { ChartTip, Empty, ErrorLine, ExportButton, Kpi, Legend, LiveChip, Loading, PageHead, Panel, RangeSeg, Status } from '../ui';
 
@@ -26,7 +26,7 @@ export default function Overview() {
 
     return (
         <>
-            <PageHead title="Platform overview" sub={`Is the platform healthy, and are people learning? The last ${days} days, refreshed every 30 seconds.`}
+            <PageHead title="Platform overview" sub={`Is the platform healthy, and are people learning? The last ${days} days, refreshed every 30 seconds.${coverageNote(d?.profile_coverage)}`}
                 right={<><RangeSeg value={days} onChange={setDays} /><LiveChip updated={ov.updated} loading={ov.loading} onRefresh={() => { void ov.reload(); void feed.reload(); void sys.reload(); }} />
                     <ExportButton onClick={() => d && downloadCsv(`kiddoo-overview-${days}d.csv`, d.days.map((day, i) => ({
                         day, active_learners: d.series.active[i] ?? `<${k}`, new_learners: d.series.new[i], questions: d.series.questions[i],

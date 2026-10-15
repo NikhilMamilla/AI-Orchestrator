@@ -1,5 +1,8 @@
 import { authed, RagError } from '../lib/rag';
 
+/** How many learners the statistics cover: the server uses the most recently active ones and says when that is not everyone. */
+export interface ProfileCoverage { profiles_used: number; profiles_total: number; capped: boolean }
+
 /** A learner count the server hid because the group is smaller than `min_group` (shown as "<k"). */
 export type Gated = number | null;
 
@@ -12,6 +15,7 @@ export interface Overview {
     series: { active: Gated[]; new: number[]; questions: number[]; answers: number[]; code_runs: number[]; grounded: number[]; refused: number[] };
     alerts: { level: 'warning' | 'serious' | 'critical'; text: string }[];
     min_group: number;
+    profile_coverage?: ProfileCoverage;
 }
 
 export interface Learners {
@@ -28,6 +32,7 @@ export interface Learners {
     streaks: { label: string; learners: Gated }[];
     missed_questions: { concept: string; question: string; answers: number; miss_rate: number; common_wrong: string | null; correct: string | null }[];
     min_group: number;
+    profile_coverage?: ProfileCoverage;
 }
 
 export interface ChallengeRow { id: string; title: string; concept: string; kind: string; tried: Gated; passed: Gated; pass_rate: number | null; mean_fails: number | null }
