@@ -61,6 +61,8 @@ function shipPlaceholders(): Plugin {
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), devPlaceholders(), shipPlaceholders()],
+  // Firebase (sign-in) is large and changes rarely: its own file, so an app update does not make visitors download it again
+  build: { rollupOptions: { output: { manualChunks: { firebase: ['firebase/app', 'firebase/auth'] } } } },
   // the landing city reads curriculum/dsa_roadmap.md directly (one source of truth for the 22 domains)
   server: { fs: { allow: [searchForWorkspaceRoot(process.cwd()), resolve(__dirname, '../../curriculum')] } },
 })
