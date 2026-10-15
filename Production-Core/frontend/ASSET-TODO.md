@@ -38,16 +38,9 @@ Every file below has a version drawn in code, which the production build uses in
 
 | File | Used for | Free replacement |
 |---|---|---|
-| `models/fancy_hand_2.glb` | Stage 1: the sculpted hand | Sketchfab CC0 / CC-BY rigged hand, or a MakeHuman (CC0) hand exported to glTF |
-| `models/human_hand_1.glb` | Stage 1: the human hand | same |
 | `models/camera_1.glb` | Stage 1: the camera path | our own camera path (Blender) |
-| `textures/matcap-hand.webp` | Stage 1 and the gate: the hand's material | a matcap from github.com/nidorx/matcaps (CC0) |
-| `atlases/human_hands.ktx2` | Stages 1–2: skin textures and the hand mask | textures baked from the CC0 hand |
-| `models/stage2_glass-shatter.glb` | Stage 2: the stage 1 frame breaks along its cells | Blender cell-fracture of our own pane |
 | `models/glass_shards.glb` | Stage 2: the shards carrying Kiddoo's evidence lines | same |
-| `models/human_hand_2.glb` | Stage 2: the rising hand | Sketchfab CC0 / CC-BY rigged hand, or a MakeHuman (CC0) hand exported to glTF |
 | `models/camera_2.glb` | Stage 2: the camera path | our own camera path (Blender) |
-| `textures/frost_normal.webp` | Stage 2: the shards' surface | a CC0 frosted-glass normal map (ambientCG) |
 | `textures/stage2_background2.webp` | Stage 2: the closing grain | Pexels (free licence) abstract texture |
 | `textures/stage3_background1.webp` | Stage 3: background | Pexels (free licence) dark texture |
 | `atlases/clouds.ktx2`, `atlases/clouds-mobile.ktx2` | Stage 5: clouds over the city | Poly Haven (CC0) cloud textures |
@@ -68,6 +61,8 @@ Every file below has a version drawn in code, which the production build uses in
 
 | File(s) | Why |
 |---|---|
+| `models/fancy_hand_2.glb`, `models/human_hand_1.glb`, `models/human_hand_2.glb`, `atlases/human_hands.ktx2`, `textures/matcap-hand.webp` | The story's hands were never drawn (stage 1 is words only, stage 2 uses the camera path only), so they are no longer loaded |
+| `models/stage2_glass-shatter.glb`, `textures/frost_normal.webp` | The glass pane that broke was never visible, and the shards' normal map was never read; no longer loaded |
 | `models/loader_hand.glb`, `textures/frost.webp` | Belonged to the removed "draw a zero" gate; the opening now goes from the count straight into the story |
 | `atlases/garden-godrays.ktx2`, `atlases/shards-petals-coins.ktx2`, `videos/stage2_background_video-*.mp4` | Replaced by the code-drawn sky, light motes and teal curtain; nothing loads them |
 | `atlases/leather-money-shreds.ktx2`, `textures/stage3_money-hand.webp` | Stage 3 burns our own pages of study notes (drawn in code), not money |

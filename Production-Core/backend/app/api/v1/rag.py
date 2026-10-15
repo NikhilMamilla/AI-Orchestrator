@@ -69,7 +69,7 @@ async def ask(req: AskRequest, request: Request, user: User = Depends(get_curren
     pipe = await get_pipeline()
     history = [m.model_dump() for m in req.history]
     queue: asyncio.Queue = asyncio.Queue()
-    mastery, tone, pref_style = None, "neutral", None
+    mastery, tone = None, "neutral"
     if db.pool is not None:                                  # mastery-aware answers; degrade to generic if unavailable
         try:
             profile = await StudentProfileService(db).get_profile_by_user_id(user.uid)

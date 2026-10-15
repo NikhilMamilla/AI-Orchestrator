@@ -253,8 +253,6 @@ async def handle_start_session(
     """Handle session start request"""
     
     student_id = session_state["user_id"]          # from the verified token, not the payload
-    initial_concept_id = payload.get("initial_concept_id")
-    available_time_minutes = payload.get("available_time_minutes", 40)
     
     # Get student profile
     try:

@@ -25,19 +25,12 @@ export const PLACEHOLDERS_ENABLED: boolean =
     (import.meta.env.DEV && import.meta.env.VITE_PLACEHOLDERS !== 'off') || import.meta.env.VITE_PLACEHOLDERS === 'ship';
 
 const PH = (path: string, kind: AssetKind, use: string, replaceWith: string): AssetEntry => ({ path, kind, placeholder: true, use, replaceWith });
-const HAND = 'Sketchfab CC0 / CC-BY rigged hand, or a MakeHuman (CC0) hand exported to glTF';
 
 export const EXPERIENCE_ASSETS = {
     // stage 1: the two hands, their camera path, the garden
-    handEth: PH('models/fancy_hand_2.glb', 'model', 'Stage 1: the sculpted hand that reaches across', HAND),
-    handHuman: PH('models/human_hand_1.glb', 'model', 'Stage 1: the human hand that reaches back', HAND),
     camera1: PH('models/camera_1.glb', 'model', 'Stage 1: the animated camera path', 'our own camera path (Blender)'),
-    handMatcap: PH('textures/matcap-hand.webp', 'texture', 'Stage 1: the sculpted hand\'s material', 'a matcap from github.com/nidorx/matcaps (CC0)'),
-    humanHandsAtlas: PH('atlases/human_hands.ktx2', 'ktx2', 'Stages 1-2: skin textures and the hand mask', 'textures baked from the CC0 hand above'),
     // stage 2: the glass
-    glassShatter: PH('models/stage2_glass-shatter.glb', 'model', 'Stage 2: the pane that breaks (animated fracture)', 'Blender cell-fracture of our own pane'),
     glassShards: PH('models/glass_shards.glb', 'model', 'Stage 2: the shards that carry our evidence lines', 'Blender cell-fracture of our own pane'),
-    handHuman2: PH('models/human_hand_2.glb', 'model', 'Stage 2: the hand that rises behind the glass', HAND),
     camera2: PH('models/camera_2.glb', 'model', 'Stage 2: the animated camera path', 'our own camera path (Blender)'),
     stage2Bg: PH('textures/stage2_background2.webp', 'texture', 'Stage 2: background', 'Pexels (free licence) abstract light'),
     // stage 3: what wasted study burns
@@ -48,7 +41,6 @@ export const EXPERIENCE_ASSETS = {
     // stage 4: the tunnel, stage 5: clouds
     clouds: PH('atlases/clouds.ktx2', 'ktx2', 'Stage 5: clouds parting over the city', 'Poly Haven (CC0) cloud textures'),
     cloudsMobile: PH('atlases/clouds-mobile.ktx2', 'ktx2', 'Stage 5: clouds (phones)', 'Poly Haven (CC0) cloud textures'),
-    frostNormal: PH('textures/frost_normal.webp', 'texture', 'Stage 2: the surface of the glass shards (normal map)', 'a CC0 frosted-glass normal map (ambientCG)'),
     // sound
     ambBelieved: PH('audio/amb_stage1.mp3', 'audio', 'Stage 1 ambience', 'Pixabay Music or Freesound CC0 ambient pad'),
     ambShatter: PH('audio/amb_stage2-3.mp3', 'audio', 'Stages 2-3 ambience', 'Freesound CC0 dark drone'),
@@ -75,8 +67,8 @@ export function assetUrl(key: AssetKey): string | null {
 
 /** What each stage loads; the next stage's set is prefetched while the current one plays. */
 export const STAGE_ASSETS: Record<'believed' | 'shatter' | 'burn' | 'tunnel' | 'city', AssetKey[]> = {
-    believed: ['handEth', 'handHuman', 'camera1', 'handMatcap', 'humanHandsAtlas'],
-    shatter: ['glassShatter', 'glassShards', 'handHuman2', 'camera2', 'stage2Bg', 'humanHandsAtlas', 'frostNormal'],
+    believed: ['camera1'],
+    shatter: ['glassShards', 'camera2', 'stage2Bg'],
     burn: ['stage3Bg'],                                                 // the pages and the board are drawn in code
     tunnel: [],
     city: ['clouds', 'cloudsMobile'],

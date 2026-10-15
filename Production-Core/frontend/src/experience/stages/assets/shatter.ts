@@ -1,17 +1,17 @@
 import {
     Box3,
     DoubleSide, Euler, Group, Mesh, MeshBasicMaterial, PerspectiveCamera, PlaneGeometry, PMREMGenerator,
-    Quaternion, RepeatWrapping, Scene, ShaderMaterial, Vector2, Vector3, BufferAttribute, type Object3D, type Texture,
+    Quaternion, RepeatWrapping, Scene, ShaderMaterial, Vector3, type Object3D, type Texture,
 } from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { EVIDENCE_SHARDS } from '../../copy';
-import { canvasTexture, clamp01, fontsReady, SERIF, span } from '../../procedural/common';
+import { canvasTexture, fontsReady, SERIF, span } from '../../procedural/common';
 import type { StageCtx, StageFactory } from '../../types';
-import { cameraPath, dress, scrubbable, skin, tile } from './common';
+import { cameraPath, scrubbable } from './common';
 
 /**
- * Stage 2 on the placeholder assets. The last frame of stage 1 breaks along the cells of stage2_glass-shatter.glb
- * (the belief shatters); behind it the curtain drifts and the hand of human_hand_2.glb rises on camera_2's path.
+ * Stage 2 on the placeholder assets: the teal curtain drifts on camera_2's path (only the camera is used: no hand and no glass
+ * pane are loaded, they were never drawn).
  * Then the pieces of glass_shards.glb rise past the camera, four of them carrying what Kiddoo does instead (README).
  */
 
@@ -168,11 +168,8 @@ function fitRect(h: [number, number][], aspect: number) {
 
 const factory: StageFactory = async (ctx: StageCtx) => {
     const A = ctx.assets;
-    const [pane, shards, hand2, cam2, still, atlas] = await Promise.all([
-        A.model('glassShatter'), A.model('glassShards'), A.model('handHuman2'), A.model('camera2'), A.texture('stage2Bg'), A.texture('humanHandsAtlas'),
-        fontsReady(),
-    ]);
-    if (!pane || !shards || !hand2 || !cam2) return (await import('../shatter')).default(ctx);
+    const [shards, cam2, still] = await Promise.all([A.model('glassShards'), A.model('camera2'), A.texture('stage2Bg'), fontsReady()]);
+    if (!shards || !cam2) return (await import('../shatter')).default(ctx);
 
     const scene = new Scene();
     const camera = new PerspectiveCamera(23, 1, 0.01, 100);
@@ -195,14 +192,11 @@ const factory: StageFactory = async (ctx: StageCtx) => {
     bg.renderOrder = -1000;
     scene.add(bg);
 
-    // the rising hand and its camera path (one timeline)
-    const rigs = [scrubbable(hand2), scrubbable(cam2)];
-    const duration = Math.max(...rigs.map((r) => r.duration));
-    const tiles = [[0, 1], [1, 1], [2, 1], [3, 1], [0, 2], [1, 2], [2, 2], [3, 2], [0, 3], [1, 3], [2, 3]].map(([c, r]) => tile(c, r));
-    const hand = skin(atlas, tiles, [40, 60, 75, 150, 190, 220, 275, 350, 420, 435, 445], 40, duration);
-    dress(hand2.scene, 'HumanHandScene2', hand.mat);
+    // the camera path (the hand and the glass pane it once carried were never drawn, so they are no longer loaded)
+    const rigs = [scrubbable(cam2)];
+    const duration = Math.max(...rigs.map((r) => r.duration));                // camera_2's own 16.33 s, as it always was the longest clip
     const path = cameraPath(cam2);
-    scene.add(cam2.scene);                                                 // no hand: the camera path only
+    scene.add(cam2.scene);                                                 // the camera path only
     const handT = (p: number) => {
         const g = span(p, 0, GATE), r = HAND_RISE / duration;
         const eased = g < 0.3 ? g : 0.3 + 0.7 * (1 - (1 - (g - 0.3) / 0.7) ** 2);
@@ -210,43 +204,6 @@ const factory: StageFactory = async (ctx: StageCtx) => {
     };
     rigs.forEach((r) => r.set(0));
     path.follow(camera, 1, { x: 0, y: 0 });
-
-    // the pane: the snapshot of stage 1 projected onto the shatter cells in front of the camera
-    const paneRig = scrubbable(pane);
-    paneRig.set(0);
-    const paneMat = new MeshBasicMaterial({ map: ctx.snapshot, color: ctx.snapshot ? 0xffffff : 0xf2f4f3, side: DoubleSide, toneMapped: false, depthTest: false, depthWrite: false });
-    const paneRoot = new Group();
-    paneRoot.add(pane.scene);
-    camera.add(paneRoot);
-    const cells: Mesh[] = [];
-    pane.scene.traverse((o) => { if ((o as Mesh).isMesh) { (o as Mesh).material = paneMat; o.frustumCulled = false; o.renderOrder = 1000; cells.push(o as Mesh); } });
-    const fitPane = () => {
-        paneRig.set(0);
-        pane.scene.updateMatrixWorld(true);
-        const box = { min: new Vector2(Infinity, Infinity), max: new Vector2(-Infinity, -Infinity) }, v = new Vector3();
-        for (const m of cells) {
-            const pos = m.geometry.getAttribute('position');
-            for (let i = 0; i < pos.count; i += 3) { v.fromBufferAttribute(pos, i).applyMatrix4(m.matrixWorld); box.min.min(new Vector2(v.x, v.y)); box.max.max(new Vector2(v.x, v.y)); }
-        }
-        const d = 1, visH = 2 * d * Math.tan((camera.fov * Math.PI) / 360), visW = visH * camera.aspect;
-        const bw = box.max.x - box.min.x, bh = box.max.y - box.min.y, s = Math.max(visW / bw, visH / bh) * 1.04;
-        paneRoot.scale.setScalar(s);
-        paneRoot.position.set(-((box.min.x + box.max.x) / 2) * s, -((box.min.y + box.max.y) / 2) * s, -d);
-        paneRoot.updateMatrix();
-        // each vertex samples the snapshot where it sits on screen at rest, so the unbroken pane is the old frame exactly
-        const ndc = new Vector3();
-        for (const m of cells) {
-            const pos = m.geometry.getAttribute('position'), uv = new Float32Array(pos.count * 2);
-            m.updateWorldMatrix(true, false);
-            for (let i = 0; i < pos.count; i++) {
-                ndc.fromBufferAttribute(pos, i).applyMatrix4(m.matrixWorld).applyMatrix4(paneRoot.matrix).applyMatrix4(camera.projectionMatrix);
-                uv[i * 2] = ndc.x * 0.5 + 0.5; uv[i * 2 + 1] = ndc.y * 0.5 + 0.5;
-            }
-            const old = m.geometry.getAttribute('uv') as BufferAttribute | undefined;
-            if (old && old.count === pos.count) { (old.array as Float32Array).set(uv); old.needsUpdate = true; }
-            else m.geometry.setAttribute('uv', new BufferAttribute(uv, 2));
-        }
-    };
 
     // the rising shards, attached to the camera like a pane of glass you scroll through
     const glass = new ShaderMaterial({
@@ -312,7 +269,6 @@ const factory: StageFactory = async (ctx: StageCtx) => {
         piece(`BG_Shard_${String(e + 1).padStart(2, '0')}`, [x, y - 0.792, z], [x, y + 0.792, z], o, [o[0] + l * sgn, o[1] - l * 0.6, o[2] + l * sgn], BG_SCALE[e], true);
     });
     const qa = new Quaternion(), qw = new Quaternion(), ew = new Euler();
-    let shattered = false;
 
     return {
         scene, camera,
@@ -333,29 +289,18 @@ const factory: StageFactory = async (ctx: StageCtx) => {
                 pc.obj.scale.setScalar(pc.base * k);
                 pc.dx = dx;
             }
-            fitPane();
         },
         update(p, dt, c) {
-            if (c.snapshot && paneMat.map !== c.snapshot) { paneMat.map = c.snapshot; paneMat.color.set(0xffffff); paneMat.needsUpdate = true; }
             const gate = span(p, 0.02, GATE), t = span(p, GATE, 1);
             rigs.forEach((r) => r.set(duration * handT(p)));
-            hand.at(handT(p));
             path.follow(camera, dt, c.pointer);
 
-            // the glass breaks during the gate; a light pulse at the moment of impact
-            const breakT = clamp01(span(gate, 0.15, 1) * 1.2);
-            if (!shattered && breakT > 0) { shattered = true; }
-            if (shattered && p < 0.01) shattered = false;
-            paneRig.set(paneRig.duration * breakT);
-            paneRoot.visible = false;                                          // straight into the red: no breaking frame
+            // a light pulse at the moment of impact (the pane itself is gone: straight into the teal, no breaking frame)
             bgMat.uniforms.uRed.value = Math.max(0, 1 - gate * 15) * 0.85 * (p > 0 ? 1 : 0);
             glass.uniforms.uRed.value = bgMat.uniforms.uRed.value;
             glass.uniforms.uTime.value = c.time;
             bgMat.uniforms.uTime.value = c.time;
 
-            // the end: the hand fades, the background settles on the still
-            const fade = span(t, 0.85, 1);
-            hand.mat.uniforms.uOpacity.value = atlas ? 1 - fade : 0;
             bgMat.uniforms.uToStill.value = 0;                                   // it stays teal to the end; the pages follow
 
             const now = c.time;
@@ -377,10 +322,10 @@ const factory: StageFactory = async (ctx: StageCtx) => {
         },
         dispose() {
             bgMat.dispose(); bg.geometry.dispose(); env.dispose(); pmrem.dispose();
-            hand.mat.dispose(); paneMat.dispose(); glass.dispose(); texts.forEach((x) => x.dispose());
-            rigs.forEach((r) => r.mixer.stopAllAction()); paneRig.mixer.stopAllAction();
-            camera.remove(paneRoot, shardGroup);
-            scene.remove(hand2.scene, cam2.scene);
+            glass.dispose(); texts.forEach((x) => x.dispose());
+            rigs.forEach((r) => r.mixer.stopAllAction());
+            camera.remove(shardGroup);
+            scene.remove(cam2.scene);
         },
     };
 };
