@@ -68,7 +68,7 @@ export default function LearningSessionPage() {
                 addMessage('system', `Connection issue: ${message.message}`);
                 break;
         }
-    }, [sessionId]); // Only recreate if sessionId changes
+    }, []);
 
     const { isConnected, sendMessage, isStreaming, streamingText } = useWebSocket(
         sessionId || '',
@@ -85,7 +85,7 @@ export default function LearningSessionPage() {
                 student_id: user.id
             });
         }
-    }, [isConnected, user?.id]);
+    }, [isConnected, user?.id, sendMessage]);
 
     const handleSendMessage = (text: string) => {
         addMessage('user', text);

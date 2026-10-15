@@ -148,8 +148,11 @@ export default function AgentOrchestration() {
         setIsPlaying(true);
     };
 
+    // starts the demo when it scrolls into view; it reads the latest state through a ref so that pausing at step 0 later does not restart it
+    const latest = useRef({ isPlaying, currentStep });
+    latest.current = { isPlaying, currentStep };
     useEffect(() => {
-        if (isInView && !isPlaying && currentStep === 0) setIsPlaying(true);
+        if (isInView && !latest.current.isPlaying && latest.current.currentStep === 0) setIsPlaying(true);
     }, [isInView]);
 
     useEffect(() => {

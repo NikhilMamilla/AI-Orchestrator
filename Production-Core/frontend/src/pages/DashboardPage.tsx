@@ -1,6 +1,6 @@
 
 import { formatInvested } from '../lib/timeInvested';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../store/authStore';
@@ -47,6 +47,18 @@ export default function DashboardPage() {
     const navigate = useNavigate();
     const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
     const [nextSteps, setNextSteps] = useState<PathStep[]>([]);
+    const userId = useRef(user?.id);                         // the dashboard loads when sign-in state changes, with whoever is signed in then
+    userId.current = user?.id;
+    const loadDashboard = useCallback(async () => {
+        try {
+            if (userId.current) {
+                const data = await apiClient.getDashboard();
+                setDashboardData(data);
+            }
+        } catch (error) {
+            console.error('Failed to load dashboard:', error);
+        }
+    }, []);
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -55,18 +67,7 @@ export default function DashboardPage() {
         }
         loadDashboard();
         fetchPath().then((p) => setNextSteps(p.steps.filter((x) => x.mastery < 0.8).slice(0, 3))).catch(() => setNextSteps([]));
-    }, [isAuthenticated, navigate]);
-
-    const loadDashboard = async () => {
-        try {
-            if (user?.id) {
-                const data = await apiClient.getDashboard();
-                setDashboardData(data);
-            }
-        } catch (error) {
-            console.error('Failed to load dashboard:', error);
-        }
-    };
+    }, [isAuthenticated, navigate, loadDashboard]);
 
     const history = dashboardData?.analytics?.progress_over_time ?? [];
     // an older server sends no per-day answer counts: then any recorded day counts as activity
