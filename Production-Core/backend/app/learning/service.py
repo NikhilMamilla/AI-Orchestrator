@@ -165,6 +165,13 @@ class LearningService:
         cid, text = rng.choice(passages)
         return text, cid
 
+    def _own_sentences(self, doc_id: str) -> List[str]:
+        """Sentences of the concept's own passages: the raw material for plausible, altered (false) wrong options."""
+        out: List[str] = []
+        for _, text in self.store.passages_for_doc(doc_id):
+            out += [s.strip() for s in _SENT.split(re.sub(r"```.*?```", " ", text, flags=re.S)) if 40 <= len(s.strip()) <= 200]
+        return out
+
     def _distractors(self, doc_id: str, rng: random.Random, n: int = 14) -> tuple[List[str], Dict[str, str]]:
         others = [d for d in self._docs() if d.id != doc_id]
         rng.shuffle(others)
@@ -186,11 +193,13 @@ class LearningService:
             raise LearningError("Unknown concept.", 404)
         rng = random.Random()
         pool, sources = await asyncio.to_thread(self._distractors, doc_id, rng)
+        own_sentences = await asyncio.to_thread(self._own_sentences, doc_id)
         quiz = None
         for attempt in range(4):                       # a passage can lack a usable sentence: try another
             passage, cid = await asyncio.to_thread(self._passage_for, doc_id, chunk_id if attempt == 0 else None, rng)
             quiz = await generate_quiz(self.llm, title=doc.title, level=level, passage=passage, doc_id=doc_id,
-                                       chunk_id=cid, distractor_pool=pool, distractor_sources=sources)
+                                       chunk_id=cid, distractor_pool=pool, distractor_sources=sources,
+                                       same_concept_sentences=own_sentences)
             if quiz:
                 break
         if quiz is None:
@@ -223,6 +232,8 @@ class LearningService:
         seconds = (now - created).total_seconds() if isinstance(created, datetime) else None
         sources = row.get("option_sources") or []
         confused = sources[chosen] if (not correct and isinstance(sources, list) and chosen < len(sources)) else None
+        if confused == row["doc_id"]:
+            confused = None                              # an altered statement of the same concept is not a confusion with another one
         local_hour = (now + timedelta(minutes=-tz_offset_min)).hour if tz_offset_min is not None else None
         if not await self.quizzes.mark_answered(user_id, quiz_id, chosen, correct):
             raise LearningError("This question was already answered.", 409)

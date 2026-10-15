@@ -22,6 +22,28 @@ _CODE = re.compile(r"```.*?```", re.S)
 _KEY = re.compile(r"O\(|because|only if|must|never|always|worst|average|amortized|stable|in-place|requires", re.I)
 
 
+# Alterations that turn a true statement from the course into a plausible false one (a changed complexity, a swapped direction...).
+_ALTER = [
+    (r"O\(n log n\)", "O(n^2)"), (r"O\(log n\)", "O(n)"), (r"O\(n\^2\)", "O(n log n)"), (r"O\(1\)", "O(n)"), (r"O\(n\)", "O(log n)"),
+    (r"\bsmaller\b", "larger"), (r"\blarger\b", "smaller"), (r"\bleft\b", "right"), (r"\bright\b", "left"),
+    (r"\bunsorted\b", "sorted"), (r"\bsorted\b", "unsorted"), (r"\bbefore\b", "after"), (r"\bafter\b", "before"),
+    (r"\bmore\b", "fewer"), (r"\bfewer\b", "more"), (r"\bincreases\b", "decreases"), (r"\bdecreases\b", "increases"),
+    (r"\bfirst\b", "last"), (r"\blast\b", "first"), (r"\balways\b", "never"), (r"\bnever\b", "always"),
+    (r"\bminimum\b", "maximum"), (r"\bmaximum\b", "minimum"), (r"\bshortest\b", "longest"), (r"\blongest\b", "shortest"),
+]
+
+
+def corrupt(sentence: str) -> Optional[str]:
+    """The sentence with one fact altered, or None when no rule applies. The result is a plausible *false* statement that uses the
+    concept's own vocabulary, which makes a better wrong option than a true sentence about a different concept."""
+    for pattern, replacement in _ALTER:
+        if re.search(pattern, sentence, re.I):
+            altered = re.sub(pattern, replacement, sentence, count=1, flags=re.I)
+            if altered != sentence:
+                return altered
+    return None
+
+
 @dataclass
 class Quiz:
     question: str
@@ -66,6 +88,12 @@ def validate(data: dict, passage: str) -> Optional[dict]:
     support = _content_words(opts[idx] + " " + expl)
     if len(support) >= 3 and len(support & _content_words(passage)) / len(support) < 0.35:
         return None
+    # A wrong option that is nearly a copy of the passage is as true as the key: that question has two right answers.
+    passage_words = _content_words(passage)
+    for i, o in enumerate(opts):
+        words = _content_words(o)
+        if i != idx and len(words) >= 4 and len(words & passage_words) / len(words) >= 0.8:
+            return None
     notes = data.get("misconceptions") if isinstance(data.get("misconceptions"), list) else []
     return {"question": q, "options": opts, "answer_index": idx, "explanation": expl[:400],
             "notes": [str(n)[:120] for n in notes][:4]}
@@ -79,24 +107,36 @@ def _shuffle(opts: List[str], idx: int, notes: List[str], rng: random.Random):
 
 
 def template_quiz(title: str, passage: str, distractor_pool: Sequence[str], doc_id: str, chunk_id: str,
-                  rng: random.Random, sources: Optional[Mapping[str, str]] = None) -> Optional[Quiz]:
+                  rng: random.Random, sources: Optional[Mapping[str, str]] = None,
+                  same_concept_sentences: Sequence[str] = ()) -> Optional[Quiz]:
     sents = [s for s in _SENT.split(_clean(passage)) if 40 <= len(s) <= 200]
     if not sents:
         return None
     key = max(sents, key=lambda s: (bool(_KEY.search(s)), len(_content_words(s))))
+    # wrong options: first the concept's own material with a fact altered (plausible, in the right vocabulary, and false)...
+    own: List[str] = []
+    for s in dict.fromkeys(same_concept_sentences):
+        altered = corrupt(s) if s != key and 40 <= len(s) <= 200 else None
+        if altered and altered != key and altered not in own:
+            own.append(altered)
+    rng.shuffle(own)
+    own = own[:3]
+    # ...then, only if the concept has too little material, true sentences about other concepts
     pool = [d for d in dict.fromkeys(distractor_pool) if d != key and len(d) >= 30]
-    if len(pool) < 3:
+    if len(own) + len(pool) < 3:
         return None
-    wrong = rng.sample(pool, 3)
+    wrong = own + rng.sample(pool, 3 - len(own))
     opts, idx, _ = _shuffle([key] + wrong, 0, [], rng)
-    origin = [None if o == key else (sources or {}).get(o) for o in opts]
+    own_set = set(own)
+    origin = [None if o == key else (doc_id if o in own_set else (sources or {}).get(o)) for o in opts]
     return Quiz(f"Which of these statements about {title} is correct, according to the course material?",
                 opts, idx, f"From the course material on {title}: {key}", doc_id, chunk_id, "template", [], origin)
 
 
 async def generate_quiz(llm: Optional[BaseLLM], *, title: str, level: str, passage: str, doc_id: str,
                         chunk_id: str, distractor_pool: Sequence[str] = (), seed: Optional[int] = None,
-                        distractor_sources: Optional[Mapping[str, str]] = None) -> Optional[Quiz]:
+                        distractor_sources: Optional[Mapping[str, str]] = None,
+                        same_concept_sentences: Sequence[str] = ()) -> Optional[Quiz]:
     rng = random.Random(seed)
     clean = _clean(passage)
     if llm is not None and llm.available and len(clean) >= 80:
@@ -118,4 +158,4 @@ async def generate_quiz(llm: Optional[BaseLLM], *, title: str, level: str, passa
                 return Quiz(ok["question"], opts, idx, ok["explanation"], doc_id, chunk_id, "llm", notes)
         except LLMUnavailable:
             pass
-    return template_quiz(title, passage, distractor_pool, doc_id, chunk_id, rng, distractor_sources)
+    return template_quiz(title, passage, distractor_pool, doc_id, chunk_id, rng, distractor_sources, same_concept_sentences)

@@ -256,10 +256,11 @@ async def test_answer_records_timing_and_the_concept_a_wrong_option_came_from(sv
     row = svc.quizzes.rows[q["quiz_id"]]
     wrong = next(i for i in range(4) if i != row["answer_index"])
     src = row["option_sources"][wrong]
-    assert src and src != "binary-search"                                    # a distractor from another concept
+    assert src                                                               # every wrong option records where it came from
     await svc.answer("u10", q["quiz_id"], wrong, tz_offset_min=0)
     a = svc.profiles.p["u10"].patterns["attempts"][-1]
-    assert a["ok"] is False and a["x"] == src and a["s"] is not None and a["h"] is not None
+    # an altered statement of the same concept is not a confusion with another concept, so it records none
+    assert a["ok"] is False and a["x"] == (None if src == "binary-search" else src) and a["s"] is not None and a["h"] is not None
     ins = await svc.insights("u10")
     assert ins["attempts"] == 1 and ins["accuracy"] == 0.0
     plan = await svc.session_plan("u10", 30)

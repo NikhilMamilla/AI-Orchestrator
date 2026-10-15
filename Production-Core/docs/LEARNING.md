@@ -66,6 +66,10 @@ as "worth revisiting first". Per-learner data is stripped from admin metrics.
 
 ## Other features
 
+* **Check-question quality**: a question written by the model is rejected when a wrong option is nearly a copy of the passage (it would be as
+  true as the key). When the model is down, the fallback question uses the concept's own sentences with one fact altered (a changed complexity,
+  a swapped direction) as wrong options, so the key is not obvious from the vocabulary; true sentences about other concepts are used only
+  when the concept has too little material.
 * **Hints**: first hint rules out one wrong option, second shows the source passage; each lowers mastery credit.
 * **Confidence**: "guess / not sure / sure" before answering; calibration is reported by confidence level.
 * **Journal**: summary of a period built from recorded answers; "overcame" requires an actual miss followed by mastery.
