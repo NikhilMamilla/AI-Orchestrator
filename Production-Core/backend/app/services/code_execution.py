@@ -10,8 +10,8 @@ class CodeExecutionService:
     """Execute code safely using Judge0 API"""
 
     def __init__(self):
-        self.judge0_url = settings.dict().get("JUDGE0_API_URL", "https://judge0-ce.p.rapidapi.com")
-        self.api_key = settings.dict().get("JUDGE0_API_KEY", "")
+        self.judge0_url = settings.JUDGE0_API_URL
+        self.api_key = settings.JUDGE0_API_KEY or ""
 
     async def execute_code(
         self,
@@ -46,7 +46,12 @@ class CodeExecutionService:
             "cpp": 54
         }
 
-        language_id = language_ids.get(language, 71)
+        language_id = language_ids.get(language)
+        if language_id is None:                       # never run someone's code as a different language
+            raise ValueError(f"Unsupported language: {language!r} (use one of {sorted(language_ids)})")
+        headers = {}
+        if "rapidapi.com" in self.judge0_url:         # the key and host header are for RapidAPI only, never for a public instance
+            headers = {"X-RapidAPI-Key": self.api_key, "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com"}
 
         # Submit code
         try:
@@ -59,10 +64,7 @@ class CodeExecutionService:
                         "stdin": stdin,
                         "cpu_time_limit": timeout
                     },
-                    headers={
-                        "X-RapidAPI-Key": self.api_key or "",
-                        "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com"
-                    },
+                    headers=headers,
                     params={"base64_encoded": "false", "wait": "true"},
                     timeout=timeout + 5
                 )
