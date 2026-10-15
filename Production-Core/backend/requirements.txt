@@ -1,2 +1,3 @@
 -r requirements-server.txt
-sentence-transformers>=2.5      # bge-small embeddings + MiniLM cross-encoder reranker (free, local)
+# torch is installed first from the CPU index (see README): pip install --extra-index-url https://download.pytorch.org/whl/cpu torch==2.14.1
+sentence-transformers==6.1.0      # bge-small embeddings + MiniLM cross-encoder reranker (free, local)

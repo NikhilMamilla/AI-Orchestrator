@@ -26,6 +26,10 @@ jobs:
         run: npm ci
       - name: Lint
         run: npm run lint
+      # advisories in the packages that ship to the browser: reported, never a reason to fail (dev-only tooling is left out)
+      - name: Dependency audit (production, report)
+        continue-on-error: true
+        run: npm audit --omit=dev
       - name: Unit tests
         run: npm test
       # also fails if any dev-only placeholder asset reaches dist/ (scripts/check-dist.mjs)

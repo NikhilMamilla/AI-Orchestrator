@@ -1,5 +1,5 @@
 -r requirements.txt
-pytest>=8
-python-jose[cryptography]>=3.3   # tests only: the older auth tests sign their test tokens with it; the server uses PyJWT
-pytest-asyncio>=0.23
-pillow>=10.1          # sketch_eval only (renders synthetic drawings)
+pytest==9.1.1
+pytest-asyncio==1.4.0
+python-jose[cryptography]==3.5.0  # tests only: the older auth tests sign their test tokens with it; the server uses PyJWT
+pillow==12.3.0                    # sketch_eval only (renders synthetic drawings)

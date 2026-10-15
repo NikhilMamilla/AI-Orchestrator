@@ -1,15 +1,19 @@
-# Everything the API needs except the local AI models (torch). Small servers install only this file and set
+# Everything the API needs except the local AI models (torch). Small servers install only this file with
 # EMBEDDINGS=hosted; requirements.txt adds the local models on top.
-fastapi>=0.109,<1
-uvicorn[standard]>=0.27
-pydantic>=2.6
-pydantic-settings>=2.1
-PyJWT[crypto]>=2.8                # verifies the sign-in tokens (replaced python-jose)
-python-multipart>=0.0.9
-httpx>=0.26
-python-dotenv>=1.0
-numpy>=1.26
-scipy>=1.11
-pypdf>=4.0                      # PDF ingestion
-psycopg[binary,pool]>=3.1       # Supabase Postgres
-pgvector>=0.2                   # pgvector adapter
+#
+# Every direct dependency is pinned to the exact version the test suite passes with (Python 3.11). To update one: change its
+# version here, run `python -m pytest` and `pip-audit -r backend/requirements-server.txt`, and commit the change.
+fastapi==0.142.2
+uvicorn[standard]==0.54.0
+pydantic==2.13.5
+pydantic-settings==2.15.0
+PyJWT[crypto]==2.15.1             # verifies the sign-in tokens (replaced python-jose)
+cryptography==50.0.2              # used by PyJWT for RS256/ES256 keys
+python-multipart==0.0.32
+httpx==0.28.1
+python-dotenv==1.2.4
+numpy==2.4.6
+scipy==1.17.1
+pypdf==6.19.0                     # PDF ingestion
+psycopg[binary,pool]==3.3.6       # Supabase Postgres
+pgvector==0.5.0                   # pgvector adapter

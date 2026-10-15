@@ -100,5 +100,7 @@ and the frontend dev server; reads `backend/.env`). Self-hosted Judge0:
   include them. **A `git push` does not update that site.** Anyone else deploying gets the code-drawn story, which needs
   no extra files. Details: [FRONTEND.md](FRONTEND.md) and [../frontend/ASSET-TODO.md](../frontend/ASSET-TODO.md).
 
-**CI** (GitHub Actions): backend tests on `Production-Core/backend|data|supabase` changes; frontend lint, tests and build
-on `Production-Core/frontend`, `curriculum` and challenge changes; the backend image on `main`.
+**CI** (GitHub Actions): backend lint (ruff, errors only), a dependency audit of the server requirements (fails on an advisory) and the tests,
+on `Production-Core/backend|data|supabase` changes; frontend lint, a production-dependency audit (reported only), tests and build on
+`Production-Core/frontend`, `curriculum` and challenge changes; the backend image on `main`. Python dependencies are pinned to exact versions
+(`backend/requirements*.txt`); to update one, change its version, run the tests and `pip-audit`, and commit.
