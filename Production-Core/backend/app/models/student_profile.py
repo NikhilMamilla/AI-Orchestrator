@@ -1,14 +1,18 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
 
+
+def _now() -> datetime:
+    return datetime.now(timezone.utc)
+
 class ConceptMastery(BaseModel):
     concept_id: str  # knowledge-base document id (slug)
     mastery_level: float = Field(ge=0, le=1, default=0.0)
-    first_attempted: datetime = Field(default_factory=datetime.utcnow)
-    last_practiced: datetime = Field(default_factory=datetime.utcnow)
+    first_attempted: datetime = Field(default_factory=_now)
+    last_practiced: datetime = Field(default_factory=_now)
     attempts_count: int = 0
     avg_score: float = 0.0
     retention_score: float = 0.0
@@ -17,7 +21,7 @@ class ConceptMastery(BaseModel):
 class LearningStyle(BaseModel):
     primary_modality: str  # visual, auditory, reading, kinesthetic
     confidence_score: float = Field(ge=0, le=1)
-    last_updated: datetime = Field(default_factory=datetime.utcnow)
+    last_updated: datetime = Field(default_factory=_now)
 
 class OverallStats(BaseModel):
     total_sessions: int = 0
@@ -36,5 +40,5 @@ class StudentProfile(BaseModel):
     patterns: dict = Field(default_factory=dict)
     current_learning_path: List[Any] = Field(default_factory=list)
     current_goal: Optional[dict] = None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=_now)
+    updated_at: datetime = Field(default_factory=_now)

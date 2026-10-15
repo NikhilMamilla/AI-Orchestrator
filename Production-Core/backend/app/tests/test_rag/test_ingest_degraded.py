@@ -22,9 +22,11 @@ def test_fallback_vectors_are_never_stored():
     report = Ingestor(store, emb).ingest_bytes("demo.md", DOC)
     assert "demo.md" in report.failed and "embedding" in report.failed["demo.md"].lower()
     assert store.get_document("demo") is None                 # nothing was stored, so a retry will embed it properly
+    store.close()
 
 
 def test_ingest_still_works_when_the_embedder_is_healthy():
     store = KnowledgeStore(":memory:")
     report = Ingestor(store, CachedEmbedder(HashingEmbedder())).ingest_bytes("demo.md", DOC)
     assert report.added == ["demo"] and not report.failed
+    store.close()

@@ -1,4 +1,5 @@
 import time
+from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -40,7 +41,18 @@ class BodySizeLimit(BaseHTTPMiddleware):
         return await call_next(request)
 
 
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    """Start-up and shut-down (both defined below; they are looked up when the server starts)."""
+    await startup_event()
+    try:
+        yield
+    finally:
+        await shutdown_event()
+
+
 app = FastAPI(
+    lifespan=lifespan,
     title=settings.PROJECT_NAME,
     openapi_url=None if settings.is_production else f"{settings.API_V1_STR}/openapi.json",
     docs_url=None if settings.is_production else "/docs",
@@ -77,7 +89,6 @@ async def database_unavailable(_: Request, exc: DatabaseUnavailable):
     return JSONResponse(status_code=503, content={"detail": "The database is unavailable. Please try again shortly."})
 
 
-@app.on_event("startup")
 async def startup_event():
     if settings.AUTH_DISABLED and settings.is_production:
         raise RuntimeError("AUTH_DISABLED must not be set in production")
@@ -93,7 +104,6 @@ async def startup_event():
     rag_service.warm_up()                                  # models load in the background; pages that only read the store never wait
 
 
-@app.on_event("shutdown")
 async def shutdown_event():
     await db.close_database_connection()
 

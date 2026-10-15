@@ -44,4 +44,5 @@ def kb():
     store = KnowledgeStore(":memory:")
     report = Ingestor(store, emb).ingest_directory(KNOWLEDGE)
     assert not report.failed, report.failed
-    return store, emb
+    yield store, emb
+    store.close()

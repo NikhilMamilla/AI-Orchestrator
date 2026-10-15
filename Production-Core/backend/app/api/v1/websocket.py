@@ -12,7 +12,6 @@ import json
 import logging
 import asyncio
 import time
-import traceback
 from typing import Dict, Optional
 
 logger = logging.getLogger(__name__)
@@ -177,8 +176,7 @@ async def websocket_endpoint(
                     await handle_end_session(websocket, session_id, session_state, profile_service)
                     return True # Signal to break main loop
             except Exception as e:
-                logger.error(f"Error processing {msg_type}: {e}")
-                traceback.print_exc()
+                logger.exception("Error processing %s", msg_type)
             return False
 
         in_flight: set = set()
@@ -219,9 +217,7 @@ async def websocket_endpoint(
                 logger.debug(f"WebSocketDisconnect caught in loop for session {session_id}")
                 break
             except Exception as e:
-                logger.debug(f"Error in session {session_id} loop: {e}")
-                import traceback
-                traceback.print_exc()
+                logger.exception("Error in session %s loop", session_id)
                 try:
                     await websocket.send_json({
                         "type": "error",
@@ -267,8 +263,7 @@ async def handle_start_session(
         
         session_state["student_profile"] = profile.model_dump()
     except Exception as e:
-        logger.debug(f"[WS] ERROR in handle_start_session (profile): {e}")
-        traceback.print_exc()
+        logger.exception("WS: could not load the profile when starting session %s", session_id)
         await websocket.send_json({
             "type": "error",
             "message": "We couldn't load your learning profile. Please try again in a moment."
@@ -294,8 +289,7 @@ async def handle_start_session(
         logger.debug(f"[WS] Streaming greeting...")
         await manager.send_streaming_message(session_id, greeting, "tutor_greeting")
     except Exception as e:
-        logger.debug(f"[WS] ERROR in handle_start_session (greeting): {e}")
-        traceback.print_exc()
+        logger.exception("WS: could not send the greeting for session %s", session_id)
     
     # We still pre-plan the session in background but don't force a move yet
     # unless the user asks for it or it's implicitly clear

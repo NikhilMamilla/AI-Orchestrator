@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Any
 from backend.app.agents.assessment.question_generator import QuestionGenerator
 from backend.app.agents.assessment.evaluator import AnswerEvaluator
 from backend.app.services.llm import LLMService
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 
 logger = logging.getLogger(__name__)
@@ -69,7 +69,7 @@ class AssessmentAgent:
 
         # Create assessment
         assessment = {
-            "assessment_id": f"assess_{concept.get('concept_id', 'unknown')}_{int(datetime.utcnow().timestamp())}",
+            "assessment_id": f"assess_{concept.get('concept_id', 'unknown')}_{int(datetime.now(timezone.utc).timestamp())}",
             "concept_id": concept.get("concept_id", "unknown"),
             "concept_title": concept.get("title", "Unknown"),
             "assessment_type": assessment_type,
@@ -79,7 +79,7 @@ class AssessmentAgent:
             "estimated_time_minutes": len(questions) * 3,  # 3 min per question
             "metadata": {
                 "agent": self.agent_name,
-                "generated_at": datetime.utcnow().isoformat()
+                "generated_at": datetime.now(timezone.utc).isoformat()
             }
         }
 
@@ -153,7 +153,7 @@ class AssessmentAgent:
             "analysis": analysis,
             "metadata": {
                 "agent": self.agent_name,
-                "evaluated_at": datetime.utcnow().isoformat()
+                "evaluated_at": datetime.now(timezone.utc).isoformat()
             }
         }
 

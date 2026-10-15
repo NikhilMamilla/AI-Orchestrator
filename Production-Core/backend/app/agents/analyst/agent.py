@@ -2,7 +2,7 @@
 import json
 import logging
 from typing import Dict, List, Optional, Any
-from datetime import datetime
+from datetime import datetime, timezone
 import re
 
 from backend.app.agents.analyst.pattern_detector import PatternDetector
@@ -86,7 +86,7 @@ class AnalystAgent:
         analysis = {
             "session_id": session_id,
             "student_id": student_id,
-            "analysis_timestamp": datetime.utcnow().isoformat(),
+            "analysis_timestamp": datetime.now(timezone.utc).isoformat(),
             
             "performance_analysis": performance_analysis,
             "engagement_analysis": engagement_analysis,
