@@ -38,6 +38,13 @@ data is in Supabase Postgres and is reached only through this API.
 * **Response headers (API):** `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`,
   `Cache-Control: no-store`. The static site adds `nosniff`, `X-Frame-Options: DENY` and a strict referrer policy
   (`frontend/vercel.json`). In production the API docs and OpenAPI schema are switched off.
+* **Content-Security-Policy (report only).** `frontend/vercel.json` sends `Content-Security-Policy-Report-Only` listing the origins the app
+  really uses (its own files, Google Fonts, jsDelivr for the Monaco editor, Google/Firebase for sign-in, `*.onrender.com` for the API and the
+  live session). It blocks nothing: violations only appear in the browser console as "[Report Only] Refused to ...". **Before enforcing it**,
+  open the live site with DevTools open and go through: the landing story, register and sign in (email and Google popup), Ask, Challenges and
+  Playground (the code editor), a live session, Settings and the admin console. Add any origin the console reports as refused (the real API
+  host if it is not on `onrender.com`), then rename the header key to `Content-Security-Policy`. `script-src` still allows `'unsafe-inline'`
+  because `index.html` has inline scripts; moving them into files would let that go.
 * **Rate limits** (sliding window, per user, or per client address when unauthenticated): ask 20/min (configurable with
   `RAG_RATE_LIMIT_PER_MIN`), quiz 20, challenge submit 12, code run 30, teach-back 10, sketch 6, coding-profile verify 6,
   share create 10, upload 5, `/agents/*` 12 and `/sessions/*` 20 (both reach the LLM), and public share view 30 per address.
