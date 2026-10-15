@@ -14,7 +14,6 @@ class Settings(BaseSettings):
     # Firebase Auth (authentication only): when set, Firebase ID tokens from this project are what the API accepts
     FIREBASE_PROJECT_ID: str = ""
     SUPABASE_JWT_SECRET: str = ""                 # only for legacy HS256 projects; new projects use JWKS
-    REDIS_URL: str = "redis://localhost:6379/0"
 
     GROQ_API_KEY: str = ""
     GROQ_API_KEYS: str = ""

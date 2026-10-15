@@ -43,7 +43,7 @@ def live(kb):
     store, emb = kb
     llm = FakeLLM()
     pipe = RAGPipeline(store, emb, None, llm, RAGConfig(use_rerank=False, min_top_score=0.0))   # offline hashing scores sit below the neural scale the score gate is tuned for; the keyword-coverage gate still refuses off-topic questions
-    agent = OrchestratorAgent(NoLLMService(), None, rag=pipe)
+    agent = OrchestratorAgent(NoLLMService(), rag=pipe)
     state = {"user_id": "u1", "student_profile": {"user_id": "u1", "name": "Asha", "concept_mastery": []},
              "interactions": [], "current_concept_id": None, "evaluations": []}
     return agent, state, llm

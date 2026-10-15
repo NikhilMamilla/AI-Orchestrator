@@ -55,11 +55,9 @@ class OrchestratorAgent:
     def __init__(
         self,
         llm_service: Any,
-        message_queue: Any = None,
         rag: Any = None
     ):
         self.llm_service = llm_service
-        self.message_queue = message_queue            # optional; nothing in the session depends on it
         self.rag = rag                                # the RAGPipeline: knowledge store, retrieval, verified answers
         self.decision_engine = DecisionEngine(self._graph)
         self.session_planner = SessionPlanner()

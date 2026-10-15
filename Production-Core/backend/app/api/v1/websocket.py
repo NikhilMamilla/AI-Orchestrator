@@ -2,7 +2,6 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect, Depends
 from backend.app.services.database import get_database
 from backend.app.services.student_profile_service import StudentProfileService
-from backend.app.services.message_queue import MessageQueue
 from backend.app.agents.orchestrator.agent import OrchestratorAgent
 from backend.app.services.llm import LLMService
 from backend.app.services.rag_service import get_pipeline
@@ -143,12 +142,10 @@ async def websocket_endpoint(
         # Initialize services
         logger.debug(f"Initializing services for session {session_id}")
         llm_service = LLMService()
-        message_queue = MessageQueue(settings.REDIS_URL)
-        await message_queue.connect()
         logger.debug(f"Services ready for session {session_id}")
         
         profile_service = StudentProfileService(db)
-        orchestrator = OrchestratorAgent(llm_service, message_queue, rag=await get_pipeline())   # every answer comes from the notes
+        orchestrator = OrchestratorAgent(llm_service, rag=await get_pipeline())   # every answer comes from the notes
         orchestrator.event_sink = make_sink(db, ws_user.uid)
         
         # Session state
@@ -243,11 +240,6 @@ async def websocket_endpoint(
             pass
     finally:
         manager.disconnect(session_id, websocket)
-        try:
-            if 'message_queue' in locals():
-                await message_queue.disconnect()
-        except Exception:
-            pass
 
 
 async def handle_start_session(

@@ -13,4 +13,3 @@ scipy>=1.11
 pypdf>=4.0                      # PDF ingestion
 psycopg[binary,pool]>=3.1       # Supabase Postgres
 pgvector>=0.2                   # pgvector adapter
-redis>=4.2                      # optional: agent message queue

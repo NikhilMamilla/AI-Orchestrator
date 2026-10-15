@@ -86,7 +86,7 @@ study next, explains why, and lets you practise on real code that is actually ru
 | Data | Supabase Postgres with pgvector and full-text search |
 | Sign-in | Firebase Authentication (sign-in only; all data stays in Postgres) |
 | Code execution | Judge0 CE |
-| Optional | Redis (agent message queue; nothing needs it), Hugging Face Inference (hosted embeddings on small servers) |
+| Optional | Hugging Face Inference (hosted embeddings on small servers) |
 | Tests and CI | pytest, Vitest, ESLint, GitHub Actions |
 
 ## Run it on your computer
@@ -190,7 +190,6 @@ The backend reads `Production-Core/backend/.env`; the template is
 | `STUDY_MIN_GAP_HOURS` | optional | Evidence Lab: hours between finishing the pre-test and the post-test opening (default 72) |
 | `ADMIN_MIN_GROUP` | optional | Smallest learner group the admin console will show (default 5, production only) |
 | `RAG_RATE_LIMIT_PER_MIN` | optional | Ask requests per user per minute (default 20) |
-| `REDIS_URL` | optional | Agent message queue; the app works without it |
 | `AUTH_DISABLED` | development only | Treats every request as one dev user; the server refuses to start with it when `ENV=production` |
 | `SUPABASE_URL`, `SUPABASE_JWT_SECRET` | legacy | Only for projects that sign in with Supabase Auth instead of Firebase |
 | `RAG_NEURAL` | optional | `true` uses the AI models for search and checking; `false` uses a lightweight offline mode |
@@ -264,7 +263,7 @@ GitHub Actions runs the backend tests and the frontend lint, tests and build on 
     │   └── eval/            labelled questions and attack prompts for measuring quality
     ├── docs/                architecture, frontend, setup, security, RAG, learning, agents, evaluation results
     ├── scripts/             migrate, ingest knowledge, smoke test, build/verify challenges
-    └── infrastructure/      Docker Compose files (stack with Redis; self-hosted Judge0)
+    └── infrastructure/      Docker Compose files (backend and frontend; self-hosted Judge0)
 ```
 
 ## Deploying

@@ -41,8 +41,6 @@ async def start_session(
     """
     try:
         from backend.app.services.llm import LLMService
-        from backend.app.config import settings
-        from backend.app.services.message_queue import MessageQueue
         from backend.app.agents.orchestrator.agent import OrchestratorAgent
         
         # Get student profile
@@ -54,10 +52,8 @@ async def start_session(
         
         # Initialize Orchestrator
         llm_service = LLMService()
-        message_queue = MessageQueue(settings.REDIS_URL)
-        await message_queue.connect()
         
-        orchestrator = OrchestratorAgent(llm_service, message_queue, rag=await get_pipeline())
+        orchestrator = OrchestratorAgent(llm_service, rag=await get_pipeline())
         
         # Start session
         session_data = await orchestrator.start_learning_session(
@@ -89,15 +85,11 @@ async def process_response(
     """
     try:
         from backend.app.services.llm import LLMService
-        from backend.app.config import settings
-        from backend.app.services.message_queue import MessageQueue
         from backend.app.agents.orchestrator.agent import OrchestratorAgent
         
         llm_service = LLMService()
-        message_queue = MessageQueue(settings.REDIS_URL)
-        await message_queue.connect()
         
-        orchestrator = OrchestratorAgent(llm_service, message_queue, rag=await get_pipeline())
+        orchestrator = OrchestratorAgent(llm_service, rag=await get_pipeline())
         
         next_action = await orchestrator.process_student_response(
             session_id=request.session_id,

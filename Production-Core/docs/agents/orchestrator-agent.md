@@ -42,11 +42,10 @@ rejected. The client's chat history is screened and assistant turns are dropped.
 The message-type key is `interaction_type` (`chat`, `assessment_answer`, `comprehension_check`); `type` is accepted as well. The
 current web UI sends chat turns only; the assessment and comprehension branches are exercised by tests.
 
-## Messaging
+## No message bus
 
-`services/message_queue.py` wraps Redis pub/sub and is **optional**: with no Redis the orchestrator still runs and
-nothing else depends on it (the admin *System* page lists Redis as optional). The only channel the orchestrator publishes
-to today is `analyst.requests`.
+The agents are called directly and share the learner profile and the `agent_events` table. An earlier Redis pub/sub queue published to
+`analyst.requests` with nothing subscribed to it, so it was removed; the app needs no Redis.
 
 ## Verification
 

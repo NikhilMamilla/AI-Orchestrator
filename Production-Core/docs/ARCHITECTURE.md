@@ -29,7 +29,6 @@ flowchart LR
     LLM[LLM router<br/>Mistral → Gemini → Groq]
     HF[Hugging Face Inference<br/>hosted embeddings, optional]
     J0[Judge0 CE<br/>code sandbox]
-    RD[(Redis, optional<br/>agent message queue)]
 
     UI -- sign in --> FB
     UI -- "Bearer ID token (REST, SSE)" --> SEC
@@ -44,7 +43,6 @@ flowchart LR
     AG --> LLM
     RAG -. EMBEDDINGS=hosted .-> HF
     LRN --> J0
-    AG -. optional .-> RD
 ```
 
 ## Layers and choices
@@ -60,7 +58,6 @@ flowchart LR
 | Claim checker | NLI cross-encoder `nli-deberta-v3-xsmall` blended with word/embedding overlap; lexical fallback | Per-sentence faithfulness check without a second LLM call. |
 | LLM | Router over **Mistral** (`ministral-14b/8b`, `open-mistral-nemo`), **Gemini** (`gemini-flash-latest`, `-lite`) and **Groq** (`llama-3.3-70b-versatile`, `llama-3.1-8b-instant`), in `LLM_PROVIDERS` order | Key rotation, model walk on 429/5xx, cool-down for a dead provider, response cache, and an extractive cited answer if every provider is down. Mistral's `pixtral-12b` reads hand-drawn diagrams only. |
 | Code execution | Judge0 CE (public instance, or self-hosted with `docker-compose.judge0.yml`) | Real execution against hidden tests; time and memory are reported only if the engine returns them. |
-| Message queue | Redis pub/sub, **optional** | The orchestrator publishes to it when present; everything works without it (the admin *System* page shows it as optional). |
 | Offline / CI | SQLite (FTS5 BM25) store + hashing embedder + mocked LLM and HTTP | Same interfaces as production, so the whole backend suite runs with no network or model download. |
 
 ## Repository map
@@ -82,7 +79,7 @@ Kiddoo/
     │   ├── agents/        knowledge · teaching · assessment · analyst · orchestrator
     │   ├── admin/         stats (aggregates only), inspect, audit
     │   ├── services/      database, rag_service, llm (agent-facing), code_execution, concept_service,
-    │   │                  student_profile_service, message_queue, agent_factory, activity
+    │   │                  student_profile_service, agent_factory, activity
     │   └── tests/         283 offline tests
     ├── frontend/src/
     │   ├── pages/         one file per screen
@@ -94,7 +91,7 @@ Kiddoo/
     ├── supabase/migrations/   0001–0010, applied in order by scripts/migrate.py
     ├── data/{knowledge,challenges,eval}/
     ├── scripts/               migrate · ingest_knowledge · smoke_test · build_challenges · verify_challenges
-    ├── infrastructure/        docker-compose.yml (redis + backend + frontend), docker-compose.judge0.yml
+    ├── infrastructure/        docker-compose.yml (backend + frontend), docker-compose.judge0.yml
     └── docs/                  this documentation
 ```
 
@@ -144,8 +141,7 @@ The five PRD agents are real modules with measurable behaviour. Thresholds and f
 | Master Orchestrator | `learning/policy.py`, `planner.py`, `goals.py`, `diagnostic.py`, `agents/orchestrator/` | Advance / deepen / review / remediate, 60/25/15 session plan, goal feasibility, adaptive placement |
 
 Every decision is written to `agent_events` with its reasoning and shown in *Insights*. Agents communicate through the
-learner profile (JSONB) and the events table, with Redis pub/sub as an optional extra; there is no required message
-bus, which keeps the data flow inspectable.
+learner profile (JSONB) and the events table; there is no message bus, which keeps the data flow inspectable.
 
 ## Data model (`supabase/migrations`)
 

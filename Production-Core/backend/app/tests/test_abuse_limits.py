@@ -72,19 +72,11 @@ def _live_socket(app, monkeypatch, limiter):
         await sock.receive_json()
         return User(uid="ws-user")
 
-    class Queue:
-        def __init__(self, *_a):
-            pass
-
-        async def connect(self):
-            return None
-
     async def noop(*_a, **_k):
         return None
 
     monkeypatch.setattr(ws, "authenticate_websocket", auth)
     monkeypatch.setattr(ws, "LLMService", lambda: SimpleNamespace())
-    monkeypatch.setattr(ws, "MessageQueue", Queue)
     monkeypatch.setattr(ws, "OrchestratorAgent", lambda *_a, **_k: SimpleNamespace())
     monkeypatch.setattr(ws, "get_pipeline", noop)
     monkeypatch.setattr(ws, "handle_hint_request", noop)

@@ -127,18 +127,6 @@ async def _judge0_ok() -> bool | None:
     return ok
 
 
-async def _redis_ok() -> bool | None:
-    try:
-        import redis.asyncio as aioredis
-        r = aioredis.from_url(settings.REDIS_URL, socket_connect_timeout=1)
-        try:
-            return bool(await r.ping())
-        finally:
-            await r.aclose()
-    except Exception:
-        return False
-
-
 async def _system_checks() -> Dict[str, Any]:
     t0 = time.perf_counter()
     db_ok = None
@@ -151,7 +139,7 @@ async def _system_checks() -> Dict[str, Any]:
     db_ms = round((time.perf_counter() - t0) * 1000)
     llm = get_router()
     providers = llm.status()
-    judge0, redis_ok = await asyncio.gather(_judge0_ok(), _redis_ok())
+    judge0 = await _judge0_ok()
     pipe = rag_service._pipeline                          # report on the models only if they are already loaded
     store = await rag_service.get_store()
 
@@ -165,7 +153,6 @@ async def _system_checks() -> Dict[str, Any]:
          "required": True},
         {"name": "Judge0 sandbox", "ok": judge0, "detail": settings.JUDGE0_API_URL, "required": True},
         {"name": "Firebase sign-in", "ok": bool(settings.FIREBASE_PROJECT_ID), "detail": "project set" if settings.FIREBASE_PROJECT_ID else "FIREBASE_PROJECT_ID missing", "required": True},
-        {"name": "Redis (optional queue)", "ok": redis_ok, "detail": "used by the agent message queue when present", "required": False},
         {"name": "Retrieval models", "ok": True if pipe is not None else None,
          "detail": f"{pipe.embedder.name} · {pipe.reranker.name}" if pipe is not None else "loading in the background", "required": False},
     ]
@@ -173,7 +160,7 @@ async def _system_checks() -> Dict[str, Any]:
 
 
 SETTINGS = ("DATABASE_URL", "FIREBASE_PROJECT_ID", "MISTRAL_API_KEY", "GEMINI_API_KEY", "GROQ_API_KEYS", "JUDGE0_API_URL",
-            "ADMIN_EMAILS", "ALLOWED_ORIGINS", "REDIS_URL")
+            "ADMIN_EMAILS", "ALLOWED_ORIGINS")
 
 
 @router.get("/system")

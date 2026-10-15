@@ -2,23 +2,16 @@
 # Secrets come from backend/.env and frontend/.env.local (never committed); see .env.example.
 # Run from Production-Core/infrastructure:  docker compose up --build
 services:
-  redis:
-    image: redis:7.2-alpine
-    ports: ["127.0.0.1:6379:6379"]
-    volumes: [redis_data:/data]
-
   backend:
     build:
       context: ..
       dockerfile: backend/Dockerfile
     env_file: ../backend/.env
     environment:
-      REDIS_URL: redis://redis:6379/0
       ALLOWED_ORIGINS: http://localhost:5173
     ports: ["127.0.0.1:8000:8000"]
     volumes:
       - hf_cache:/home/app/.cache/huggingface      # model weights downloaded once
-    depends_on: [redis]
 
   frontend:
     build:
@@ -30,5 +23,4 @@ services:
     command: npm run dev -- --host
 
 volumes:
-  redis_data:
   hf_cache:
