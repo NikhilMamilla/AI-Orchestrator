@@ -71,6 +71,14 @@ prerequisites, tags`.
   account or bad key, short for a rate limit), and identical concurrent requests share one call. If all fail, an
   extractive answer quoted from the evidence is returned with citations (the UI badge reads "Quoted from sources").
 
+## Questions about topics that have no notes yet
+
+The roadmap (`curriculum/dsa_roadmap.md`, 22 domains) is wider than the notes (26 concepts). When the evidence gate refuses a question that mentions a
+roadmap topic with no concept document (segment trees, Fenwick trees, Mo's algorithm...), the refusal says so: "Segment Trees are on Kiddoo's
+roadmap but not in its course notes yet, so I can't answer that from the material and I won't guess." The server reads its copy of the roadmap
+from `data/curriculum/dsa_roadmap.md` (a test checks it is identical to `curriculum/dsa_roadmap.md`). The landing page marks each domain as
+written or "notes coming".
+
 ## Local and hosted modes
 
 | Setting | Embeddings | Reranker | Claim checker | Used for |

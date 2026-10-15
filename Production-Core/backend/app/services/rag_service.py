@@ -11,6 +11,7 @@ from backend.app.config import settings
 from backend.app.rag.embeddings import load_embedder
 from backend.app.rag.ingest import Ingestor
 from backend.app.rag.configurations import pipeline_config
+from backend.app.rag.roadmap import load_roadmap
 from backend.app.rag.pipeline import RAGConfig, RAGPipeline
 from backend.app.rag.guard import SemanticGuard
 from backend.app.rag.nli import load_nli
@@ -20,6 +21,8 @@ from backend.app.services.llm import get_router
 
 logger = logging.getLogger(__name__)
 KNOWLEDGE_DIR = Path(__file__).resolve().parents[3] / "data" / "knowledge"
+ROADMAP_FILE = KNOWLEDGE_DIR.parent / "curriculum" / "dsa_roadmap.md"
+ROADMAP = load_roadmap(ROADMAP_FILE) if ROADMAP_FILE.exists() else None      # names roadmap topics that have no notes yet
 
 _pipeline: Optional[RAGPipeline] = None
 _ingestor: Optional[Ingestor] = None
@@ -49,7 +52,7 @@ def _build() -> tuple[RAGPipeline, Ingestor]:
                 len(report.added), len(report.updated), len(report.unchanged), len(report.failed))
     nli = load_nli(enabled=local_models)                      # entailment-based claim verification
     guard = SemanticGuard(embedder) if (settings.RAG_NEURAL or hosted) else None   # needs real embeddings
-    return RAGPipeline(store, embedder, reranker, llm, pipeline_config(hosted), nli, guard), ingestor
+    return RAGPipeline(store, embedder, reranker, llm, pipeline_config(hosted), nli, guard, roadmap=ROADMAP), ingestor
 
 
 async def get_pipeline() -> RAGPipeline:

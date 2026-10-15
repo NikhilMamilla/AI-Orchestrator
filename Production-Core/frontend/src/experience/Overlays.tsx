@@ -4,6 +4,8 @@ import { AGENTS, RING_P } from './copy';
 import { useExperience } from './store';
 import { PLACEHOLDERS_ENABLED as ASSETS } from '../lib/experienceAssets';
 import { Script } from '../components/fx/ScriptWord';
+import { DOMAINS } from './domains';
+import { coverage } from './coverage';
 
 /**
  * The statement lines of each stage. The engine fades every [data-in] element in (with blur) at progress `data-in` and
@@ -25,6 +27,8 @@ function Stage({ id, title, children }: { id: StageId; title: string; children: 
         </section>
     );
 }
+
+const COVER = coverage(DOMAINS);
 
 const small = 'font-mono text-[11px] uppercase tracking-[0.4em] text-white/60';
 
@@ -147,7 +151,7 @@ export default function Overlays() {
             </Stage>
 
             {/* the city's opening, over the clouds: what is real about Kiddoo (README, docs/LEARNING.md), then the map */}
-            <Stage id="city" title="Meet Kiddoo: real sources, real practice, real progress. Explore the 22 domains of DSA.">
+            <Stage id="city" title="Meet Kiddoo: real sources, real practice, real progress. Its notes cover some of the 22 DSA domains so far.">
                 <L a={-0.1} b={0.2} className="halo absolute inset-0 grid place-items-center text-center">
                     <div>
                         <Script deep first="M" rest="eet" size="clamp(1.8rem, 4.6vw, 4.6rem)" />
@@ -177,9 +181,9 @@ export default function Overlays() {
                 </L>
                 <L a={0.74} b={0.97} className="halo absolute inset-0 grid place-items-center text-center">
                     <div>
-                        <p className="ink-deep-flat font-display text-[clamp(1.6rem,4vw,4rem)] font-medium italic leading-none">explore the</p>
-                        <p className="ink-deep-flat font-display text-[clamp(3rem,9vw,9.6rem)] font-semibold leading-none">22 domains</p>
-                        <p className="ink-deep-flat mt-1 font-display text-[clamp(1.4rem,3.4vw,3.4rem)] italic leading-none">of DSA</p>
+                        <p className="ink-deep-flat font-display text-[clamp(1.6rem,4vw,4rem)] font-medium italic leading-none">its notes cover</p>
+                        <p className="ink-deep-flat font-display text-[clamp(3rem,9vw,9.6rem)] font-semibold leading-none">{COVER.covered} of {COVER.total}</p>
+                        <p className="ink-deep-flat mt-1 font-display text-[clamp(1.4rem,3.4vw,3.4rem)] italic leading-none">DSA domains so far</p>
                     </div>
                 </L>
             </Stage>

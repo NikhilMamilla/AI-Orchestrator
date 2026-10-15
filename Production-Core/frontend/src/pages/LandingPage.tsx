@@ -20,6 +20,7 @@ import { introWillPlay, prefersReducedMotion } from '../lib/introFlag';
 import HoldToStart from '../components/intro/HoldToStart';
 import StoryCards from '../experience/StoryCards';
 import Motes from '../components/fx/Motes';
+import RoadmapCoverage from '../components/landing/RoadmapCoverage';
 
 const Experience = lazy(() => import('../experience/Experience'));
 
@@ -515,6 +516,7 @@ export default function LandingPage() {
                             </Reveal>
                         ))}
                     </div>
+                    <Reveal><RoadmapCoverage /></Reveal>
                 </div>
             </section>
 

@@ -29,6 +29,12 @@ from .types import LEVELS, Answer, Candidate, Evidence, QueryPlan
 logger = logging.getLogger(__name__)
 StageCb = Optional[Callable[[str, Dict[str, Any]], Awaitable[None]]]
 
+def roadmap_refusal(topic) -> str:
+    verb = "are" if topic.name.lower().endswith("s") else "is"
+    return (f"{topic.name} {verb} on Kiddoo's roadmap but not in its course notes yet, so I can't answer that from the material "
+            "and I won't guess.")
+
+
 INSUFFICIENT_MSG = ("I couldn't find enough support for that in the course material, so I won't "
                     "guess. Try rephrasing, name the concept, or upload a source that covers it.")
 
@@ -56,8 +62,9 @@ class RAGConfig:
 
 class RAGPipeline:
     def __init__(self, store: KnowledgeStore, embedder, reranker: Optional[CrossEncoderReranker] = None,
-                 llm=None, config: Optional[RAGConfig] = None, nli=None, guard=None):
+                 llm=None, config: Optional[RAGConfig] = None, nli=None, guard=None, roadmap=None):
         self.store, self.embedder = store, embedder
+        self.roadmap = roadmap                      # optional: lets a refusal name a roadmap topic that has no notes yet
         self.reranker = reranker or CrossEncoderReranker(enabled=False)
         self.llm, self.cfg, self.nli, self.guard = llm, config or RAGConfig(), nli, guard
         self.retriever = HybridRetriever(store, embedder)
@@ -198,7 +205,8 @@ class RAGPipeline:
                   evidence_items=len(evidence), intent=plan.intent, warnings=plan.warnings)
         gate_score = top if self.cfg.use_rerank else min(1.0, (ranked[0].dense_score if ranked else 0.0))
         if not evidence or gate_score < self.cfg.min_top_score or coverage < self.cfg.min_kw_coverage:
-            return done(Answer(text=INSUFFICIENT_MSG, status="insufficient_evidence", confidence=0.0,
+            topic = self.roadmap.uncovered_mention(q, self.store.list_documents()) if self.roadmap else None
+            return done(Answer(text=roadmap_refusal(topic) if topic else INSUFFICIENT_MSG, status="insufficient_evidence", confidence=0.0,
                                citations=[], unsupported_claims=[], evidence=evidence, trace={}),
                         gate="low_evidence")
 

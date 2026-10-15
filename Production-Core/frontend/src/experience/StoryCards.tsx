@@ -1,4 +1,8 @@
 import { AGENTS } from './copy';
+import { DOMAINS } from './domains';
+import { coverage } from './coverage';
+
+const COVER = coverage(DOMAINS);
 
 /**
  * The story as five still cards, for visitors who ask for reduced motion (and anyone whose browser has no WebGL):
@@ -9,7 +13,7 @@ const BEATS = [
     { k: 'Confident, not right', title: 'Most AI tutors sound confident, even when they are wrong.', body: 'Kiddoo only answers from a curated knowledge base, cites every claim, checks each sentence against its sources, and says “I don’t have enough evidence” instead of guessing.' },
     { k: 'Wasted study', title: 'Hours re-reading what you already know, guessing what to study.', body: 'Kiddoo measures what you know (Bayesian Knowledge Tracing + spaced repetition), so you only study what you don’t.' },
     { k: 'Five agents', title: 'Five cooperating agents decide what you study next.', body: AGENTS.map((a) => a.name).join(' · ') },
-    { k: 'The DSA city', title: '22 roadmap domains, joined by real prerequisite links.', body: 'Each domain lists what you will cover and the Kiddoo tools you can use for it.' },
+    { k: 'The roadmap', title: COVER.sentence, body: 'The other domains are on the roadmap and marked "notes coming". Ask about one and Kiddoo says so instead of guessing.' },
 ];
 
 export default function StoryCards() {
