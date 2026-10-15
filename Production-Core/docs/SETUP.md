@@ -48,11 +48,11 @@ npm run dev                       # http://localhost:5173
 ## 5. Verify
 
 ```bash
-python -m pytest                                   # 283 offline tests (no network, no models)
+python -m pytest                                   # 411 offline tests (+5 Postgres tests that run only with TEST_DATABASE_URL) (no network, no models)
 python -m backend.app.rag.evaluation --neural      # retrieval ablation, writes docs/eval/results.json
 python -m backend.app.rag.evaluation --neural --pg # same against Supabase
 python scripts/smoke_test.py                       # end-to-end through the real SSE endpoint
-cd frontend && npm run lint && npm test && npm run build   # 27 tests; the build also runs scripts/check-dist.mjs
+cd frontend && npm run lint && npm test && npm run build   # 51 tests; the build also runs scripts/check-dist.mjs
 ```
 
 ## Environment variables
