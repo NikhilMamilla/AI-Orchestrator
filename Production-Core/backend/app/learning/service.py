@@ -26,7 +26,7 @@ from .goals import plan_goal
 from .journal import build_journal
 from .planner import plan_session
 from . import challenges, diagnostic, prefs, rhythm, strategy, study, teachback
-from .quiz import Quiz, generate_quiz
+from .quiz import Quiz, generate_quiz, has_usable_sentence
 
 EventFn = Callable[[str, str, str, Dict[str, Any]], Awaitable[None]]     # (user_id, agent, message, meta)
 _SENT = re.compile(r"(?<=[.!?])\s+")
@@ -162,7 +162,8 @@ class LearningService:
         passages = [(cid, t) for cid, t in self.store.passages_for_doc(doc_id) if len(t) >= 120]
         if not passages:
             raise LearningError("That concept has no content to quiz on.", 404)
-        cid, text = rng.choice(passages)
+        usable = [p for p in passages if has_usable_sentence(p[1])]       # about 1 passage in 20 cannot make a question
+        cid, text = rng.choice(usable or passages)
         return text, cid
 
     def _own_sentences(self, doc_id: str) -> List[str]:

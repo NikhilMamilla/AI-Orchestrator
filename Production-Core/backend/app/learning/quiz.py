@@ -61,6 +61,11 @@ def _clean(text: str) -> str:
     return re.sub(r"\s+", " ", _CODE.sub(" ", text)).strip()
 
 
+def has_usable_sentence(text: str) -> bool:
+    """Whether the passage has a sentence the fallback question can be built on (code blocks are ignored)."""
+    return any(40 <= len(s) <= 200 for s in _SENT.split(_clean(text)))
+
+
 def _extract_json(raw: str) -> Optional[dict]:
     m = re.search(r"\{.*\}", raw, re.S)
     if not m:
