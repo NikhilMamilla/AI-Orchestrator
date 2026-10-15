@@ -92,7 +92,7 @@ and the "evidence only" contract are the backstops, and the verifier is a signal
 * **Admin console:** aggregates only. Any group smaller than `ADMIN_MIN_GROUP` (5, production only) is hidden, and
   mastery-based personalisation is removed from traces before they enter the admin metrics buffer. Admin actions are
   written to `admin_audit` (the actor is the admin's own email).
-* **Study data and the leaderboard are opt-in.** The leaderboard shows nicknames only. The Evidence Lab CSV export is
+* **Study data and the leaderboard are opt-in.** The leaderboard shows nicknames only, and a nickname with profanity, a slur, or an email or link is refused. The Evidence Lab CSV export is
   anonymised.
 * **Your data:** *Settings → Privacy & data* exports everything, or deletes a part or all of it. "Delete my data" runs in one
   transaction.

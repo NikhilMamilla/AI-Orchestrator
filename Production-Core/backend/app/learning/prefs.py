@@ -6,6 +6,7 @@ learner chose, only if they opted in, ranked by a number derived from their own 
 """
 from __future__ import annotations
 
+import codecs
 import re
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
@@ -69,10 +70,34 @@ def merged(stored: Optional[Mapping[str, Any]]) -> Dict[str, Any]:
         return dict(DEFAULTS)
 
 
+# Words a public nickname may not contain. Kept ROT13-encoded so this file is safe to open; matched after the nickname is lower-cased,
+# stripped of spaces/_/-, de-leetspeaked and de-stuttered ("f u c k", "sh1t", "fuuuck" are all caught). Every entry is 4+ letters, so
+# ordinary names ("Class", "Dick" the name is not listed) are not caught by accident.
+_BLOCKED_ROT13 = ("shpx", "fuvg", "ovgpu", "onfgneq", "nffubyr", "phag", "fyhg", "juber", "cbea", "avtt", "snttbg", "ergneq", "encvfg", "pbpxfhpx")
+# real words that contain a blocked string (the "Scunthorpe problem"); removed before matching
+_INNOCENT = ("scunthorpe", "shiitake", "shitake", "assessor")
+_LINK_WORDS = ("http", "www", "dotcom", "dotnet", "dotorg", "gmail", "yahoo", "hotmail", "outlook", "protonmail", "telegram", "whatsapp")
+_LEET = str.maketrans({"0": "o", "1": "i", "3": "e", "4": "a", "5": "s", "7": "t", "8": "b", "9": "g"})
+
+
+def _squash(text: str) -> str:
+    plain = re.sub(r"[\s_-]+", "", text.lower()).translate(_LEET)
+    return re.sub(r"(.)\1+", r"\1", plain)
+
+
+_BLOCKED = tuple(_squash(codecs.decode(w, "rot13")) for w in _BLOCKED_ROT13)
+_LINKS = tuple(_squash(w) for w in _LINK_WORDS)                    # normalised the same way as the nickname
+
+
 def clean_nickname(nick: str) -> str:
     nick = " ".join(nick.split())
     if not NICK.match(nick):
         raise PrefsError("Nickname must be 3 to 20 letters, numbers, spaces, _ or -.")
+    squashed = _squash(nick)
+    for ok in _INNOCENT:
+        squashed = squashed.replace(_squash(ok), "")
+    if any(w in squashed for w in _BLOCKED) or any(w in squashed for w in _LINKS):
+        raise PrefsError("Pick a different nickname: it can't contain offensive words, an email address or a link.")
     return nick
 
 

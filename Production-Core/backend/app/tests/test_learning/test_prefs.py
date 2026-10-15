@@ -52,3 +52,45 @@ def test_rhythm_counts_hours_weeks_and_streak():
     assert r["grid"][now.weekday()][20] == 2 and r["peak"]["hour"] == 20
     assert r["weekly"][-1] == {"weeks_ago": 0, "answers": 4, "accuracy": 0.75}
     assert rhythm([], now)["peak"] is None
+
+
+# ---------------- leaderboard nicknames: no profanity, slurs, emails or links ----------------
+import codecs
+
+import pytest as _pytest
+
+_rude = lambda w: codecs.decode(w, "rot13")                     # test words are kept ROT13-encoded too, so this file is safe to open
+
+
+@_pytest.mark.parametrize("nick", ["Ada", "Binary Bob", "Sam_3", "Class Act", "Scunthorpe Fan", "Grace-H", "Dijkstra 99"])
+def test_ordinary_nicknames_are_accepted(nick):
+    assert prefs.clean_nickname(nick) == nick
+
+
+@_pytest.mark.parametrize("coded", ["shpx", "fuvg", "ovgpu", "nffubyr", "pbpxfhpxre", "phag", "juber", "cbea"])
+def test_profanity_is_rejected_even_when_disguised(coded):
+    word = _rude(coded)
+    for disguised in (word, word.upper(), " ".join(word), word[0] + "_" + word[1:], word.replace("i", "1").replace("e", "3").replace("o", "0"),
+                      word + word[-1] * 3, "Mr " + word + " 7"):
+        if 3 <= len(disguised) <= 20:
+            with _pytest.raises(prefs.PrefsError, match="different nickname"):
+                prefs.clean_nickname(disguised)
+
+
+@_pytest.mark.parametrize("coded", ["avttre", "snttbg"])
+def test_slurs_are_rejected(coded):
+    with _pytest.raises(prefs.PrefsError, match="different nickname"):
+        prefs.clean_nickname("xx" + _rude(coded) + "xx")
+
+
+@_pytest.mark.parametrize("nick", ["mygmail", "visit www site", "http fun", "name dot com", "yahoo guy", "Hotmail Hal"])
+def test_email_and_link_words_are_rejected(nick):
+    with _pytest.raises(prefs.PrefsError, match="different nickname"):
+        prefs.clean_nickname(nick)
+
+
+def test_stretched_letters_are_collapsed_before_matching():
+    for stretched in ("sshhiiit", "f-u-u-u-c-k", "bbiittcchh"):
+        with _pytest.raises(prefs.PrefsError, match="different nickname"):
+            prefs.clean_nickname(stretched if len(stretched) <= 20 else stretched[:20])
+    assert prefs.clean_nickname("Aaron") == "Aaron"                      # collapsing only affects matching, never the stored name
