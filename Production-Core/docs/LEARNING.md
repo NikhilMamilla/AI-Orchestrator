@@ -47,7 +47,8 @@ learner picks reveals what they confuse the topic with. No model is involved.
   (with the daily time that would work), past deadline, done. The 25 minutes per concept and 5 study days per week are
   stated assumptions, shown in the UI.
 * **Placement diagnostic** (`diagnostic.py`): about 8 adaptive questions. A correct answer raises the probability that
-  the concept's prerequisites are known; a wrong answer lowers its dependents. The next question is the most
+  the concept's prerequisites are known (one answer is never enough to assume one known, because it could be a lucky guess: two consistent
+  answers are); a wrong answer lowers its dependents. The next question is the most
   informative one. Inferred concepts are labelled **assumed** and count as "ready" for unlocking, never as mastered.
 
 ## Meta-learning (`strategy.py`)

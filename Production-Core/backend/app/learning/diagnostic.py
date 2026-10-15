@@ -17,7 +17,9 @@ from .policy import ConceptNode
 GUESS = 0.25               # 4-option multiple choice
 SLIP = 0.10
 PRIOR = 0.5
-ANCESTOR_LIFT = 0.70       # how strongly a correct answer implies each (direct) prerequisite is known
+ANCESTOR_LIFT = 0.55       # how strongly a correct answer implies each (direct) prerequisite is known. Kept below 0.6 so that one answer
+                           # (it could be a lucky guess, 1 in 4) lifts a prerequisite from 0.5 to 0.775 at most, short of ASSUMED_KNOWN; two
+                           # consistent answers are needed
 DESCENDANT_DROP = 0.55     # how strongly a wrong answer implies each (direct) dependent is not known
 DEPTH_DECAY = 0.8          # inference weakens with graph distance
 ASSUMED_KNOWN = 0.80

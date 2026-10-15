@@ -79,3 +79,25 @@ def test_knowledge_map_bands_follow_the_prd_thresholds():
     from backend.app.api.v1.concepts import band_of
     assert [band_of(m) for m in (0, 0.2, 0.4, 0.59, 0.6, 0.79, 0.8, 1)] == [
         "untouched", "needs_work", "weak", "weak", "partial", "partial", "mastered", "mastered"]
+
+
+# ---------------- one lucky answer must not place a learner ----------------
+def test_one_correct_answer_never_makes_another_concept_assumed_known():
+    for concept in G:
+        b = dg.update(B0, G, concept, True)
+        assert all(p < dg.ASSUMED_KNOWN for c, p in b.items() if c != concept), concept
+    assert dg.update(B0, G, "bs", True)["arrays"] < dg.ASSUMED_KNOWN        # a direct prerequisite, the strongest lift
+
+
+def test_one_correct_answer_on_the_real_graph_assumes_nothing(svc):
+    graph = svc.graph()
+    base = {c: dg.PRIOR for c in graph}
+    for concept in graph:
+        b = dg.update(base, graph, concept, True)
+        assert all(p < dg.ASSUMED_KNOWN for c, p in b.items() if c != concept), concept
+
+
+def test_two_consistent_answers_do_assume_the_shared_prerequisite():
+    b = dg.update(dg.update(B0, G, "bs", True), G, "graphs", True)          # two different concepts that both need arrays
+    assert b["arrays"] >= dg.ASSUMED_KNOWN
+    assert dg.placement(b, {"bs": True, "graphs": True}, {})["arrays"]["status"] == "assumed_known"
