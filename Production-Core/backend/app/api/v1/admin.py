@@ -19,7 +19,7 @@ from backend.app.config import settings
 from backend.app.learning import challenges
 from backend.app.rag.gaps import RETENTION_DAYS
 from backend.app.security import User, require_admin
-from backend.app.services import rag_service
+from backend.app.services import rag_service, retention
 from backend.app.services.database import db
 from backend.app.services.llm import get_router
 
@@ -194,7 +194,7 @@ async def admin_system(user: User = Depends(require_admin)):
 
 
 @router.post("/tools/{tool}")
-async def admin_tool(tool: Literal["clear-cache", "prune-shares", "prune-gaps"], user: User = Depends(require_admin)):
+async def admin_tool(tool: Literal["clear-cache", "prune-shares", "prune-gaps", "prune-old-data"], user: User = Depends(require_admin)):
     out = await _run_tool(tool)
     await audit.record(db, user.get("email"), f"tool:{tool}", {"affected": out["affected"]})
     return out
@@ -213,6 +213,11 @@ async def _run_tool(tool: str) -> Dict[str, Any]:
     if tool == "prune-shares":
         n = await db.execute("delete from progress_shares where expires_at < now() or revoked_at is not null")
         return {"tool": tool, "affected": n, "message": f"Removed {n} expired or revoked share links."}
+    if tool == "prune-old-data":
+        removed = await retention.prune(db)
+        total = sum(removed.values())
+        detail = ", ".join(f"{table} {n} (older than {retention.RETENTION_DAYS[table]} days)" for table, n in removed.items())
+        return {"tool": tool, "affected": total, "message": f"Removed {total} old rows: {detail}."}
     n = await db.execute("delete from content_gaps where created_at < now() - make_interval(days => %s)", (RETENTION_DAYS,))
     return {"tool": tool, "affected": n, "message": f"Removed {n} content-gap entries older than {RETENTION_DAYS} days."}
 

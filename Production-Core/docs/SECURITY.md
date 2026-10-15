@@ -87,6 +87,8 @@ and the "evidence only" contract are the backstops, and the verifier is a signal
   `no-referrer`; the API sends `Referrer-Policy: no-referrer` and `Cache-Control: no-store`.
 * **Content gaps:** refused questions are stored with no user column, shown to admins only, clustered by meaning and
   deleted after 90 days.
+* **Retention.** The server deletes old operational data itself, at start-up and every 24 hours: question logs (`rag_requests`) after 90 days,
+  playground runs (`code_submissions`) after 180 days and content gaps after 90 days. An admin can run it at once from *System → Prune old data now*.
 * **Admin console:** aggregates only. Any group smaller than `ADMIN_MIN_GROUP` (5, production only) is hidden, and
   mastery-based personalisation is removed from traces before they enter the admin metrics buffer. Admin actions are
   written to `admin_audit` (the actor is the admin's own email).

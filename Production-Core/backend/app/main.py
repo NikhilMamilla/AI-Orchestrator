@@ -1,3 +1,4 @@
+import asyncio
 import time
 from contextlib import asynccontextmanager
 
@@ -9,6 +10,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from backend.app.api.v1 import admin, auth, sessions, concepts, websocket, agents, dashboard, code, rag, learning, share
 from backend.app.config import settings
 from backend.app.security import get_current_user
+from backend.app.services import retention
 from backend.app.services.database import DatabaseUnavailable, db
 from backend.app.utils.logger import logger
 
@@ -45,9 +47,13 @@ class BodySizeLimit(BaseHTTPMiddleware):
 async def lifespan(_: FastAPI):
     """Start-up and shut-down (both defined below; they are looked up when the server starts)."""
     await startup_event()
+    await retention.safe_prune(db)                                  # delete old operational data now, then once a day
+    sweeper = asyncio.create_task(retention.retention_loop(db))
     try:
         yield
     finally:
+        sweeper.cancel()
+        await asyncio.gather(sweeper, return_exceptions=True)
         await shutdown_event()
 
 

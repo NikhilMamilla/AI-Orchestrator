@@ -204,6 +204,7 @@ flowchart LR
 * **No fabricated metrics.** Achievements are computed from stored progress; agent activity is read from
   `agent_events`; code-run time and memory are reported only if the engine returns them; the live session's answers, grading and
   analysis are real or say plainly that they cannot be. The dashboard's *Time invested* is an estimate from timed answers (capped at 5 minutes each) and says so.
+* **Bounded growth.** `services/retention.py` prunes question logs (90 days), playground runs (180 days) and content gaps (90 days) at start-up and daily.
 * **Privacy by construction.** Content gaps carry no user; admin views are aggregates with a minimum group size; share
   links expose an allow-list of fields; per-learner data is stripped before a trace reaches the admin buffer.
 * **One decorative particle.** The sign-in pages, the landing hero and every app page share one `Motes` component

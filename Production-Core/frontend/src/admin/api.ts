@@ -86,7 +86,7 @@ export const adminChallenges = () => get<{ challenges: ChallengeRow[]; min_group
 export const adminQuality = (days = 14) => get<Quality>(`/quality?days=${days}`);
 export const adminSystem = () => get<SystemInfo>('/system');
 
-export async function adminTool(tool: 'clear-cache' | 'prune-shares' | 'prune-gaps'): Promise<{ affected: number; message: string }> {
+export async function adminTool(tool: 'clear-cache' | 'prune-shares' | 'prune-gaps' | 'prune-old-data'): Promise<{ affected: number; message: string }> {
     const res = await authed(`/admin/tools/${tool}`, { method: 'POST' });
     if (!res.ok) throw new RagError(res.status === 503 ? 'The database is not connected.' : 'That tool failed.', res.status);
     return res.json();

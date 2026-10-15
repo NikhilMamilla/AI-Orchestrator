@@ -8,6 +8,7 @@ import { ErrorLine, LiveChip, Loading, PageHead, Panel, Status } from '../ui';
 const TOOLS = [
     { id: 'clear-cache', icon: Eraser, title: 'Clear the answer cache', text: 'Model answers are cached for an hour. Clear it after changing a source so the next answer is fresh.' },
     { id: 'prune-shares', icon: Link2Off, title: 'Remove dead share links', text: 'Deletes teacher/parent links that have expired or were revoked. Live links are untouched.' },
+    { id: 'prune-old-data', icon: Trash2, title: 'Prune old data now', text: 'Deletes old operational data: question logs older than 90 days, playground runs older than 180 days and content gaps older than 90 days. The server also does this at start-up and once a day.' },
     { id: 'prune-gaps', icon: Trash2, title: 'Prune old content gaps', text: 'Deletes refused-question records older than the 90-day retention window.' },
 ] as const;
 
