@@ -77,9 +77,9 @@ export default function SettingsPage() {
 
                 <div className="grid min-h-0 flex-1 grid-cols-1 gap-5 lg:grid-cols-[15rem_1fr]">
                     {/* ── sections ── */}
-                    <nav aria-label="Settings sections" className="sticker flex gap-1.5 overflow-x-auto p-2.5 lg:flex-col lg:overflow-visible" style={{ borderRadius: '24px 10px 24px 10px' }}>
+                    <nav aria-label="Settings sections" className="sticker no-scrollbar flex gap-1.5 overflow-x-auto p-2.5 lg:flex-col lg:overflow-visible" style={{ borderRadius: '24px 10px 24px 10px' }}>
                         {SECTIONS.map((s) => (
-                            <button key={s.id} type="button" onClick={() => setSection(s.id)} aria-current={section === s.id}
+                            <button key={s.id} type="button" onClick={(e) => { setSection(s.id); e.currentTarget.scrollIntoView?.({ inline: 'center', block: 'nearest', behavior: 'smooth' }); }} aria-current={section === s.id}
                                 className={`relative flex shrink-0 items-center gap-2.5 rounded-full px-3 py-2 text-left text-[13px] font-semibold ${section === s.id ? 'text-[#1b1405]' : 'text-campus-warm-500 hover:text-campus-navy'}`}>
                                 {section === s.id && <motion.span layoutId="settings-pill" className="pill-lit absolute inset-0 rounded-full" transition={{ type: 'spring', stiffness: 420, damping: 32 }} />}
                                 <span className="relative grid h-6 w-6 place-items-center rounded-full border-2 border-[var(--max-line)]" style={{ background: s.tone }}><s.icon className="h-3 w-3 text-[#1b1405]" aria-hidden /></span>
@@ -100,7 +100,7 @@ export default function SettingsPage() {
                     </nav>
 
                     {/* ── the section ── */}
-                    <section className="sticker no-scrollbar relative min-h-[420px] min-w-0 overflow-y-auto overflow-x-hidden p-6 max-sm:p-4 lg:min-h-0" style={{ borderRadius: '10px 28px 10px 28px', ['--max' as string]: SECTIONS.find((s) => s.id === section)!.tone }}>
+                    <section className="sticker no-scrollbar relative min-w-0 overflow-y-auto overflow-x-hidden p-6 max-sm:p-4 max-lg:min-h-[240px] lg:min-h-0" style={{ borderRadius: '10px 28px 10px 28px', ['--max' as string]: SECTIONS.find((s) => s.id === section)!.tone }}>
                         <AnimatePresence mode="wait">
                             <motion.div key={section} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.18 }}>
                                 {section === 'profile' && <ProfileSection run={run} />}
@@ -517,7 +517,7 @@ function LeaderboardSection({ run }: { run: Run }) {
             <Head title="The" mark="leaderboard" sub="Off by default. If you join, only your chosen nickname and your mastery points (10 per concept's worth of measured mastery) are shown. No email, no name." />
             <form onSubmit={(e) => { e.preventDefault(); void run(() => optInLeaderboard(nick.trim()), 'You are on the leaderboard.').then(load); }} className="mb-5 flex flex-wrap items-end gap-2">
                 <label><Label>Nickname</Label>
-                    <input value={nick} maxLength={20} onChange={(e) => setNick(e.target.value)} placeholder="e.g. Ada L" className="share-input w-56" />
+                    <input value={nick} maxLength={20} onChange={(e) => setNick(e.target.value)} placeholder="e.g. Ada L" className="share-input w-full sm:w-56" />
                 </label>
                 <button type="submit" disabled={nick.trim().length < 3} className="btn-skeu h-10 px-4 text-xs disabled:opacity-50">{prefs?.leaderboard_nickname ? 'Update nickname' : 'Join'}</button>
                 {prefs?.leaderboard_nickname && (
