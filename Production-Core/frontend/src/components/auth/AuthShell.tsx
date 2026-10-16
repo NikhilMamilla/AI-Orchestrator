@@ -26,7 +26,7 @@ export function AuthShell({ title, mark, subtitle, error, children, footer }: {
                     <span className="font-heading text-lg font-bold text-campus-navy">Kiddoo</span>
                 </Link>
                 <div className="flex items-center gap-3">
-                    <Link to="/" className="hidden items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-campus-navy/75 hover:text-campus-navy sm:flex"><ArrowLeft className="h-3.5 w-3.5" />Home</Link>
+                    <Link to="/" aria-label="Back to the landing page" className="flex items-center gap-1.5 rounded-full border-2 border-[var(--max-line)] px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-campus-navy/75 hover:text-campus-navy sm:border-0 sm:px-0 sm:py-0"><ArrowLeft className="h-3.5 w-3.5" />Back<span className="max-sm:hidden"> home</span></Link>
                     <ThemeToggle />
                 </div>
             </div>
