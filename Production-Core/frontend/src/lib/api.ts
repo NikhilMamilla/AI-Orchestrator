@@ -1,8 +1,11 @@
 import axios from 'axios';
 import { signOut } from 'firebase/auth';
 import { auth, getAccessToken } from './firebase';
+import { RETRY_DELAY_MS, shouldRetry, wakeBackend } from './coldStart';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+
+wakeBackend(API_BASE_URL);                                   // start waking the host as soon as the app loads
 
 class ApiClient {
     private client: ReturnType<typeof axios.create>;
@@ -28,7 +31,13 @@ class ApiClient {
         // Handle session expiry or errors
         this.client.interceptors.response.use(
             (response) => response,
-            (error) => {
+            async (error) => {
+                if (shouldRetry(error)) {                 // the host may still be waking up: try the read again
+                    const config = error.config as typeof error.config & { __retries?: number };
+                    config.__retries = (config.__retries ?? 0) + 1;
+                    await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+                    return this.client.request(config);
+                }
                 if (error.response?.status === 401) {
                     void signOut(auth);      // expired/invalid session: App routes to /login
                 }
